@@ -1,0 +1,10 @@
+apiVersion: v2
+name: pagopa-afm-calculator
+description: Microservice that handles calculation for pagoPA Advanced Fees Management
+type: application
+version: 0.0.0
+appVersion: 0.0.0
+dependencies:
+  - name: microservice-chart
+    version: 1.21.0
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"

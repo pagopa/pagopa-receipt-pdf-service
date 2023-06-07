@@ -1,0 +1,35 @@
+{
+  "summaryTrendStats": [
+    "avg",
+    "min",
+    "med",
+    "max",
+    "p(95)",
+    "p(99)",
+    "p(99.99)",
+    "count"
+  ],
+  "stages": [
+    {
+      "duration": "2m",
+      "target": 400
+    },
+    {
+      "duration": "3h56m",
+      "target": 400
+    },
+    {
+      "duration": "2m",
+      "target": 0
+    }
+  ],
+  "thresholds": {
+    "http_req_failed": [
+      "rate<0.001"
+    ],
+    "http_req_duration": [
+      "p(99)<1500"
+    ]
+  }
+}
+
