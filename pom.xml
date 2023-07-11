@@ -74,6 +74,12 @@
       <artifactId>quarkus-smallrye-health</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>io.projectreactor.netty</groupId>
+      <artifactId>reactor-netty</artifactId>
+      <version>1.1.8</version>
+    </dependency>
+
 
     <!-- utilities -->
     <dependency>
@@ -117,6 +123,32 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${compiler-plugin.version}</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok-mapstruct-binding</artifactId>
+              <version>0.2.0</version>
+            </path>
+            <path>
+              <groupId>io.quarkus</groupId>
+              <artifactId>quarkus-panache-common</artifactId>
+              <version>${quarkus.platform.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -170,7 +202,7 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
+    <!--  <plugin>
         <groupId>org.sonarsource.scanner.maven</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
         <version>3.3.0.603</version>
@@ -182,7 +214,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin>-->
     </plugins>
   </build>
   <profiles>
