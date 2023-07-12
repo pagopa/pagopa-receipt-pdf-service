@@ -1,7 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
@@ -12,7 +11,8 @@ import it.gov.pagopa.receipt.pdf.service.model.Receipt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client for the CosmosDB database
@@ -20,26 +20,16 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
 
+    private final Logger logger = LoggerFactory.getLogger(ReceiptCosmosClientImpl.class);
+
     @ConfigProperty(name = "cosmos.db.name")
     private String databaseId;
 
     @ConfigProperty(name = "cosmos.container.name")
     private String containerId;
 
-    private final CosmosClient cosmosClient;
-
     @Inject
-    private Logger logger;
-
-    public ReceiptCosmosClientImpl(
-            @ConfigProperty(name = "azure.key") String azureKey,
-            @ConfigProperty(name = "cosmos.endpoint") String serviceEndpoint
-    ) {
-        this.cosmosClient = new CosmosClientBuilder()
-                .endpoint(serviceEndpoint)
-                .key(azureKey)
-                .buildClient();
-    }
+    private CosmosClient cosmosClient;
 
     /**
      * Retrieve receipt document from CosmosDB database

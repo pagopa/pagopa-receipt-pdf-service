@@ -17,7 +17,6 @@ public enum AppErrorCodeEnum {
 
     PDFS_800("PDFS_800", "Receipt not found with the provided third party id"),
 
-    PDFS_900("PDFS_900", "Invalid third party id"),
     PDFS_901("PDFS_901", "Invalid fiscal code header");
 
     private final String errorCode;

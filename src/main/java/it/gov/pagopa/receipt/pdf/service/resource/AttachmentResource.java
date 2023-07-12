@@ -18,13 +18,13 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_900;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -33,8 +33,7 @@ import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 @Path("/receipts/pdf/messages")
 public class AttachmentResource {
 
-    @Inject
-    private Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);
 
     @Inject
     private AttachmentsService attachmentsService;
@@ -59,11 +58,6 @@ public class AttachmentResource {
             @PathParam("tp_id") String thirdPartyId,
             @RestHeader("fiscal_code") String requestFiscalCode
             ) {
-
-        if (thirdPartyId == null) {
-            logger.error("Third party id is null");
-            return RestResponse.status(BAD_REQUEST, buildErrorResponse(PDFS_900, BAD_REQUEST));
-        }
 
         if (requestFiscalCode == null) {
             logger.error("Fiscal code header is null");

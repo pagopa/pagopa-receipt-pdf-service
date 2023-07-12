@@ -12,15 +12,15 @@ import it.gov.pagopa.receipt.pdf.service.model.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
 @ApplicationScoped
 public class AttachmentsServiceImpl implements AttachmentsService {
 
-    @Inject
-    private Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(AttachmentsServiceImpl.class);
 
     @Inject
     private ReceiptCosmosClient cosmosClient;
@@ -83,7 +83,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                         Collections.singletonList(
                                 Attachment.builder()
                                         .id(receiptDocument.getId())
-                                        .contentType("") // TODO manca l'informazione application/zip o application/pdf
+                                        .contentType("application/pdf") // TODO manca l'informazione application/zip o application/pdf
                                         .url(receiptMetadata.getUrl())
                                         .name(receiptMetadata.getName())
                                         .build()
