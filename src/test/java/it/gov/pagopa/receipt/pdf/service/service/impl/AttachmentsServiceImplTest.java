@@ -2,6 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
@@ -12,11 +13,13 @@ import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @QuarkusTest
 class AttachmentsServiceImplTest {
@@ -25,7 +28,10 @@ class AttachmentsServiceImplTest {
     private static final String FISCAL_CODE_B = "BBBBBBBBBBBBBBBB";
 
     @InjectMock(convertScopes = true)
-    private ReceiptCosmosClient cosmosClient;
+    private ReceiptCosmosClient cosmosClientMock;
+
+    @InjectMock(convertScopes = true)
+    private ReceiptBlobClient receiptBlobClientMock;
 
     @Inject
     private AttachmentsService sut;
@@ -35,33 +41,10 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsSuccessWithDifferentPayerDebtor() {
         String id = UUID.randomUUID().toString();
         String fileNameDebtor = "file1.pdf";
-        String urlDebtor = "file/" + fileNameDebtor;
         String fileNamePayer = "file2.pdf";
-        String urlPayer = "file/" + fileNamePayer;
-        Receipt receipt = Receipt.builder()
-                .id(id)
-                .eventData(
-                        EventData.builder()
-                                .debtorFiscalCode(FISCAL_CODE_A)
-                                .payerFiscalCode(FISCAL_CODE_B)
-                                .build()
-                )
-                .mdAttach(
-                        ReceiptMetadata.builder()
-                                .name(fileNameDebtor)
-                                .url(urlDebtor)
-                                .build()
-                )
-                .mdAttachPayer(
-                        ReceiptMetadata.builder()
-                                .name(fileNamePayer)
-                                .url(urlPayer)
-                                .build()
-                )
-                .numRetry(0)
-                .build();
+        Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-        doReturn(receipt).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
         AttachmentDetailsResponse result = sut.getAttachmentDetails(anyString(), FISCAL_CODE_B);
 
@@ -81,25 +64,9 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsSuccessWithSamePayerDebtor() {
         String id = UUID.randomUUID().toString();
         String fileNameDebtor = "file1.pdf";
-        String urlDebtor = "file/" + fileNameDebtor;
-        Receipt receipt = Receipt.builder()
-                .id(id)
-                .eventData(
-                        EventData.builder()
-                                .debtorFiscalCode(FISCAL_CODE_A)
-                                .payerFiscalCode(FISCAL_CODE_A)
-                                .build()
-                )
-                .mdAttach(
-                        ReceiptMetadata.builder()
-                                .name(fileNameDebtor)
-                                .url(urlDebtor)
-                                .build()
-                )
-                .numRetry(0)
-                .build();
+        Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
-        doReturn(receipt).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
         AttachmentDetailsResponse result = sut.getAttachmentDetails(anyString(), FISCAL_CODE_A);
 
@@ -117,7 +84,7 @@ class AttachmentsServiceImplTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailReceiptNull() {
-        doReturn(null).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(null).when(cosmosClientMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
 
@@ -128,7 +95,7 @@ class AttachmentsServiceImplTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailEventDataNull() {
-        doReturn(Receipt.builder().numRetry(0).build()).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(Receipt.builder().numRetry(0).build()).when(cosmosClientMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
 
@@ -148,7 +115,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
 
@@ -168,7 +135,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
 
@@ -189,7 +156,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
 
@@ -211,7 +178,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
 
@@ -242,11 +209,161 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClient).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(FiscalCodeNotAuthorizedException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_B));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_700, e.getErrorCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentSuccessWithDifferentPayerDebtorPayerRequestPayerReceipt() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
+
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+        File result = sut.getAttachment(anyString(), FISCAL_CODE_B, fileNamePayer);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentSuccessWithSamePayerDebtor() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
+
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+        File result = sut.getAttachment(anyString(), FISCAL_CODE_A, fileNameDebtor);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailWithDifferentPayerDebtorPayerRequestDebtorReceipt() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
+
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+        FiscalCodeNotAuthorizedException e = assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachment(anyString(), FISCAL_CODE_B, fileNameDebtor));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailWithDifferentPayerDebtorDebtorRequestPayerReceipt() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
+
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+        FiscalCodeNotAuthorizedException e = assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachment(anyString(), FISCAL_CODE_A, fileNamePayer));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailWithSamePayerDebtorDebtorRequestNotExistingReceipt() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
+
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+        FiscalCodeNotAuthorizedException e = assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachment(anyString(), FISCAL_CODE_A, UUID.randomUUID().toString()));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailWithDifferentPayerDebtorDebtorRequestNotExistingReceipt() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
+
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+        FiscalCodeNotAuthorizedException e = assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachment(anyString(), FISCAL_CODE_A, fileNamePayer));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
+    }
+
+    private Receipt buildReceiptWithDifferentPayerDebtor(String id, String fileNameDebtor, String fileNamePayer) {
+        return Receipt.builder()
+                .id(id)
+                .eventData(
+                        EventData.builder()
+                                .debtorFiscalCode(FISCAL_CODE_A)
+                                .payerFiscalCode(FISCAL_CODE_B)
+                                .build()
+                )
+                .mdAttach(
+                        ReceiptMetadata.builder()
+                                .name(fileNameDebtor)
+                                .url("file/" + fileNameDebtor)
+                                .build()
+                )
+                .mdAttachPayer(
+                        ReceiptMetadata.builder()
+                                .name(fileNamePayer)
+                                .url("file/" + fileNamePayer)
+                                .build()
+                )
+                .numRetry(0)
+                .build();
+    }
+
+    private Receipt buildReceiptWithSamePayerDebtor(String id, String fileNameDebtor) {
+        return Receipt.builder()
+                .id(id)
+                .eventData(
+                        EventData.builder()
+                                .debtorFiscalCode(FISCAL_CODE_A)
+                                .payerFiscalCode(FISCAL_CODE_A)
+                                .build()
+                )
+                .mdAttach(
+                        ReceiptMetadata.builder()
+                                .name(fileNameDebtor)
+                                .url("file/" + fileNameDebtor)
+                                .build()
+                )
+                .numRetry(0)
+                .build();
     }
 }

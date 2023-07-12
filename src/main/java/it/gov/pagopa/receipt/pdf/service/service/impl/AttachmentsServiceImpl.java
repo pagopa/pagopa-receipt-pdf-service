@@ -53,10 +53,10 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
         if (isFiscalCodeNotAuthorized(requestFiscalCode, attachmentUrl, receiptDocument)) {
-            String errMsg = String.format("Fiscal code: %s, is not authorized to access the receipts with url: %s",
+            String errMsg = String.format("Fiscal code: %s, is not authorized to access the receipts with name: %s",
                     requestFiscalCode, attachmentUrl);
             logger.error(errMsg);
-            throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
+            throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_706, errMsg);
         }
 
         return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl);
@@ -121,14 +121,13 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         String payerFiscalCode = receiptDocument.getEventData().getPayerFiscalCode();
         String debtorFileName = receiptDocument.getMdAttach().getName();
 
-        if (!debtorFiscalCode.equals(requestFiscalCode) && !payerFiscalCode.equals(requestFiscalCode)) {
+        if (requestFiscalCode.equals(debtorFiscalCode) && debtorFileName.equals(attachmentUrl)) {
+            return false;
+        }
+        if (isReceiptUnique(receiptDocument) || !requestFiscalCode.equals(payerFiscalCode)) {
             return true;
         }
-        if (requestFiscalCode.equals(debtorFiscalCode) && !debtorFileName.equals(attachmentUrl)) {
-            return true;
-        }
-
-        return requestFiscalCode.equals(payerFiscalCode) && !receiptDocument.getMdAttachPayer().getName().equals(attachmentUrl);
+        return !receiptDocument.getMdAttachPayer().getName().equals(attachmentUrl);
     }
 
     private boolean isReceiptUnique(Receipt receiptDocument) {
