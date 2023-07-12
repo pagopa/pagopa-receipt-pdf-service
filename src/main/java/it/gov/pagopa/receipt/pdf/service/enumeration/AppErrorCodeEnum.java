@@ -8,6 +8,9 @@ import lombok.Getter;
 @Getter
 public enum AppErrorCodeEnum {
 
+    PDFS_600("PDFS_600", "I/O error when creating the temporary directory to download the receipt PDF from Blob Storage"),
+    PDFS_601("PDFS_601", "I/O Error when downloading the PDF receipt from Blob Storage"),
+
     PDFS_700("PDFS_700", "Fiscal code not authorized to access the requested receipts"),
     PDFS_701("PDFS_701", "The retrieved receipt is null"),
     PDFS_702("PDFS_702", "The retrieved receipt has null event data"),

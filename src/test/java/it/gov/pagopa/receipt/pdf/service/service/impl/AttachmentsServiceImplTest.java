@@ -35,9 +35,9 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsSuccessWithDifferentPayerDebtor() {
         String id = UUID.randomUUID().toString();
         String fileNameDebtor = "file1.pdf";
-        String urlDebtor = "file/file1";
+        String urlDebtor = "file/" + fileNameDebtor;
         String fileNamePayer = "file2.pdf";
-        String urlPayer = "file/file2";
+        String urlPayer = "file/" + fileNamePayer;
         Receipt receipt = Receipt.builder()
                 .id(id)
                 .eventData(
@@ -72,7 +72,7 @@ class AttachmentsServiceImplTest {
         Attachment attachment = result.getAttachments().get(0);
         assertEquals(id, attachment.getId());
         assertEquals("application/pdf", attachment.getContentType());
-        assertEquals(urlPayer, attachment.getUrl());
+        assertEquals(fileNamePayer, attachment.getUrl());
         assertEquals(fileNamePayer, attachment.getName());
     }
 
@@ -81,7 +81,7 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsSuccessWithSamePayerDebtor() {
         String id = UUID.randomUUID().toString();
         String fileNameDebtor = "file1.pdf";
-        String urlDebtor = "file/file1";
+        String urlDebtor = "file/" + fileNameDebtor;
         Receipt receipt = Receipt.builder()
                 .id(id)
                 .eventData(
@@ -110,7 +110,7 @@ class AttachmentsServiceImplTest {
         Attachment attachment = result.getAttachments().get(0);
         assertEquals(id, attachment.getId());
         assertEquals("application/pdf", attachment.getContentType());
-        assertEquals(urlDebtor, attachment.getUrl());
+        assertEquals(fileNameDebtor, attachment.getUrl());
         assertEquals(fileNameDebtor, attachment.getName());
     }
 

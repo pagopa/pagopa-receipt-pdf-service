@@ -23,6 +23,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Collections;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
@@ -34,6 +35,8 @@ import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 public class AttachmentResource {
 
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);
+
+    private static final String FISCAL_CODE_HEADER = "fiscal_code";
 
     @Inject
     private AttachmentsService attachmentsService;
@@ -56,9 +59,8 @@ public class AttachmentResource {
     @GET
     public RestResponse<?> getAttachmentDetails(
             @PathParam("tp_id") String thirdPartyId,
-            @RestHeader("fiscal_code") String requestFiscalCode
-            ) {
-
+            @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode
+    ) {
         if (requestFiscalCode == null) {
             logger.error("Fiscal code header is null");
             return RestResponse.status(BAD_REQUEST, buildErrorResponse(PDFS_901, BAD_REQUEST));
@@ -68,7 +70,8 @@ public class AttachmentResource {
         try {
              attachmentDetails = attachmentsService.getAttachmentDetails(thirdPartyId, requestFiscalCode);
         } catch (PdfServiceException e) {
-            logger.error("Error retrieving the receipt", e);
+            String errMsg = String.format("Error retrieving the receipt details, application error %s", e.getErrorCode());
+            logger.error(errMsg, e);
             return RestResponse.status(
                     INTERNAL_SERVER_ERROR,
                     buildErrorResponse(e.getErrorCode(), INTERNAL_SERVER_ERROR)
@@ -93,17 +96,32 @@ public class AttachmentResource {
             })
     @Path("/{tp_id}/{attachment_url}")
     @GET
-    public RestResponse<byte[]> getAttachment(
+    public RestResponse<?> getAttachment(
             @PathParam("tp_id") String thirdPartyId,
             @PathParam("attachment_url") String attachmentUrl,
-            @RestHeader("fiscal_code")String requestFiscalCode
-
+            @RestHeader(FISCAL_CODE_HEADER)String requestFiscalCode
     ) {
+        if (requestFiscalCode == null) {
+            logger.error("Fiscal code header is null");
+            return RestResponse.status(BAD_REQUEST, buildErrorResponse(PDFS_901, BAD_REQUEST));
+        }
 
-        // TODO add GetAttachment logic
-
-        return RestResponse.status(
-                Status.OK, null);
+        File attachment;
+        try {
+            attachment = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
+        } catch (PdfServiceException e) {
+            String errMsg = String.format("Error retrieving the receipt attachment, application error %s", e.getErrorCode());
+            logger.error(errMsg, e);
+            return RestResponse.status(
+                    INTERNAL_SERVER_ERROR,
+                    buildErrorResponse(e.getErrorCode(), INTERNAL_SERVER_ERROR)
+            );
+        }
+        return RestResponse.ResponseBuilder
+                .ok(attachment)
+                .header("content-type", "application/pdf")
+                .header("content-disposition", "attachment; ")
+                .build();
     }
 
     private ErrorResponse buildErrorResponse(AppErrorCodeEnum errorCode, Status status) {
