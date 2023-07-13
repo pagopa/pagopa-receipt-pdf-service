@@ -42,7 +42,7 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         if (!queryResponse.iterator().hasNext()) {
             String errMsg = String.format("Receipt with id %s not found in the defined container %s", thirdPartyId, cosmosContainer.getId());
             logger.error(errMsg);
-            throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg);
+            throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, thirdPartyId, errMsg);
         }
         return queryResponse.iterator().next();
     }
