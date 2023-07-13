@@ -13,8 +13,8 @@ on:
         type: string
 
 env:
-  NAMESPACE: # TODO
-  APP_NAME: # TODO
+  NAMESPACE: receipts
+  APP_NAME: pagopapagopareceiptpdfservice
 
 
 permissions:

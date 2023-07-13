@@ -1,21 +1,21 @@
 microservice-chart:
-  namespace: "your-namespace" # TODO: set your AKS namespace
+  namespace: "receipts"
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: ghcr.io/pagopa/yourname # TODO
+    repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
     tag: "0.0.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
-      path: /actuator/health/liveness
+      path: /q/health/live
       port: 8080
     initialDelaySeconds: 90
     failureThreshold: 6
     periodSeconds: 10
   readinessProbe:
     httpGet:
-      path: /actuator/health/readiness
+      path: /q/health/ready
       port: 8080
     initialDelaySeconds: 90
     failureThreshold: 6
@@ -28,8 +28,8 @@ microservice-chart:
     port: 8080
   ingress:
     create: true
-    host: "your.host" # TODO: set the host
-    path: /your-path-here/(.*) # TODO: set your path
+    host: "weuprod.receipts.internal.platform.pagopa.it"
+    path: /pagopa-receipt-pdf-datastore/(.*) #
   serviceAccount:
     create: false
     annotations: { }
@@ -60,17 +60,23 @@ microservice-chart:
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
   envConfig:
-    # TODO: set your name
-    WEBSITE_SITE_NAME: 'yourProjectName' # required to show cloud role name in application insights
+    WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
     ENV: 'azure-prod'
     APP_LOGGING_LEVEL: 'INFO'
     DEFAULT_LOGGING_LEVEL: 'INFO'
     CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
+    COSMOS_RECEIPT_SERVICE_ENDPOINT: 'https://pagopa-p-weu-receipts-ds-cosmos-account.documents.azure.com:443/'
+    COSMOS_RECEIPT_DB_NAME: 'db'
+    COSMOS_RECEIPT_CONTAINER_NAME: 'receipts'
+    BLOB_STORAGE_ACCOUNT_ENDPOINT: 'https://pagopapweureceiptsfnsa.blob.core.windows.net'
+    BLOB_STORAGE_CONTAINER_NAME: 'pagopa-p-weu-receipts-azure-blob-receipt-st-attach'
   envSecret:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-p-connection-string'
+    COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
+    BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
   keyvault:
-    name: "pagopa-p-name-kv" #TODO
+    name: "pagopa-p-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   nodeSelector: { }
   tolerations: [ ]
@@ -97,7 +103,7 @@ microservice-chart:
     deployment:
       create: true
       image:
-        repository: ghcr.io/pagopa/yourname # TODO
+        repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
         tag: "0.0.0"
         pullPolicy: Always
       envConfig: { }
