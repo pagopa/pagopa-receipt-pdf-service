@@ -1,88 +1,91 @@
-# Template for Java Spring Microservice project
+# pagoPA Receipt-pdf-service
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=TODO-set-your-id&metric=alert_status)](https://sonarcloud.io/dashboard?id=TODO-set-your-id)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-pdf-receipt-service&metric=alert_status)](https://sonarcloud.io/dashboard?id=pagopa_pagopa-pdf-receipt-service)
 
-TODO: add a description
+Expose APIs that will be used by IO to retrieve the PDF receipts
 
-TODO: generate a index with this tool: https://ecotrust-canada.github.io/markdown-toc/
+---
 
-TODO: resolve all the TODOs in this template
+## Summary 📖
+
+- [Api Documentation 📖](#api-documentation-)
+- [Technology Stack 📚](#technology-stack-)
+- [Start Project Locally 🚀](#start-project-locally-)
+  * [Running the application in dev mode](#running-the-application-in-dev-mode)
+- [Develop Locally 💻](#develop-locally-)
+  * [Prerequisites](#prerequisites)
+  * [Testing 🧪](#testing-)
+    + [Unit test](#unit-test)
+    + [Integration test [WIP]](#integration-test-wip)
+    + [Performance test [WIP]](#performance-test-wip)
+- [Contributors 👥](#contributors-)
+  * [Maintainers](#maintainers)
 
 ---
 
 ## Api Documentation 📖
 
-See the [OpenApi 3 here.](TODO: set your url)
+See
+the [OpenApi 3 here](https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-pdf-receipt-service/main/openapi/openapi.json)
+
+In local env typing following url on browser for ui interface:
+
+```http://localhost:8080/q/swagger-ui```
+
+or that for `yaml` version ```http://localhost:8080/q/openapi```
+
+or that for `json` version ```http://localhost:8080/q/openapi?format=json```
 
 ---
 
-## Technology Stack
+## Technology Stack 📚
 
-- Java 11
-- Spring Boot
-- Spring Web
-- Hibernate
-- JPA
-- ...
-- TODO
+- Java 17 Runtime Environment GraalVM CE
+- [Quarkus](https://quarkus.io/)
+- quarkus-resteasy-reactive
+- quarkus-smallrye-health
+- quarkus-smallrye-openapi
+- quarkus-resteasy-reactive-jackson
+- camel-quarkus-azure-storage-blob
+- camel-quarkus-azure-cosmosdb
+- reactor-netty
+- lombok (provided)
 
 ---
-
 ## Start Project Locally 🚀
 
-### Prerequisites
+### Running the application in dev mode
 
-- docker
+You can run your application in dev mode that enables live coding using:
 
-### Run docker container
+```shell script
+./mvnw compile quarkus:dev
+```
 
-from `./docker` directory
-
-`sh ./run_docker.sh dev`
-
-ℹ️ Note: for PagoPa ACR is required the login `az acr login -n <acr-name>`
-
----
+> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only
+> at http://localhost:8080/q/dev/.
 
 ## Develop Locally 💻
 
 ### Prerequisites
 
 - git
-- maven
-- jdk-11
-
-### Run the project
-
-Start the springboot application with this command:
-
-`mvn spring-boot:run -Dspring-boot.run.profiles=local`
-
-### Spring Profiles
-
-- **local**: to develop locally.
-- _default (no profile set)_: The application gets the properties from the environment (for Azure).
+- maven (v3.9.3)
+- jdk-17
 
 ### Testing 🧪
 
-#### Unit testing
+#### Unit test
 
-To run the **Junit** tests:
+Typing `mvn clean verify`
 
-`mvn clean verify`
+#### Integration test [WIP]
 
-#### Integration testing
+- Run the application
+- Install dependencies: `yarn install`
+- Run the test: `yarn test`
 
-From `./integration-test/src`
-
-1. `yarn install`
-2. `yarn test`
-
-#### Performance testing
-
-install [k6](https://k6.io/) and then from `./performance-test/src`
-
-1. `k6 run --env VARS=local.environment.json --env TEST_TYPE=./test-types/load.json main_scenario.js`
+#### Performance test [WIP]
 
 ---
 
