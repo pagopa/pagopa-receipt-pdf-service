@@ -1,13 +1,16 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
+import com.azure.core.http.HttpResponse;
 import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.options.BlobDownloadToFileOptions;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
+import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.BlobStorageClientException;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -61,7 +64,7 @@ class ReceiptBlobClientImplTest {
 
     @Test
     @SneakyThrows
-    void getAttachmentFromBlobStorageFailDownloadThrowsException() {
+    void getAttachmentFromBlobStorageFailDownloadThrowsUncheckedIOException() {
         doThrow(UncheckedIOException.class).when(blobClientMockMock)
                 .downloadToFileWithResponse(
                         any(BlobDownloadToFileOptions.class),
@@ -73,5 +76,41 @@ class ReceiptBlobClientImplTest {
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_601, e.getErrorCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFromBlobStorageFailDownloadAttachmentNotFound() {
+        HttpResponse responseMock = mock(HttpResponse.class);
+        doReturn(404).when(responseMock).getStatusCode();
+        doThrow(new BlobStorageException("", responseMock, null)).when(blobClientMockMock)
+                .downloadToFileWithResponse(
+                        any(BlobDownloadToFileOptions.class),
+                        any(Duration.class),
+                        any(Context.class)
+                );
+
+        AttachmentNotFoundException e = assertThrows(AttachmentNotFoundException.class, () -> sut.getAttachmentFromBlobStorage(anyString()));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_602, e.getErrorCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFromBlobStorageFailDownloadThrowsBlobStorageException() {
+        HttpResponse responseMock = mock(HttpResponse.class);
+        doReturn(500).when(responseMock).getStatusCode();
+        doThrow(new BlobStorageException("", responseMock, null)).when(blobClientMockMock)
+                .downloadToFileWithResponse(
+                        any(BlobDownloadToFileOptions.class),
+                        any(Duration.class),
+                        any(Context.class)
+                );
+
+        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(anyString()));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_603, e.getErrorCode());
     }
 }
