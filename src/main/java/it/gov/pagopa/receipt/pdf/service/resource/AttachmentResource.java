@@ -2,7 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.PdfServiceException;
-import it.gov.pagopa.receipt.pdf.service.model.AttachmentDetailsResponse;
+import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorMessage;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
@@ -30,6 +30,9 @@ import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDF
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
+/**
+ * Resource class that expose the API to retrieve the attachments
+ */
 @Tag(name = "Attachments", description = "Attachments operations")
 @Path("/receipts/pdf/messages")
 public class AttachmentResource {
@@ -53,7 +56,7 @@ public class AttachmentResource {
                             content =
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON,
-                                    schema = @Schema(implementation = AttachmentDetailsResponse.class)))
+                                    schema = @Schema(implementation = AttachmentsDetailsResponse.class)))
             })
     @Path("/{tp_id}")
     @GET
@@ -66,9 +69,9 @@ public class AttachmentResource {
             return RestResponse.status(BAD_REQUEST, buildErrorResponse(PDFS_901, BAD_REQUEST));
         }
 
-        AttachmentDetailsResponse attachmentDetails;
+        AttachmentsDetailsResponse attachmentDetails;
         try {
-             attachmentDetails = attachmentsService.getAttachmentDetails(thirdPartyId, requestFiscalCode);
+             attachmentDetails = attachmentsService.getAttachmentsDetails(thirdPartyId, requestFiscalCode);
         } catch (PdfServiceException e) {
             String errMsg = String.format("Error retrieving the receipt details, application error %s", e.getErrorCode());
             logger.error(errMsg, e);

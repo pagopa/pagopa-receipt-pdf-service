@@ -8,6 +8,9 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.Produces;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+/**
+ * Producer class for {@link CosmosContainer} bean
+ */
 @Singleton
 public class CosmosContainerProducer {
 

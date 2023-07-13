@@ -3,12 +3,9 @@ package it.gov.pagopa.receipt.pdf.service.service.impl;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
-import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
-import it.gov.pagopa.receipt.pdf.service.exception.InvalidReceiptException;
-import it.gov.pagopa.receipt.pdf.service.exception.PdfServiceException;
-import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.Attachment;
-import it.gov.pagopa.receipt.pdf.service.model.AttachmentDetailsResponse;
+import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.model.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
@@ -32,7 +29,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     private ReceiptBlobClient receiptBlobClient;
 
     @Override
-    public AttachmentDetailsResponse getAttachmentDetails(String thirdPartyId, String requestFiscalCode) throws PdfServiceException {
+    public AttachmentsDetailsResponse getAttachmentsDetails(String thirdPartyId, String requestFiscalCode)
+            throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
         if (isFiscalCodeNotAuthorized(requestFiscalCode, receiptDocument)) {
@@ -49,7 +47,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     }
 
     @Override
-    public File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl) throws PdfServiceException {
+    public File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
+            throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, BlobStorageClientException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
         if (isFiscalCodeNotAuthorized(requestFiscalCode, attachmentUrl, receiptDocument)) {
@@ -98,8 +97,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         return receiptDocument;
     }
 
-    private AttachmentDetailsResponse buildAttachmentDetails(Receipt receiptDocument, ReceiptMetadata receiptMetadata) {
-        return AttachmentDetailsResponse.builder()
+    private AttachmentsDetailsResponse buildAttachmentDetails(Receipt receiptDocument, ReceiptMetadata receiptMetadata) {
+        return AttachmentsDetailsResponse.builder()
                 .attachments(
                         Collections.singletonList(
                                 Attachment.builder()

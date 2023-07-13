@@ -5,7 +5,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import it.gov.pagopa.receipt.pdf.service.exception.PdfServiceException;
 import it.gov.pagopa.receipt.pdf.service.model.Attachment;
-import it.gov.pagopa.receipt.pdf.service.model.AttachmentDetailsResponse;
+import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
@@ -43,7 +43,7 @@ class AttachmentResourceTest {
     @SneakyThrows
     void getAttachmentDetailsSuccess() {
 
-        AttachmentDetailsResponse attachment = AttachmentDetailsResponse.builder()
+        AttachmentsDetailsResponse attachment = AttachmentsDetailsResponse.builder()
                 .attachments(
                         Collections.singletonList(
                                 Attachment.builder()
@@ -55,7 +55,7 @@ class AttachmentResourceTest {
                         )
                 ).build();
 
-        doReturn(attachment).when(attachmentsServiceMock).getAttachmentDetails(THIRD_PARTY_ID, FISCAL_CODE);
+        doReturn(attachment).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
 
         String responseString =
                 given()
@@ -69,7 +69,7 @@ class AttachmentResourceTest {
 
 
         assertNotNull(responseString);
-        AttachmentDetailsResponse response = objectMapper.readValue(responseString, AttachmentDetailsResponse.class);
+        AttachmentsDetailsResponse response = objectMapper.readValue(responseString, AttachmentsDetailsResponse.class);
         assertNotNull(response);
         assertNotNull(response.getAttachments());
         assertEquals(1, response.getAttachments().size());
@@ -105,7 +105,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailGetReceiptError() {
-        doThrow(new PdfServiceException(PDFS_700, "")).when(attachmentsServiceMock).getAttachmentDetails(THIRD_PARTY_ID, FISCAL_CODE);
+        doThrow(new PdfServiceException(PDFS_700, "")).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
 
         String responseString =
                 given()
@@ -180,7 +180,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentFailGetReceiptError() {
-        doThrow(new PdfServiceException(PDFS_706, "")).when(attachmentsServiceMock).getAttachmentDetails(THIRD_PARTY_ID, FISCAL_CODE);
+        doThrow(new PdfServiceException(PDFS_706, "")).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
 
         String responseString =
                 given()

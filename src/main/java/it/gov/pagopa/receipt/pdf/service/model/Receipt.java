@@ -3,6 +3,9 @@ package it.gov.pagopa.receipt.pdf.service.model;
 import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
 import lombok.*;
 
+/**
+ * Model class for the receipt
+ */
 @Data
 @Builder
 @NoArgsConstructor

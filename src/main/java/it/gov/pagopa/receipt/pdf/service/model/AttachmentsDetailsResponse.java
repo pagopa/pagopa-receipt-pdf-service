@@ -6,10 +6,13 @@ import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
 
+/**
+ * Model class for the attachment details response
+ */
 @Getter
 @Builder
 @Jacksonized
-public class AttachmentDetailsResponse {
+public class AttachmentsDetailsResponse {
 
     private List<Attachment> attachments;
 }
