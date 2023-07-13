@@ -1,8 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
-import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -12,7 +10,7 @@ import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.Receipt;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -30,25 +28,19 @@ class ReceiptCosmosClientImplTest {
     private ReceiptCosmosClient sut;
 
     @Inject
-    private CosmosClient cosmosClientMock;
+    private CosmosContainer cosmosContainerMock;
 
     private static Iterator<Receipt> iteratorMock;
 
-
-    @BeforeEach
-    void setUp() {
-        CosmosDatabase cosmosDatabaseMock = mock(CosmosDatabase.class);
-
-        CosmosClient cosmosClientMock = mock(CosmosClient.class);
-        doReturn(cosmosDatabaseMock).when(cosmosClientMock).getDatabase(anyString());
-        QuarkusMock.installMockForType(cosmosClientMock, CosmosClient.class);
-
-        CosmosContainer cosmosContainerMock = mock(CosmosContainer.class);
+    @BeforeAll
+    static void setUp() {
         CosmosPagedIterable<Receipt> cosmosPagedIterableMock = mock(CosmosPagedIterable.class);
         iteratorMock = mock(Iterator.class);
 
-        doReturn(cosmosContainerMock).when(cosmosDatabaseMock).getContainer(anyString());
+        CosmosContainer cosmosContainerMock = mock(CosmosContainer.class);
         doReturn(cosmosPagedIterableMock).when(cosmosContainerMock).queryItems(anyString(), any(), any());
+        QuarkusMock.installMockForType(cosmosContainerMock, CosmosContainer.class);
+
         doReturn(iteratorMock).when(cosmosPagedIterableMock).iterator();
     }
 

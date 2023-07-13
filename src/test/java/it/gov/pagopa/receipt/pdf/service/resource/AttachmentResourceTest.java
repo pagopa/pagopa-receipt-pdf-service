@@ -16,8 +16,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_700;
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +29,7 @@ class AttachmentResourceTest {
 
     private static final String THIRD_PARTY_ID = "test-id";
     private static final String FISCAL_CODE = "AAAAAAAAAAAAAAAA";
+    private static final String ATTACHMENT_URL = "url";
 
     @InjectMock(convertScopes = true)
     private AttachmentsService attachmentsServiceMock;
@@ -122,6 +122,81 @@ class AttachmentResourceTest {
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
         assertEquals(PDFS_700.getErrorCode(), response.getAppErrorCode());
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
+        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
+        assertNotNull(response.getErrors());
+        assertNotNull(response.getErrors().get(0));
+        assertNotNull(response.getErrors().get(0).getMessage());
+
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentSuccess() {
+
+        doReturn(null).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+
+        byte[] response =
+                given()
+                        .header("fiscal_code", FISCAL_CODE)
+                        .when().get(String.format("/receipts/pdf/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
+                        .then()
+                        .statusCode(200)
+                        .contentType("application/pdf")
+                        .header("content-disposition", "attachment;")
+                        .extract()
+                        .asByteArray();
+
+
+        assertNotNull(response);
+
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailMissingFiscalCodeHeader() {
+        String responseString =
+                given()
+                        .when().get(String.format("/receipts/pdf/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
+                        .then()
+                        .statusCode(400)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_901.getErrorCode(), response.getAppErrorCode());
+        assertEquals(BAD_REQUEST.getStatusCode(), response.getHttpStatusCode());
+        assertEquals(BAD_REQUEST.getReasonPhrase(), response.getHttpStatusDescription());
+        assertNotNull(response.getErrors());
+        assertNotNull(response.getErrors().get(0));
+        assertNotNull(response.getErrors().get(0).getMessage());
+
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailGetReceiptError() {
+        doThrow(new PdfServiceException(PDFS_706, "")).when(attachmentsServiceMock).getAttachmentDetails(THIRD_PARTY_ID, FISCAL_CODE);
+
+        String responseString =
+                given()
+                        .header("fiscal_code", FISCAL_CODE)
+                        .when().get("/receipts/pdf/messages/" + THIRD_PARTY_ID)
+                        .then()
+                        .statusCode(500)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_706.getErrorCode(), response.getAppErrorCode());
         assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
         assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
         assertNotNull(response.getErrors());

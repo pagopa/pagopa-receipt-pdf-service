@@ -120,7 +120,7 @@ public class AttachmentResource {
         return RestResponse.ResponseBuilder
                 .ok(attachment)
                 .header("content-type", "application/pdf")
-                .header("content-disposition", "attachment; ")
+                .header("content-disposition", "attachment;")
                 .build();
     }
 

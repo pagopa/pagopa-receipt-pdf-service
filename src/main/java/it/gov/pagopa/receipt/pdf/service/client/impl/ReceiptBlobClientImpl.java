@@ -2,7 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.DownloadRetryOptions;
 import com.azure.storage.blob.options.BlobDownloadToFileOptions;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
@@ -33,9 +33,6 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
 
     private final Logger logger = LoggerFactory.getLogger(ReceiptBlobClientImpl.class);
 
-    @ConfigProperty(name = "blob.storage.container.name")
-    private String containerName;
-
     @ConfigProperty(name = "blob.storage.client.max-retry-request")
     private int maxRetryRequests;
 
@@ -43,7 +40,7 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
     private int timeout;
 
     @Inject
-    private BlobServiceClient blobServiceClient;
+    private BlobContainerClient blobContainerClient;
 
     /**
      * Retrieve a PDF receipt from the blob storage
@@ -52,7 +49,7 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
      * @return the file where the PDF receipt was stored
      */
     public File getAttachmentFromBlobStorage(String fileName) throws BlobStorageClientException {
-        BlobClient blobClient = this.blobServiceClient.getBlobContainerClient(containerName).getBlobClient(fileName);
+        BlobClient blobClient = blobContainerClient.getBlobClient(fileName);
 
         Path tempDirectory;
         try {
