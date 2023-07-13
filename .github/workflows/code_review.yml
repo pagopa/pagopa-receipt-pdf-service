@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_KEY: # TODO
+  PROJECT_KEY: pagopa_pagopa-receipt-pdf-service
 
 permissions:
   id-token: write
