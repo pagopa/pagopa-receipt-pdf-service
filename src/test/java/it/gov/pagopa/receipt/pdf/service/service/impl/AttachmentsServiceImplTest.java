@@ -46,7 +46,7 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        AttachmentDetailsResponse result = sut.getAttachmentDetails(anyString(), FISCAL_CODE_B);
+        AttachmentsDetailsResponse result = sut.getAttachmentsDetails(anyString(), FISCAL_CODE_B);
 
         assertNotNull(result);
         assertNotNull(result.getAttachments());
@@ -68,7 +68,7 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        AttachmentDetailsResponse result = sut.getAttachmentDetails(anyString(), FISCAL_CODE_A);
+        AttachmentsDetailsResponse result = sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A);
 
         assertNotNull(result);
         assertNotNull(result.getAttachments());
@@ -86,7 +86,7 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsFailReceiptNull() {
         doReturn(null).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_701, e.getErrorCode());
@@ -97,7 +97,7 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsFailEventDataNull() {
         doReturn(Receipt.builder().numRetry(0).build()).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_702, e.getErrorCode());
@@ -117,7 +117,7 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_703, e.getErrorCode());
@@ -137,7 +137,7 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_703, e.getErrorCode());
@@ -158,7 +158,7 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_704, e.getErrorCode());
@@ -180,7 +180,7 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_705, e.getErrorCode());
@@ -211,7 +211,7 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-        FiscalCodeNotAuthorizedException e = assertThrows(FiscalCodeNotAuthorizedException.class, () -> sut.getAttachmentDetails(anyString(), FISCAL_CODE_B));
+        FiscalCodeNotAuthorizedException e = assertThrows(FiscalCodeNotAuthorizedException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_B));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_700, e.getErrorCode());

@@ -9,6 +9,9 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+/**
+ * Model class for the error response
+ */
 @Getter
 @Builder
 @Jacksonized
