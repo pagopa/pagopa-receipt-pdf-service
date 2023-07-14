@@ -63,6 +63,8 @@ public class AttachmentResource {
             InvalidReceiptException,
             FiscalCodeNotAuthorizedException {
 
+        String message = String.format("Received get attachment details for receipt with id %s", thirdPartyId);
+        logger.info(message);
         if (requestFiscalCode == null) {
             String errMsg = "Fiscal code header is null";
             logger.error(errMsg);
@@ -100,6 +102,8 @@ public class AttachmentResource {
             FiscalCodeNotAuthorizedException,
             AttachmentNotFoundException {
 
+        String message = String.format("Received get attachment with name %s for receipt with id %s", attachmentUrl, thirdPartyId);
+        logger.info(message);
         if (requestFiscalCode == null) {
             String errMsg = "Fiscal code header is null";
             logger.error(errMsg);
