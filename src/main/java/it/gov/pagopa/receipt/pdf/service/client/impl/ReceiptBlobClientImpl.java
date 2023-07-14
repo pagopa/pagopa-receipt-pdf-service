@@ -79,11 +79,11 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
         } catch (BlobStorageException e) {
             String errMsg;
             if (e.getStatusCode() == 404) {
-                errMsg = String.format("PDF receipt with name %s not found in Blob Storage %s", fileName, blobClient.getAccountName());
+                errMsg = String.format("PDF receipt with name: %s not found in Blob Storage: %s", fileName, blobClient.getAccountName());
                 logger.error(errMsg);
                 throw new AttachmentNotFoundException(PDFS_602, errMsg, fileName, e);
             }
-            errMsg = String.format("Unable to download the PDF receipt with name %s from Blob Storage %s. Error message from server %s",
+            errMsg = String.format("Unable to download the PDF receipt with name: %s from Blob Storage: %s. Error message from server: %s",
                     fileName,
                     blobClient.getAccountName(),
                     e.getServiceMessage()
