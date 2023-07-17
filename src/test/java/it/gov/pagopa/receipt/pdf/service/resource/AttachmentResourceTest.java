@@ -60,7 +60,7 @@ class AttachmentResourceTest {
         String responseString =
                 given()
                         .header("fiscal_code", FISCAL_CODE)
-                        .when().get("/receipts/pdf/messages/" + THIRD_PARTY_ID)
+                        .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(200)
                         .contentType("application/json")
@@ -82,7 +82,7 @@ class AttachmentResourceTest {
     void getAttachmentDetailsFailMissingFiscalCodeHeader() {
         String responseString =
                 given()
-                        .when().get("/receipts/pdf/messages/" + THIRD_PARTY_ID)
+                        .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(400)
                         .contentType("application/json")
@@ -110,7 +110,7 @@ class AttachmentResourceTest {
         String responseString =
                 given()
                         .header("fiscal_code", FISCAL_CODE)
-                        .when().get("/receipts/pdf/messages/" + THIRD_PARTY_ID)
+                        .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(500)
                         .contentType("application/json")
@@ -139,7 +139,7 @@ class AttachmentResourceTest {
         byte[] response =
                 given()
                         .header("fiscal_code", FISCAL_CODE)
-                        .when().get(String.format("/receipts/pdf/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
+                        .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
                         .then()
                         .statusCode(200)
                         .contentType("application/pdf")
@@ -157,7 +157,7 @@ class AttachmentResourceTest {
     void getAttachmentFailMissingFiscalCodeHeader() {
         String responseString =
                 given()
-                        .when().get(String.format("/receipts/pdf/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
+                        .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
                         .then()
                         .statusCode(400)
                         .contentType("application/json")
@@ -185,7 +185,7 @@ class AttachmentResourceTest {
         String responseString =
                 given()
                         .header("fiscal_code", FISCAL_CODE)
-                        .when().get("/receipts/pdf/messages/" + THIRD_PARTY_ID)
+                        .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(500)
                         .contentType("application/json")
