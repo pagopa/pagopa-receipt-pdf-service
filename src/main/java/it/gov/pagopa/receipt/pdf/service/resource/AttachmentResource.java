@@ -28,7 +28,7 @@ import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDF
  * Resource class that expose the API to retrieve the attachments
  */
 @Tag(name = "Attachments", description = "Attachments operations")
-@Path("/receipts/pdf/messages")
+@Path("/messages")
 public class AttachmentResource {
 
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);
