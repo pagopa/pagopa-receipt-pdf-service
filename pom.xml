@@ -6,7 +6,7 @@
 
   <groupId>it.gov.pagopa</groupId>
   <artifactId>pdf-receipt-service</artifactId>
-  <version>0.0.1-PRDP-18-feat-add-receipt-pdf-service</version>
+  <version>0.0.2-PRDP-18-feat-add-receipt-pdf-service</version>
 
   <name>pagopa-pdf-receipt-service</name>
 
