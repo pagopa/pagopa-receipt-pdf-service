@@ -35,6 +35,8 @@ public class AttachmentResource {
 
     private static final String FISCAL_CODE_HEADER = "fiscal_code";
     private static final String THIRD_PARTY_ID_PARAM = "tp_id";
+    private static final String REGEX = "[\n\r]";
+    private static final String REPLACEMENT = "_";
 
     @Inject
     private AttachmentsService attachmentsService;
@@ -63,6 +65,9 @@ public class AttachmentResource {
             InvalidReceiptException,
             FiscalCodeNotAuthorizedException {
 
+        // replace new line and tab from user input to avoid log injection
+        thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
+
         String message = String.format("Received get attachment details for receipt with id %s", thirdPartyId);
         logger.info(message);
         if (requestFiscalCode == null) {
@@ -70,6 +75,8 @@ public class AttachmentResource {
             logger.error(errMsg);
             throw new MissingFiscalCodeHeaderException(PDFS_901, errMsg);
         }
+        // replace new line and tab from user input to avoid log injection
+        requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
 
         AttachmentsDetailsResponse attachmentDetails = attachmentsService.getAttachmentsDetails(thirdPartyId, requestFiscalCode);
 
@@ -94,13 +101,17 @@ public class AttachmentResource {
     public RestResponse<File> getAttachment(
             @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
             @PathParam("attachment_url") String attachmentUrl,
-            @RestHeader(FISCAL_CODE_HEADER)String requestFiscalCode
+            @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode
     ) throws MissingFiscalCodeHeaderException,
             BlobStorageClientException,
             ReceiptNotFoundException,
             InvalidReceiptException,
             FiscalCodeNotAuthorizedException,
             AttachmentNotFoundException {
+
+        // replace new line and tab from user input to avoid log injection
+        thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
+        attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
 
         String message = String.format("Received get attachment with name %s for receipt with id %s", attachmentUrl, thirdPartyId);
         logger.info(message);
@@ -109,6 +120,8 @@ public class AttachmentResource {
             logger.error(errMsg);
             throw new MissingFiscalCodeHeaderException(PDFS_901, errMsg);
         }
+        // replace new line and tab from user input to avoid log injection
+        requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
 
         File attachment = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
 
