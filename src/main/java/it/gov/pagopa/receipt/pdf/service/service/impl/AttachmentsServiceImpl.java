@@ -48,7 +48,11 @@ public class AttachmentsServiceImpl implements AttachmentsService {
 
     @Override
     public File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
-            throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, BlobStorageClientException {
+            throws ReceiptNotFoundException,
+            InvalidReceiptException,
+            FiscalCodeNotAuthorizedException,
+            BlobStorageClientException,
+            AttachmentNotFoundException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
         if (isFiscalCodeNotAuthorized(requestFiscalCode, attachmentUrl, receiptDocument)) {

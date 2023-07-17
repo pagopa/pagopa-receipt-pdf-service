@@ -30,7 +30,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                                     "errorId": "50905466-1881-457b-b42f-fb7b2bfb1610",
                                     "httpStatusCode": 500,
                                     "httpStatusDescription": "Internal Server Error",
-                                    "appErrorCode": "PDFS-0500",
+                                    "appErrorCode": "PDFS_603",
                                     "errors": [
                                       {
                                         "message": "An unexpected error has occurred. Please contact support."
@@ -53,7 +53,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                                   {
                                     "httpStatusCode": 400,
                                     "httpStatusDescription": "Bad Request",
-                                    "appErrorCode": "PDFS-0702",
+                                    "appErrorCode": "PDFS_703",
                                     "errors": [
                                       {
                                         "message": "The provided third party id [<td_id>] is invalid"
@@ -67,7 +67,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                                   {
                                     "httpStatusCode": 400,
                                     "httpStatusDescription": "Bad Request",
-                                    "appErrorCode": "PDFS-0702",
+                                    "appErrorCode": "PDFS_703",
                                     "errors": [
                                       {
                                         "path": "<detail.path.if-exist>",
@@ -89,7 +89,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                                   {
                                     "httpStatusCode": 404,
                                     "httpStatusDescription": "Not Found",
-                                    "appErrorCode": "PDFS-0701",
+                                    "appErrorCode": "PDFS_900",
                                     "errors": [
                                       {
                                         "message": "Third party id [<td_id>] not found"

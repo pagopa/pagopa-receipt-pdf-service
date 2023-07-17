@@ -14,7 +14,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Singleton
 public class CosmosClientProducer {
 
-    @ConfigProperty(name = "azure.key")
+    @ConfigProperty(name = "cosmos.receipt.key")
     String azureKey;
 
     @ConfigProperty(name = "cosmos.endpoint")
