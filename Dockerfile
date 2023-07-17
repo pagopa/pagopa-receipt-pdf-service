@@ -1,23 +1,34 @@
-#
-# Build
-#
-FROM maven:3.8.4-jdk-11-slim as buildtime
-WORKDIR /build
-COPY . .
-RUN mvn clean package
+## Stage 1 : build with maven builder image with native capabilities
+FROM quay.io/quarkus/ubi-quarkus-graalvmce-builder-image:22.3-java17 AS build
+COPY --chown=quarkus:quarkus mvnw /code/mvnw
+COPY --chown=quarkus:quarkus .mvn /code/.mvn
+COPY --chown=quarkus:quarkus pom.xml /code/
+USER quarkus
+WORKDIR /code
+RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
+COPY src /code/src
+ARG QUARKUS_PROFILE
+ARG APP_NAME
 
+RUN ./mvnw package -DskipTests=true -Dquarkus.application.name=$APP_NAME -Dquarkus.profile=$QUARKUS_PROFILE
 
-FROM adoptopenjdk/openjdk11:alpine-jre as builder
-COPY --from=buildtime /build/target/*.jar application.jar
-RUN java -Djarmode=layertools -jar application.jar extract
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.14
 
+ENV LANGUAGE='en_US:en'
 
-FROM ghcr.io/pagopa/docker-base-springboot-openjdk11:v1.0.1@sha256:bbbe948e91efa0a3e66d8f308047ec255f64898e7f9250bdb63985efd3a95dbf
-COPY --chown=spring:spring  --from=builder dependencies/ ./
-COPY --chown=spring:spring  --from=builder snapshot-dependencies/ ./
-# https://github.com/moby/moby/issues/37965#issuecomment-426853382
-RUN true
-COPY --chown=spring:spring  --from=builder spring-boot-loader/ ./
-COPY --chown=spring:spring  --from=builder application/ ./
+# We make four distinct layers so if there are application changes the library layers can be re-used
+COPY --from=build /code/target/quarkus-app/lib/ /deployments/lib/
+COPY --from=build /code/target/quarkus-app/*.jar /deployments/
+COPY --from=build /code/target/quarkus-app/app/ /deployments/app/
+COPY --from=build /code/target/quarkus-app/quarkus/ /deployments/quarkus/
 
 EXPOSE 8080
+USER 185
+
+ARG QUARKUS_PROFILE
+ARG APP_NAME
+
+ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Dquarkus.application.name=$APP_NAME -Dquarkus.profile=$QUARKUS_PROFILE -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
+
+

@@ -103,6 +103,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.version }}
+          build_args: |
+            'QUARKUS_PROFILE=prod'
+            'APP_NAME=pagopa-receipt-pdf-service'
 
   deploy_aks:
     name: Deploy on AKS
