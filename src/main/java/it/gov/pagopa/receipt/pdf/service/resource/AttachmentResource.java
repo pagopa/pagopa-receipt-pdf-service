@@ -69,7 +69,7 @@ public class AttachmentResource {
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
 
     String message =
-        String.format("Received get attachment details for receipt with id %s", thirdPartyId);
+        String.format("Received get attachment details for receipt with id %s and fiscal code %s", thirdPartyId, requestFiscalCode);
     logger.info(message);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
@@ -117,8 +117,8 @@ public class AttachmentResource {
 
     String message =
         String.format(
-            "Received get attachment with name %s for receipt with id %s",
-            attachmentUrl, thirdPartyId);
+            "Received get attachment with name %s for receipt with id %s and fiscal code %s",
+            attachmentUrl, thirdPartyId, requestFiscalCode);
     logger.info(message);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
