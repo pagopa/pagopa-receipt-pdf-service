@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+/**
+ * Model class for the info response
+ */
 @Getter
 @Builder
 @Jacksonized

@@ -15,6 +15,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Resource class that expose the API to retrieve info about the service */
 @Path("/info")
 @Tag(name = "Info", description = "Info operations")
 public class InfoResource {
