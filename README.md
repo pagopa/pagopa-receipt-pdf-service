@@ -1,6 +1,6 @@
 # pagoPA Receipt-pdf-service
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-pdf-receipt-service&metric=alert_status)](https://sonarcloud.io/dashboard?id=pagopa_pagopa-pdf-receipt-service)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-receipt-pdf-service&metric=alert_status)](https://sonarcloud.io/dashboard?id=pagopa_pagopa-receipt-pdf-service)
 
 Expose APIs that will be used by IO to retrieve the PDF receipts
 
