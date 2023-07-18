@@ -68,9 +68,7 @@ public class AttachmentResource {
     // replace new line and tab from user input to avoid log injection
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
 
-    String message =
-        String.format("Received get attachment details for receipt with id %s", thirdPartyId);
-    logger.info(message);
+    logger.info("Received get attachment details for receipt with id {} and fiscal code {}", thirdPartyId, requestFiscalCode);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);
@@ -115,11 +113,7 @@ public class AttachmentResource {
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
     attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
 
-    String message =
-        String.format(
-            "Received get attachment with name %s for receipt with id %s",
-            attachmentUrl, thirdPartyId);
-    logger.info(message);
+    logger.info("Received get attachment with name {} for receipt with id {} and fiscal code {}", attachmentUrl, thirdPartyId, requestFiscalCode);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);
