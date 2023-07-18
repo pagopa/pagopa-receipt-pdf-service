@@ -6,7 +6,7 @@
 
   <groupId>it.gov.pagopa</groupId>
   <artifactId>pdf-receipt-service</artifactId>
-  <version>0.2.3</version>
+  <version>0.2.4</version>
 
   <name>pagopa-pdf-receipt-service</name>
 
