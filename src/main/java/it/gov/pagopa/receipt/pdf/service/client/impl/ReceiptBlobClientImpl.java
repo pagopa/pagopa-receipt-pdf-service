@@ -59,7 +59,8 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
 
     private String createTempDirectory() throws BlobStorageClientException {
         try {
-            Path tempDirectory = Files.createTempDirectory("temp/receipt-pdf-service");
+            File workingDirectory = createWorkingDirectory();
+            Path tempDirectory = Files.createTempDirectory(workingDirectory.toPath(), "receipt-pdf-service");
             return tempDirectory.toAbsolutePath() + "/receiptPdf.pdf";
         } catch (IOException e) {
             logger.error("Error creating the temp directory to download the PDF receipt from Blob Storage");
@@ -103,5 +104,13 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
                                 StandardOpenOption.READ
                         ))
                 );
+    }
+
+    private File createWorkingDirectory() throws IOException {
+        File workingDirectory = new File("temp");
+        if (!workingDirectory.exists()) {
+            Files.createDirectory(workingDirectory.toPath());
+        }
+        return workingDirectory;
     }
 }
