@@ -107,7 +107,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                         Collections.singletonList(
                                 Attachment.builder()
                                         .id(receiptDocument.getId())
-                                        .contentType("application/pdf") // TODO manca l'informazione application/zip o application/pdf
+                                        .contentType("application/pdf")
                                         .url(receiptMetadata.getName())
                                         .name(receiptMetadata.getName())
                                         .build()
