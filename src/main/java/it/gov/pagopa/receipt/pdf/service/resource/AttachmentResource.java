@@ -7,6 +7,7 @@ import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
@@ -61,14 +62,18 @@ public class AttachmentResource {
   @GET
   public RestResponse<AttachmentsDetailsResponse> getAttachmentDetails(
       @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
-      @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode)
+      @HeaderParam(FISCAL_CODE_HEADER) String requestFiscalCode)
+      // @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode)
       throws MissingFiscalCodeHeaderException, ReceiptNotFoundException, InvalidReceiptException,
           FiscalCodeNotAuthorizedException {
 
     // replace new line and tab from user input to avoid log injection
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
 
-    logger.info("Received get attachment details for receipt with id {} and fiscal code {}", thirdPartyId, requestFiscalCode);
+    logger.info(
+        "Received get attachment details for receipt with id {} and fiscal code {}",
+        thirdPartyId,
+        requestFiscalCode);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);
@@ -113,7 +118,11 @@ public class AttachmentResource {
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
     attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
 
-    logger.info("Received get attachment with name {} for receipt with id {} and fiscal code {}", attachmentUrl, thirdPartyId, requestFiscalCode);
+    logger.info(
+        "Received get attachment with name {} for receipt with id {} and fiscal code {}",
+        attachmentUrl,
+        thirdPartyId,
+        requestFiscalCode);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);
