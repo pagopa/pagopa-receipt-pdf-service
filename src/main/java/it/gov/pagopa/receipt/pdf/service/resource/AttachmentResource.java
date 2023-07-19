@@ -1,28 +1,28 @@
 package it.gov.pagopa.receipt.pdf.service.resource;
 
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
-
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
-import java.io.File;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
 
 /** Resource class that expose the API to retrieve the attachments */
 @Tag(name = "Attachments", description = "Attachments operations")
@@ -62,7 +62,7 @@ public class AttachmentResource {
   @GET
   public RestResponse<AttachmentsDetailsResponse> getAttachmentDetails(
       @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
-      @HeaderParam(FISCAL_CODE_HEADER) String requestFiscalCode)
+      @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
       // @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode)
       throws MissingFiscalCodeHeaderException, ReceiptNotFoundException, InvalidReceiptException,
           FiscalCodeNotAuthorizedException {
@@ -70,10 +70,7 @@ public class AttachmentResource {
     // replace new line and tab from user input to avoid log injection
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
 
-    logger.info(
-        "Received get attachment details for receipt with id {} and fiscal code {}",
-        thirdPartyId,
-        requestFiscalCode);
+    logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);
@@ -110,7 +107,7 @@ public class AttachmentResource {
   public RestResponse<File> getAttachment(
       @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
       @PathParam("attachment_url") String attachmentUrl,
-      @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode)
+      @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
       throws MissingFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
           InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException {
 
@@ -119,10 +116,9 @@ public class AttachmentResource {
     attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
 
     logger.info(
-        "Received get attachment with name {} for receipt with id {} and fiscal code {}",
+        "Received get attachment with name {} for receipt with id {}",
         attachmentUrl,
-        thirdPartyId,
-        requestFiscalCode);
+        thirdPartyId);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);

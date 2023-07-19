@@ -63,7 +63,7 @@
           },
           {
             "name": "fiscal_code",
-            "in": "header",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -118,7 +118,7 @@
           },
           {
             "name": "fiscal_code",
-            "in": "header",
+            "in": "query",
             "schema": {
               "type": "string"
             }

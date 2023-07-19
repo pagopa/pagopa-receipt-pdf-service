@@ -59,7 +59,7 @@ class AttachmentResourceTest {
 
         String responseString =
                 given()
-                        .header("fiscal_code", FISCAL_CODE)
+                        .queryParam("fiscal_code", FISCAL_CODE)
                         .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(200)
@@ -109,7 +109,7 @@ class AttachmentResourceTest {
 
         String responseString =
                 given()
-                        .header("fiscal_code", FISCAL_CODE)
+                        .queryParam("fiscal_code", FISCAL_CODE)
                         .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(500)
@@ -138,7 +138,7 @@ class AttachmentResourceTest {
 
         byte[] response =
                 given()
-                        .header("fiscal_code", FISCAL_CODE)
+                        .queryParam("fiscal_code", FISCAL_CODE)
                         .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
                         .then()
                         .statusCode(200)
@@ -184,7 +184,7 @@ class AttachmentResourceTest {
 
         String responseString =
                 given()
-                        .header("fiscal_code", FISCAL_CODE)
+                        .queryParam("fiscal_code", FISCAL_CODE)
                         .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(500)
