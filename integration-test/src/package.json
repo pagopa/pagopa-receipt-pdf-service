@@ -1,7 +1,7 @@
 {
-  "name": "your-project-name", // TODO: set your name
+  "name": "pagopa-receipt-pdf-service",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "scripts": {
     "test:local": "dotenv -e ./config/.env.local yarn cucumber",
     "test:dev": "dotenv -e ./config/.env.dev yarn cucumber",
