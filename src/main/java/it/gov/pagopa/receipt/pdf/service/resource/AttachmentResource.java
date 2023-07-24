@@ -137,7 +137,9 @@ public class AttachmentResource {
               .header("content-disposition", "attachment;")
               .build();
     } finally {
-      clearTempDirectory(attachment.toPath());
+      if (attachment != null) {
+        clearTempDirectory(attachment.toPath());
+      }
     }
   }
 
