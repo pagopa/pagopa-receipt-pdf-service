@@ -45,46 +45,46 @@ jobs:
           maven_version: 3.9.3
           coverage_exclusions: "**/config/*,**/*Mock*,**/model/**,**/entity/*,**/producer/**,**/enumeration/**"
           cpd_exclusions: "**/model/**,**/entity/*"
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
 
-#  smoke-test:
-#    name: Smoke Test
-#    runs-on: ubuntu-latest
-#    environment:
-#      name: dev
-#    steps:
-#      - name: Checkout
-#        id: checkout
-#        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
-#
-#      - name: Login
-#        id: login
-#        # from https://github.com/Azure/login/commits/master
-#        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
-#        with:
-#          client-id: ${{ secrets.CLIENT_ID }}
-#          tenant-id: ${{ secrets.TENANT_ID }}
-#          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
-#
-#      - name: Run Service on Docker
-#        shell: bash
-#        id: run_service_docker
-#        run: |
-#          cd ./docker
-#          chmod +x ./run_docker.sh
-#          ./run_docker.sh local
-#
-#      - name: Run Integration Tests
-#        shell: bash
-#        id: run_integration_test
-#        run: |
-#          export SUBKEY=${{ secrets.SUBKEY }}
-#          export CANARY=${{ inputs.canary }}
-#          export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
-#
-#          cd ./integration-test
-#          chmod +x ./run_integration_test.sh
-#          ./run_integration_test.sh local
-#
+      - name: Login
+        id: login
+        # from https://github.com/Azure/login/commits/master
+        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+
+      - name: Run Service on Docker
+        shell: bash
+        id: run_service_docker
+        run: |
+          cd ./docker
+          chmod +x ./run_docker.sh
+          ./run_docker.sh local
+
+      - name: Run Integration Tests
+        shell: bash
+        id: run_integration_test
+        run: |
+          export SUBKEY=${{ secrets.SUBKEY }}
+          export CANARY=${{ inputs.canary }}
+          export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
+          export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
+
+
+          cd ./integration-test
+          chmod +x ./run_integration_test.sh
+          ./run_integration_test.sh local
 #
 #  delete_github_deployments:
 #    runs-on: ubuntu-latest
