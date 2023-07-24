@@ -2,6 +2,11 @@ const axios = require("axios");
 
 const uri = process.env.SERVICE_URI;
 
+axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = process.env.SUBKEY // for all requests
+if (process.env.canary) {
+  axios.defaults.headers.common['X-CANARY'] = 'canary' // for all requests
+}
+
 
 function getAttachmentDetails(receiptId, fiscalCode) {
 	let url = uri + "/" + receiptId;
