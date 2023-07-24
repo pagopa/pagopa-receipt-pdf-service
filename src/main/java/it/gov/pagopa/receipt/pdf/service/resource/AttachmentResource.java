@@ -10,6 +10,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
 
@@ -116,9 +118,9 @@ public class AttachmentResource {
     attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
 
     logger.info(
-        "Received get attachment with name {} for receipt with id {}",
-        attachmentUrl,
-        thirdPartyId);
+            "Received get attachment with name {} for receipt with id {}",
+            attachmentUrl,
+            thirdPartyId);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);
@@ -127,12 +129,23 @@ public class AttachmentResource {
     // replace new line and tab from user input to avoid log injection
     requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
 
-    File attachment =
-        attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
 
-    return RestResponse.ResponseBuilder.ok(attachment)
-        .header("content-type", "application/pdf")
-        .header("content-disposition", "attachment;")
-        .build();
+    File attachment = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
+    try {
+      return RestResponse.ResponseBuilder.ok(attachment)
+              .header("content-type", "application/pdf")
+              .header("content-disposition", "attachment;")
+              .build();
+    } finally {
+      clearTempDirectory(attachment.toPath());
+    }
+  }
+
+  private void clearTempDirectory(java.nio.file.Path workingDirPath) {
+    try {
+      FileUtils.deleteDirectory(workingDirPath.toFile());
+    } catch (IOException e) {
+      logger.warn("Unable to clear working directory: {}", workingDirPath, e);
+    }
   }
 }
