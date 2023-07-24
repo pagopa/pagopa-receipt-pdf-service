@@ -1,31 +1,91 @@
-const {Given, When, Then} = require('@cucumber/cucumber')
-const assert = require("assert");
-const {call, post} = require("./common");
-const fs = require("fs");
+const assert = require('assert');
+const { Given, When, Then, After } = require('@cucumber/cucumber');
+const {getAttachment, getAttachmentDetails} = require("./common.js");
+const { createDocumentInReceiptsDatastore, deleteDocumentFromReceiptsDatastore } = require("./receipts_datastore_client.js");
+const { createBlobPdf, deleteReceiptAttachment } = require("./receipts_blob_storage_client.js");
 
-let rawdata = fs.readFileSync('./config/properties.json');
-let properties = JSON.parse(rawdata);
-const app_host = properties.app_host;
+const content = "Hello world!";
 
-let body;
-let responseToCheck;
+// After each Scenario
+After(async function () {
+  // remove event
+  if (this.receiptId != null) {
+      await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
+  }
+  if (this.blobName != null) {
+    await deleteReceiptAttachment(this.blobName);
+}
 
-Given(/^initial json$/, function (payload) {
-  body = JSON.parse(payload);
+  this.receiptId = null;
+  this.blobName = null;
+  this.response = null;
 });
 
-When(/^the client send (GET|POST|PUT|DELETE) to (.*)$/,
-    async function (method, url) {
-      responseToCheck = await call(method, afm_host + url, body)
-    });
+//getAttachmentDetails
 
-Then(/^check statusCode is (\d+)$/, function (status) {
-  assert.strictEqual(responseToCheck.status, status);
+Given('a receipt with id {string} and debtorFiscalCode {string} stored on receipts datastore', async function (id, fiscalCode) {
+  this.receiptId = id;
+  // prior cancellation to avoid dirty cases
+  await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
 
+  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, fiscalCode);
+  assert.strictEqual(cosmosResponse.statusCode, 201);
 });
 
-Then(/^check response body is$/, function (payload) {
-  console.log(responseToCheck.data)
+When('an Http GET request is sent to the receipt-service getAttachmentDetails with path value {string} and fiscal_code param with value {string}', async function (receiptId, fiscalCode) {
+  this.response = await getAttachmentDetails(receiptId, fiscalCode);
+});
 
-  assert.deepStrictEqual(responseToCheck.data, JSON.parse(payload));
+When('an Http GET request is sent to the receipt-service getAttachmentDetails without fiscal_code param', async function () {
+  this.response = await getAttachmentDetails("id", null);
+});
+
+
+Then('response body contains receipt id {string}', function (receiptId) {
+  assert.strictEqual(this.response?.data?.attachments?.[0]?.id, receiptId);
+});
+
+
+//getAttachment
+
+
+Given('a receipt with id {string} and debtorFiscalCode {string} and mdAttachmentName {string} stored on receipts datastore', async function (id, fiscalCode, blobName) {
+  this.receiptId = id;
+  // prior cancellation to avoid dirty cases
+  await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
+
+  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, fiscalCode, blobName);
+  assert.strictEqual(cosmosResponse.statusCode, 201);
+});
+
+Given('a pdf with name {string} stored on Blob Storage', async function (blobName) {
+  this.blobName = blobName;
+  // prior cancellation to avoid dirty cases
+  await deleteReceiptAttachment(this.blobName);
+
+  let blobResponse = await createBlobPdf(this.blobName, content);
+  assert.strictEqual(blobResponse._response.status, 201);
+});
+
+When('an Http GET request is sent to the receipt-service getAttachment with path value {string} and {string} and fiscal_code param with value {string}', async function (receiptId, blobName, fiscalCode) {
+  this.response = await getAttachment(receiptId, blobName, fiscalCode);
+});
+
+When('an Http GET request is sent to the receipt-service getAttachment without fiscal_code param', async function () {
+  this.response = await getAttachment("id", "blobName", null);
+});
+
+Then('response body has the expected data content', function () {
+  assert.strictEqual(this.response.data, content);
+});
+
+
+//COMMON
+
+Then('response has a {int} Http status', function (expectedStatus) {
+  assert.strictEqual(this.response.status, expectedStatus);
+});
+
+Then('application error code is {string}', function (expectedAppErrorCode) {
+  assert.strictEqual(this.response.data.appErrorCode, expectedAppErrorCode);
 });

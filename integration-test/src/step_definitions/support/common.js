@@ -1,64 +1,58 @@
 const axios = require("axios");
 
-axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = process.env.subkey // for all requests
-if (process.env.canary) {
-  axios.defaults.headers.common['X-Canary'] = 'canary' // for all requests
+const uri = process.env.SERVICE_URI;
+
+
+function getAttachmentDetails(receiptId, fiscalCode) {
+	let url = uri + "/" + receiptId;
+
+	return httpGET(url, fiscalCode);
 }
 
-function get(url) {
-  return axios.get(url)
-  .then(res => {
-    return res;
-  })
-  .catch(error => {
-    return error.response;
-  });
+function getAttachment(receiptId, blobName, fiscalCode) {
+	let url = uri + "/" + receiptId + "/" + blobName;
+
+	return httpGET(url, fiscalCode);
 }
 
-function post(url, body) {
-  return axios.post(url, body)
-  .then(res => {
-    return res;
-  })
-  .catch(error => {
-    return error.response;
-  });
-}
+function httpGET(url, fiscalCode) {
+	let headers = {};//fiscalCode ? {"fiscal_code": fiscalCode} : null;
 
-function put(url, body) {
-  return axios.put(url, body)
-  .then(res => {
-    return res;
-  })
-  .catch(error => {
-    return error.response;
-  });
-}
+	let queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : null;
 
-function del(url) {
-  return axios.delete(url)
-  .then(res => {
-    return res;
-  })
-  .catch(error => {
-    return error.response;
-  });
-}
+	return axios.get(url+queryParams, { headers })
 
-function call(method, url, body) {
-  if (method === 'GET') {
-    return get(url)
-  }
-  if (method === 'POST') {
-    return post(url, body)
-  }
-  if (method === 'PUT') {
-    return put(url, body)
-  }
-  if (method === 'DELETE') {
-    return del(url)
-  }
+		.then(res => {
+
+			return res;
+
+		})
+
+		.catch(error => {
+			return error.response;
+
+		});
 
 }
 
-module.exports = {get, post, put, del, call}
+function createReceipt(id, fiscalCode, pdfName) {
+	let receipt =
+	{
+		"eventId": id,
+		"eventData": {
+			"debtorFiscalCode": fiscalCode,
+			"payerFiscalCode": fiscalCode
+		},
+		"status": "IO_NOTIFIED",
+		"mdAttach": {
+			"name": pdfName,
+			"url": pdfName
+		},
+		"id": id
+	}
+	return receipt
+}
+
+module.exports = {
+	createReceipt, getAttachmentDetails, getAttachment
+}
