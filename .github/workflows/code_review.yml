@@ -45,6 +45,7 @@ jobs:
           maven_version: 3.9.3
           coverage_exclusions: "**/config/*,**/*Mock*,**/model/**,**/entity/*,**/producer/**,**/enumeration/**"
           cpd_exclusions: "**/model/**,**/entity/*"
+
   smoke-test:
     name: Smoke Test
     runs-on: ubuntu-latest
@@ -85,42 +86,42 @@ jobs:
           cd ./integration-test
           chmod +x ./run_integration_test.sh
           ./run_integration_test.sh local
-#
-#  delete_github_deployments:
-#    runs-on: ubuntu-latest
-#    needs: smoke-test
-#    if: ${{ always() }}
-#    steps:
-#      - name: Dump GitHub context
-#        env:
-#          GITHUB_CONTEXT: ${{ toJSON(github) }}
-#        run: echo "$GITHUB_CONTEXT"
-#
-#      - name: Delete Previous deployments
-#        uses: actions/github-script@v6
-#        env:
-#          SHA_HEAD: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.sha}}
-#        with:
-#          script: |
-#            const { SHA_HEAD } = process.env
-#
-#            const deployments = await github.rest.repos.listDeployments({
-#              owner: context.repo.owner,
-#              repo: context.repo.repo,
-#              sha: SHA_HEAD
-#            });
-#            await Promise.all(
-#              deployments.data.map(async (deployment) => {
-#                await github.rest.repos.createDeploymentStatus({
-#                  owner: context.repo.owner,
-#                  repo: context.repo.repo,
-#                  deployment_id: deployment.id,
-#                  state: 'inactive'
-#                });
-#                return github.rest.repos.deleteDeployment({
-#                  owner: context.repo.owner,
-#                  repo: context.repo.repo,
-#                  deployment_id: deployment.id
-#                });
-#              })
-#            );
+
+  delete_github_deployments:
+    runs-on: ubuntu-latest
+    needs: smoke-test
+    if: ${{ always() }}
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Delete Previous deployments
+        uses: actions/github-script@v6
+        env:
+          SHA_HEAD: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.sha}}
+        with:
+          script: |
+            const { SHA_HEAD } = process.env
+
+            const deployments = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: SHA_HEAD
+            });
+            await Promise.all(
+              deployments.data.map(async (deployment) => {
+                await github.rest.repos.createDeploymentStatus({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: deployment.id,
+                  state: 'inactive'
+                });
+                return github.rest.repos.deleteDeployment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: deployment.id
+                });
+              })
+            );
