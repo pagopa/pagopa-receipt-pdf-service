@@ -3,7 +3,6 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import it.gov.pagopa.receipt.pdf.service.exception.ErrorHandlingPdfAttachmentFileException;
 import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
 import it.gov.pagopa.receipt.pdf.service.model.Attachment;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
@@ -186,7 +185,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentFailGetReceiptError() {
-        doThrow(new ErrorHandlingPdfAttachmentFileException(PDFS_706, "")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+        doThrow(new FiscalCodeNotAuthorizedException(PDFS_706, "")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
 
         String responseString =
                 given()
