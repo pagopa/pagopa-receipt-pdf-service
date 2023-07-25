@@ -143,7 +143,7 @@ public class AttachmentResource {
       logger.error("Error handling the stream generated from pdf attachment");
       throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
     }  finally {
-      if (attachment != null) {
+      if (attachment != null && attachment.exists()) {
         clearTempDirectory(attachment.toPath().getParent());
       }
     }
