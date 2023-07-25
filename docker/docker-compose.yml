@@ -8,7 +8,5 @@ services:
     build:
       dockerfile: Dockerfile
       context: ../
-    env_file:
-      - ./.env
     ports:
       - "8080:8080"
