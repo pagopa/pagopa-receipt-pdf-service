@@ -21,9 +21,12 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
 
 /** Resource class that expose the API to retrieve the attachments */
@@ -106,12 +109,12 @@ public class AttachmentResource {
   )
   @Path("/{tp_id}/{attachment_url}")
   @GET
-  public RestResponse<File> getAttachment(
+  public RestResponse<byte[]> getAttachment(
       @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
       @PathParam("attachment_url") String attachmentUrl,
       @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
-      throws MissingFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
-          InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException {
+          throws MissingFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
+          InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException {
 
     // replace new line and tab from user input to avoid log injection
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
@@ -131,14 +134,17 @@ public class AttachmentResource {
 
 
     File attachment = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
-    try {
-      return RestResponse.ResponseBuilder.ok(attachment)
+    try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(attachment))) {
+      return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
               .header("content-type", "application/pdf")
               .header("content-disposition", "attachment;")
               .build();
-    } finally {
+    } catch (IOException e) {
+      logger.error("Error handling the stream generated from pdf attachment");
+      throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
+    }  finally {
       if (attachment != null) {
-        clearTempDirectory(attachment.toPath());
+        clearTempDirectory(attachment.toPath().getParent());
       }
     }
   }
