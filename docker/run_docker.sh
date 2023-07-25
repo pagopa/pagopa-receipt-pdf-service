@@ -58,4 +58,5 @@ until [ $(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/q/health/
     attempt_counter=$((attempt_counter+1))
     sleep 5
 done
+sleep 60
 echo 'Service Started'
