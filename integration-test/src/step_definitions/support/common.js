@@ -1,8 +1,9 @@
 const axios = require("axios");
 
 const uri = process.env.SERVICE_URI;
+const environment = process.env.ENVIRONMENT;
 
-axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = process.env.SUBKEY // for all requests
+axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = process.env.SUBKEY || ""; // for all requests
 if (process.env.canary) {
   axios.defaults.headers.common['X-CANARY'] = 'canary' // for all requests
 }
@@ -21,9 +22,14 @@ function getAttachment(receiptId, blobName, fiscalCode) {
 }
 
 function httpGET(url, fiscalCode) {
-	let headers = {};//fiscalCode ? {"fiscal_code": fiscalCode} : null;
+	let queryParams = null;
+	let headers = {};
+	if (environment === "local") {	
+		queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : null;
+	} else {
+		headers = fiscalCode ? {"fiscal_code": fiscalCode} : null;
+	}
 
-	let queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : null;
 
 	return axios.get(url+queryParams, { headers })
 
