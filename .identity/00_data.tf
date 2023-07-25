@@ -36,3 +36,13 @@ data "azurerm_key_vault_secret" "key_vault_cucumber_token" {
   name         = "cucumber-token"
   key_vault_id = data.azurerm_key_vault.key_vault.id
 }
+
+data "azurerm_storage_account" "receipts_sa" {
+  name                = "pagopa${var.env_short}${local.location_short}receiptsfnsa"
+  resource_group_name = "pagopa-${var.env_short}-${local.location_short}-receipts-st-rg"
+}
+
+data "azurerm_cosmosdb_account" "receipts_cosmos" {
+  name                = "pagopa-${var.env_short}-${local.location_short}-receipts-ds-cosmos-account"
+  resource_group_name = "pagopa-${var.env_short}-${local.location_short}-receipts-rg"
+}
