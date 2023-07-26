@@ -30,22 +30,27 @@ function httpGET(url, fiscalCode) {
 		headers = fiscalCode ? {"fiscal_code": fiscalCode} : null;
 	}
 
-
 	return axios.get(url+queryParams, { headers })
-
 		.then(res => {
-		console.log(res);
-
 			return res;
-
 		})
-
 		.catch(error => {
-		console.log(error);
+		if (error.response) {
+              // The request was made and the server responded with a status code
+              // that falls out of the range of 2xx
+              console.log("RESPONSE DATA ");
+              console.log(error.response.data);
+              console.log("RESPONSE STATUS ");
+              console.log(error.response.status);
+            } else if (error.request) {
+              // The request was made but no response was received
+              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+              // http.ClientRequest in node.js
+              console.log("GENERIC ERROR ");
+              console.log(error.request);
+            }
 			return error.response;
-
 		});
-
 }
 
 function createReceipt(id, fiscalCode, pdfName) {
