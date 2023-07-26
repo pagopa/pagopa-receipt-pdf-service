@@ -39,15 +39,9 @@ function httpGET(url, fiscalCode) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
               console.log("CALL TO " + url+queryParams + " AND HEADER ");
-              console.log(headers);
+              console.log(error.request._header);
               console.log("RESPONSE WITH STATUS " + error.response.status + " AND DATA ");
               console.log(error.response.data);
-            } else if (error.request) {
-              // The request was made but no response was received
-              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-              // http.ClientRequest in node.js
-              console.log("GENERIC ERROR ");
-              console.log(error.request);
             }
 			return error.response;
 		});
