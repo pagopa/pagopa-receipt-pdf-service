@@ -32,7 +32,6 @@ microservice-chart:
     - 8080 #http
     - 12345 #jmx-exporter
   service:
-    create: true
     type: ClusterIP
       - 8080 #http
       - 12345 #jmx-exporter
