@@ -6,11 +6,11 @@ services:
     image: ${image}
     platform: linux/amd64
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_integration_test
       context: ../
       args:
         QUARKUS_PROFILE: prod
         APP_NAME: pagopa-receipt-pdf-service
-        SLEEP_FOR_INTEGRATION: 10000
+        SLEEP_FOR_INTEGRATION: 120000
     ports:
       - "8080:8080"
