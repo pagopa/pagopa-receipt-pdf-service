@@ -39,7 +39,7 @@ function httpGET(url, fiscalCode) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
               console.log("CALL TO " + url+queryParams + " AND HEADER ");
-              console.log(error.response.header);
+              console.log(headers);
               console.log("RESPONSE WITH STATUS " + error.response.status + " AND DATA ");
               console.log(error.response.data);
             } else if (error.request) {
