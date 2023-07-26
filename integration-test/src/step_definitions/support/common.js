@@ -34,12 +34,14 @@ function httpGET(url, fiscalCode) {
 	return axios.get(url+queryParams, { headers })
 
 		.then(res => {
+		console.log(res);
 
 			return res;
 
 		})
 
 		.catch(error => {
+		console.log(error);
 			return error.response;
 
 		});
