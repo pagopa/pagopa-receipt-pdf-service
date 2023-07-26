@@ -22,12 +22,12 @@ function getAttachment(receiptId, blobName, fiscalCode) {
 }
 
 function httpGET(url, fiscalCode) {
-	let queryParams = null;
+	let queryParams = '';
 	let headers = {};
 	if (environment === "local") {	
-		queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : null;
+		queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : '';
 	} else {
-		headers = fiscalCode ? {"fiscal_code": fiscalCode} : null;
+		headers = fiscalCode ? {"fiscal_code": fiscalCode} : {};
 	}
 
 	return axios.get(url+queryParams, { headers })
