@@ -88,12 +88,6 @@ jobs:
           chmod +x ./run_integration_test.sh
           ./run_integration_test.sh local
 
-      - name: Stop containers
-        # the containers should be stopped regardless of 
-        # the test result
-        if: always()
-        run: docker-compose down
-
   delete_github_deployments:
     runs-on: ubuntu-latest
     needs: smoke-test
