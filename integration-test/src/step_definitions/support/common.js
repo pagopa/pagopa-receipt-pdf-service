@@ -38,10 +38,10 @@ function httpGET(url, fiscalCode) {
 		if (error.response) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
-              console.log("RESPONSE DATA ");
+              console.log("CALL TO " + url+queryParams + " AND HEADER ");
+              console.log(error.response.header);
+              console.log("RESPONSE WITH STATUS " + error.response.status + " AND DATA ");
               console.log(error.response.data);
-              console.log("RESPONSE STATUS ");
-              console.log(error.response.status);
             } else if (error.request) {
               // The request was made but no response was received
               // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
