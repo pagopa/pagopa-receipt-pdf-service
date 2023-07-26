@@ -8,5 +8,9 @@ services:
     build:
       dockerfile: Dockerfile
       context: ../
+      args:
+        QUARKUS_PROFILE: prod
+        APP_NAME: pagopa-receipt-pdf-service
+        SLEEP_FOR_INTEGRATION: 10000
     ports:
       - "8080:8080"
