@@ -8,6 +8,8 @@ import lombok.Getter;
 @Getter
 public enum AppErrorCodeEnum {
 
+    PDFS_400("PDFS_400", "I/O error when reading the temporary file with the receipt PDF content retrieved from Blob Storage"),
+
     PDFS_500("PDFS_500", "I/O error when reading the temporary file with the receipt PDF content retrieved from Blob Storage"),
 
     PDFS_600("PDFS_600", "I/O error when creating the temporary directory to download the receipt PDF from Blob Storage"),

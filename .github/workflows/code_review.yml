@@ -86,7 +86,7 @@ jobs:
 
           cd ./integration-test
           chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh dev
+          ./run_integration_test.sh local
 
   delete_github_deployments:
     runs-on: ubuntu-latest

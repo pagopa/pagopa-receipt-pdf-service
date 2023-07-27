@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_400;
 import static jakarta.ws.rs.core.Response.Status.*;
 
 public class ExceptionMapper {
@@ -51,6 +52,14 @@ public class ExceptionMapper {
         String message = "An unexpected error has occurred. Please contact support.";
         logger.error(message, pdfServiceException);
         return RestResponse.status(status, buildErrorResponse(pdfServiceException.getErrorCode(), status, message));
+    }
+
+    @ServerExceptionMapper
+    public RestResponse<ErrorResponse> mapGenericException(Throwable t) {
+        Response.Status status = INTERNAL_SERVER_ERROR;
+        String message = "An unexpected error has occurred. Please contact support.";
+        logger.error(message, t);
+        return RestResponse.status(status, buildErrorResponse(PDFS_400, status, t.getMessage()));
     }
 
     private ErrorResponse buildErrorResponse(AppErrorCodeEnum errorCode, Response.Status status, String message) {
