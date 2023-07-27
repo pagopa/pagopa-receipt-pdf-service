@@ -25,19 +25,19 @@ FILE=.env
 #if test -f "$FILE"; then
 #    rm .env
 #fi
-config=$(yq  -r '."microservice-chart".envConfig' ../helm/values-$ENV.yaml)
-for line in $(echo $config | jq -r '. | to_entries[] | select(.key) | "\(.key)=\(.value)"'); do
-    echo $line >> .env
-done
-
-keyvault=$(yq  -r '."microservice-chart".keyvault.name' ../helm/values-$ENV.yaml)
-secret=$(yq  -r '."microservice-chart".envSecret' ../helm/values-$ENV.yaml)
-for line in $(echo $secret | jq -r '. | to_entries[] | select(.key) | "\(.key)=\(.value)"'); do
-  IFS='=' read -r -a array <<< "$line"
-  response=$(az keyvault secret show --vault-name $keyvault --name "${array[1]}")
-  value=$(echo $response | jq -r '.value')
-  echo "${array[0]}=$value" >> .env
-done
+#config=$(yq  -r '."microservice-chart".envConfig' ../helm/values-$ENV.yaml)
+#for line in $(echo $config | jq -r '. | to_entries[] | select(.key) | "\(.key)=\(.value)"'); do
+#    echo $line >> .env
+#done
+#
+#keyvault=$(yq  -r '."microservice-chart".keyvault.name' ../helm/values-$ENV.yaml)
+#secret=$(yq  -r '."microservice-chart".envSecret' ../helm/values-$ENV.yaml)
+#for line in $(echo $secret | jq -r '. | to_entries[] | select(.key) | "\(.key)=\(.value)"'); do
+#  IFS='=' read -r -a array <<< "$line"
+#  response=$(az keyvault secret show --vault-name $keyvault --name "${array[1]}")
+#  value=$(echo $response | jq -r '.value')
+#  echo "${array[0]}=$value" >> .env
+#done
  printf "ENV FILE $(cat .env) \n"
 
 stack_name=$(cd .. && basename "$PWD")
