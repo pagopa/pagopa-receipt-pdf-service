@@ -59,7 +59,8 @@ public class ExceptionMapper {
         Response.Status status = INTERNAL_SERVER_ERROR;
         String message = "An unexpected error has occurred. Please contact support.";
         logger.error(message, t);
-        return RestResponse.status(status, buildErrorResponse(PDFS_400, status, t.getMessage()));
+        String message1 = String.format("Error message %s. Stacktrace: %s",t.getMessage(), t);
+        return RestResponse.status(status, buildErrorResponse(PDFS_400, status, message1));
     }
 
     private ErrorResponse buildErrorResponse(AppErrorCodeEnum errorCode, Response.Status status, String message) {
