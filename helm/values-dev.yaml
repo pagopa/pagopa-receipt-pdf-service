@@ -72,9 +72,9 @@ microservice-chart:
           value: "75"
   fileConfig: {}
   envConfig:
-    APP_ENVIRONMENT: "dev"
+    #APP_ENVIRONMENT: "dev"
     WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
-    ENV: 'azure-dev'
+    #ENV: 'azure-dev'
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
     COSMOS_RECEIPT_SERVICE_ENDPOINT: "https://pagopa-d-weu-receipts-ds-cosmos-account.documents.azure.com:443/"
