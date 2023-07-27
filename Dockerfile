@@ -29,7 +29,6 @@ RUN mkdir -p /code/target/jmx && \
 RUN chmod 777 /code/jmx_prometheus_javaagent-0.19.0.jar && \
     cp /code/jmx_prometheus_javaagent-0.19.0.jar /code/target/jmx/jmx_prometheus_javaagent-0.19.0.jar
 
-
 FROM registry.access.redhat.com/ubi8/openjdk-17:1.14
 
 ENV LANGUAGE='en_US:en'
