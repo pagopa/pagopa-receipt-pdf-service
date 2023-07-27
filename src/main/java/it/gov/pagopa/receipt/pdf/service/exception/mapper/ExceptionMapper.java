@@ -13,6 +13,8 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_400;
@@ -59,7 +61,10 @@ public class ExceptionMapper {
         Response.Status status = INTERNAL_SERVER_ERROR;
         String message = "An unexpected error has occurred. Please contact support.";
         logger.error(message, t);
-        String message1 = String.format("Error message %s. Stacktrace: %s",t.getMessage(), t);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        String message1 = String.format("Error message %s. Stacktrace: %s",t.getMessage(), sw.toString());
         return RestResponse.status(status, buildErrorResponse(PDFS_400, status, message1));
     }
 
