@@ -35,17 +35,6 @@ function httpGET(url, fiscalCode) {
 			return res;
 		})
 		.catch(error => {
-		if (error.response) {
-              // The request was made and the server responded with a status code
-              // that falls out of the range of 2xx
-              console.log("CALL TO " + url+queryParams + " AND HEADER ");
-              console.log(error.request._header);
-              console.log("RESPONSE WITH STATUS " + error.response.status + " AND DATA ");
-              console.log(error.response.data);
-            }
-            console.log("ERROR MESSAGE ");
-            console.log(error.message);
-            console.log("---------------------");
 			return error.response;
 		});
 }

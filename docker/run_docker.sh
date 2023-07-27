@@ -38,7 +38,6 @@ for line in $(echo $secret | jq -r '. | to_entries[] | select(.key) | "\(.key)=\
   value=$(echo $response | jq -r '.value')
   echo "${array[0]}=$value" >> .env
 done
- printf "ENV FILE $(cat .env) \n"
 
 stack_name=$(cd .. && basename "$PWD")
 docker compose -p "${stack_name}" up -d --remove-orphans --force-recreate --build
