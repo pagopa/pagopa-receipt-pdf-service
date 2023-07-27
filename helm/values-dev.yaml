@@ -73,15 +73,15 @@ microservice-chart:
   fileConfig: {}
   envConfig:
     #APP_ENVIRONMENT: "dev"
-    WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
+    #WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
     #ENV: 'azure-dev'
-    APP_LOGGING_LEVEL: 'DEBUG'
-    DEFAULT_LOGGING_LEVEL: 'INFO'
-    COSMOS_RECEIPT_SERVICE_ENDPOINT: "https://pagopa-d-weu-receipts-ds-cosmos-account.documents.azure.com:443/"
-    COSMOS_RECEIPT_DB_NAME: "db"
-    COSMOS_RECEIPT_CONTAINER_NAME: "receipts"
-    BLOB_STORAGE_ACCOUNT_ENDPOINT: "https://pagopadweureceiptsfnsa.blob.core.windows.net/"
-    BLOB_STORAGE_CONTAINER_NAME: "pagopa-d-weu-receipts-azure-blob-receipt-st-attach"
+    #APP_LOGGING_LEVEL: 'DEBUG'
+    #DEFAULT_LOGGING_LEVEL: 'INFO'
+    #COSMOS_RECEIPT_SERVICE_ENDPOINT: "https://pagopa-d-weu-receipts-ds-cosmos-account.documents.azure.com:443/"
+    #COSMOS_RECEIPT_DB_NAME: "db"
+    #COSMOS_RECEIPT_CONTAINER_NAME: "receipts"
+    #BLOB_STORAGE_ACCOUNT_ENDPOINT: "https://pagopadweureceiptsfnsa.blob.core.windows.net/"
+    #BLOB_STORAGE_CONTAINER_NAME: "pagopa-d-weu-receipts-azure-blob-receipt-st-attach"
     #JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m -XX:+UseG1GC"
   envFieldRef:
     APP_NAME: "metadata.labels['app.kubernetes.io/instance']"
@@ -89,8 +89,8 @@ microservice-chart:
   envSecret:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
-    COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
-    BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
+    #COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
+    #BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
   keyvault:
     name: "pagopa-d-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
