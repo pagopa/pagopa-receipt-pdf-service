@@ -24,7 +24,7 @@ function getAttachment(receiptId, blobName, fiscalCode) {
 function httpGET(url, fiscalCode) {
 	let queryParams = '';
 	let headers = {};
-	if (environment === "local") {	
+	if (environment === "local") {
 		queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : '';
 	} else {
 		headers = fiscalCode ? {"fiscal_code": fiscalCode} : {};

@@ -55,6 +55,12 @@ resource "azuread_service_principal" "action" {
   application_id = azuread_application.action.application_id
 }
 
+resource "azurerm_role_assignment" "environment_terraform_subscription" {
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Reader"
+  principal_id         = azuread_service_principal.action.object_id
+}
+
 resource "azurerm_role_assignment" "environment_key_vault" {
   scope                = data.azurerm_key_vault.key_vault.id
   role_definition_name = "Reader"
