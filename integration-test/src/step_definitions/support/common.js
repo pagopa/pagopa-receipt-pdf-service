@@ -43,6 +43,9 @@ function httpGET(url, fiscalCode) {
               console.log("RESPONSE WITH STATUS " + error.response.status + " AND DATA ");
               console.log(error.response.data);
             }
+            console.log("ERROR MESSAGE ");
+            console.log(error.message);
+            console.log("---------------------");
 			return error.response;
 		});
 }
