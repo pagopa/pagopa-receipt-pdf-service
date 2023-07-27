@@ -13,6 +13,6 @@ services:
         APP_NAME: pagopa-receipt-pdf-service
         SLEEP_FOR_INTEGRATION: 180000
     env_file:
-      - ./.env
+      - .env
     ports:
       - "8080:8080"
