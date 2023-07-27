@@ -88,6 +88,12 @@ jobs:
           chmod +x ./run_integration_test.sh
           ./run_integration_test.sh local
 
+  log-test:
+    name: Log Test
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
       - name: Get Docker logs
         shell: bash
         id: get_docker_logs
