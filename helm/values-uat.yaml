@@ -32,7 +32,6 @@ microservice-chart:
     - 8080 #http
     - 12345 #jmx-exporter
   service:
-    create: true
     type: ClusterIP
     ports:
       - 8080 #http
@@ -78,7 +77,6 @@ microservice-chart:
     ENV: 'azure-dev'
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
-    CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
     COSMOS_RECEIPT_SERVICE_ENDPOINT: 'https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/'
     COSMOS_RECEIPT_DB_NAME: 'db'
     COSMOS_RECEIPT_CONTAINER_NAME: 'receipts'
