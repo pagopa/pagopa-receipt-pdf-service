@@ -3,7 +3,9 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
+import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.Attachment;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
@@ -12,15 +14,15 @@ import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
-import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
-import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static jakarta.ws.rs.core.Response.Status.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -104,7 +106,34 @@ class AttachmentResourceTest {
 
     @Test
     @SneakyThrows
-    void getAttachmentDetailsFailGetReceiptError() {
+    void getAttachmentDetailsFailGetReceiptError400() {
+        doThrow(new ReceiptNotFoundException(PDFS_800, "")).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
+
+        String responseString =
+                given()
+                        .queryParam("fiscal_code", FISCAL_CODE)
+                        .when().get("/messages/" + THIRD_PARTY_ID)
+                        .then()
+                        .statusCode(404)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_800.getErrorCode(), response.getAppErrorCode());
+        assertEquals(NOT_FOUND.getStatusCode(), response.getHttpStatusCode());
+        assertEquals(NOT_FOUND.getReasonPhrase(), response.getHttpStatusDescription());
+        assertNotNull(response.getErrors());
+        assertNotNull(response.getErrors().get(0));
+        assertNotNull(response.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentDetailsFailGetReceiptError500() {
         doThrow(new FiscalCodeNotAuthorizedException(PDFS_700, "")).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
 
         String responseString =
@@ -127,14 +156,42 @@ class AttachmentResourceTest {
         assertNotNull(response.getErrors());
         assertNotNull(response.getErrors().get(0));
         assertNotNull(response.getErrors().get(0).getMessage());
+    }
 
+    @Test
+    @SneakyThrows
+    void getAttachmentDetailsFailWithUnexpectedError() {
+        doThrow(IllegalArgumentException.class).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
+
+        String responseString =
+                given()
+                        .queryParam("fiscal_code", FISCAL_CODE)
+                        .when().get("/messages/" + THIRD_PARTY_ID)
+                        .then()
+                        .statusCode(500)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_400.getErrorCode(), response.getAppErrorCode());
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
+        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
+        assertNotNull(response.getErrors());
+        assertNotNull(response.getErrors().get(0));
+        assertNotNull(response.getErrors().get(0).getMessage());
     }
 
     @Test
     @SneakyThrows
     void getAttachmentSuccess() {
+        File tempDirectory = Files.createTempDirectory("test").toFile();
+        File file = Files.createTempFile(tempDirectory.toPath(), "receipt", ".pdf").toFile();
 
-        doReturn(null).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+        doReturn(file).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
 
         byte[] response =
                 given()
@@ -149,6 +206,8 @@ class AttachmentResourceTest {
 
 
         assertNotNull(response);
+        assertFalse(file.exists());
+        assertFalse(tempDirectory.exists());
 
     }
 
@@ -179,13 +238,41 @@ class AttachmentResourceTest {
 
     @Test
     @SneakyThrows
-    void getAttachmentFailGetReceiptError() {
-        doThrow(new FiscalCodeNotAuthorizedException(PDFS_706, "")).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
+    void getAttachmentFailGetReceiptError400() {
+        doThrow(new AttachmentNotFoundException(PDFS_602, "")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
 
         String responseString =
                 given()
                         .queryParam("fiscal_code", FISCAL_CODE)
-                        .when().get("/messages/" + THIRD_PARTY_ID)
+                        .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
+                        .then()
+                        .statusCode(404)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_602.getErrorCode(), response.getAppErrorCode());
+        assertEquals(NOT_FOUND.getStatusCode(), response.getHttpStatusCode());
+        assertEquals(NOT_FOUND.getReasonPhrase(), response.getHttpStatusDescription());
+        assertNotNull(response.getErrors());
+        assertNotNull(response.getErrors().get(0));
+        assertNotNull(response.getErrors().get(0).getMessage());
+
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailGetReceiptError500() {
+        doThrow(new FiscalCodeNotAuthorizedException(PDFS_706, "")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+
+        String responseString =
+                given()
+                        .queryParam("fiscal_code", FISCAL_CODE)
+                        .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
                         .then()
                         .statusCode(500)
                         .contentType("application/json")
@@ -203,5 +290,32 @@ class AttachmentResourceTest {
         assertNotNull(response.getErrors().get(0));
         assertNotNull(response.getErrors().get(0).getMessage());
 
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailReadingAttachmentFileContent() {
+        doReturn(new File("")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+
+        String responseString =
+                given()
+                        .queryParam("fiscal_code", FISCAL_CODE)
+                        .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
+                        .then()
+                        .statusCode(500)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_500.getErrorCode(), response.getAppErrorCode());
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
+        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
+        assertNotNull(response.getErrors());
+        assertNotNull(response.getErrors().get(0));
+        assertNotNull(response.getErrors().get(0).getMessage());
     }
 }

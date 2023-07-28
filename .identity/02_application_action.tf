@@ -55,6 +55,12 @@ resource "azuread_service_principal" "action" {
   application_id = azuread_application.action.application_id
 }
 
+resource "azurerm_role_assignment" "environment_terraform_subscription" {
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Reader"
+  principal_id         = azuread_service_principal.action.object_id
+}
+
 resource "azurerm_role_assignment" "environment_key_vault" {
   scope                = data.azurerm_key_vault.key_vault.id
   role_definition_name = "Reader"
@@ -64,6 +70,18 @@ resource "azurerm_role_assignment" "environment_key_vault" {
 resource "azurerm_role_assignment" "environment_key_vault_domain" {
   scope                = data.azurerm_key_vault.key_vault_domain.id
   role_definition_name = "Reader"
+  principal_id         = azuread_service_principal.action.object_id
+}
+
+resource "azurerm_role_assignment" "environment_receipts_sa_role" {
+  scope                = data.azurerm_storage_account.receipts_sa.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.action.object_id
+}
+
+resource "azurerm_role_assignment" "environment_receipts_cosmos_role" {
+  scope                = data.azurerm_cosmosdb_account.receipts_cosmos.id
+  role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.action.object_id
 }
 

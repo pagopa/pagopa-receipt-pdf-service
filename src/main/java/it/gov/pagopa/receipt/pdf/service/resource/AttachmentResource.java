@@ -10,6 +10,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -20,8 +21,12 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
 
 /** Resource class that expose the API to retrieve the attachments */
@@ -104,21 +109,21 @@ public class AttachmentResource {
   )
   @Path("/{tp_id}/{attachment_url}")
   @GET
-  public RestResponse<File> getAttachment(
+  public RestResponse<byte[]> getAttachment(
       @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
       @PathParam("attachment_url") String attachmentUrl,
       @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
-      throws MissingFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
-          InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException {
+          throws MissingFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
+          InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException {
 
     // replace new line and tab from user input to avoid log injection
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
     attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
 
     logger.info(
-        "Received get attachment with name {} for receipt with id {}",
-        attachmentUrl,
-        thirdPartyId);
+            "Received get attachment with name {} for receipt with id {}",
+            attachmentUrl,
+            thirdPartyId);
     if (requestFiscalCode == null) {
       String errMsg = "Fiscal code header is null";
       logger.error(errMsg);
@@ -127,12 +132,28 @@ public class AttachmentResource {
     // replace new line and tab from user input to avoid log injection
     requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
 
-    File attachment =
-        attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
 
-    return RestResponse.ResponseBuilder.ok(attachment)
-        .header("content-type", "application/pdf")
-        .header("content-disposition", "attachment;")
-        .build();
+    File attachment = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
+    try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(attachment))) {
+      return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
+              .header("content-type", "application/pdf")
+              .header("content-disposition", "attachment;")
+              .build();
+    } catch (IOException e) {
+      logger.error("Error handling the stream generated from pdf attachment");
+      throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
+    }  finally {
+      if (attachment != null && attachment.exists()) {
+        clearTempDirectory(attachment.toPath().getParent());
+      }
+    }
+  }
+
+  private void clearTempDirectory(java.nio.file.Path workingDirPath) {
+    try {
+      FileUtils.deleteDirectory(workingDirPath.toFile());
+    } catch (IOException e) {
+      logger.warn("Unable to clear working directory: {}", workingDirPath, e);
+    }
   }
 }

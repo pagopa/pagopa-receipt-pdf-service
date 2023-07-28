@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_400;
 import static jakarta.ws.rs.core.Response.Status.*;
 
 public class ExceptionMapper {
@@ -47,10 +48,22 @@ public class ExceptionMapper {
 
     @ServerExceptionMapper
     public RestResponse<ErrorResponse> mapPdfServiceException(PdfServiceException pdfServiceException) {
+        AppErrorCodeEnum errorCode = pdfServiceException.getErrorCode();
+        String message = String.format("Error during request elaboration, id: %s. Please contact support.", errorCode);
+        return getInternalServerErrorResponse(pdfServiceException, errorCode, message);
+    }
+
+    @ServerExceptionMapper
+    public RestResponse<ErrorResponse> mapGenericException(Exception exception) {
+        AppErrorCodeEnum errorCode = PDFS_400;
+        String message = String.format("An unexpected error has occurred, id: %s. Please contact support.", errorCode);
+        return getInternalServerErrorResponse(exception, errorCode, message);
+    }
+
+    private RestResponse<ErrorResponse> getInternalServerErrorResponse(Throwable t, AppErrorCodeEnum errorCode, String message) {
         Response.Status status = INTERNAL_SERVER_ERROR;
-        String message = "An unexpected error has occurred. Please contact support.";
-        logger.error(message, pdfServiceException);
-        return RestResponse.status(status, buildErrorResponse(pdfServiceException.getErrorCode(), status, message));
+        logger.error(message, t);
+        return RestResponse.status(status, buildErrorResponse(errorCode, status, message));
     }
 
     private ErrorResponse buildErrorResponse(AppErrorCodeEnum errorCode, Response.Status status, String message) {

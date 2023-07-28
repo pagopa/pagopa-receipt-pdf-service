@@ -34,6 +34,7 @@ hs_err_pid*
 **/node_modules
 **/.env
 .cache_ggshield
+yarn.lock
 
 # Helm
 /helm/charts/*
