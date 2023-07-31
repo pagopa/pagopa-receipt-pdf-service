@@ -1,4 +1,4 @@
-microservice-chart:
+pagopareceiptpdfservice:
   namespace: "receipts"
   nameOverride: ""
   fullnameOverride: ""
@@ -82,7 +82,9 @@ microservice-chart:
     COSMOS_RECEIPT_CONTAINER_NAME: "receipts"
     BLOB_STORAGE_ACCOUNT_ENDPOINT: "https://pagopadweureceiptsfnsa.blob.core.windows.net/"
     BLOB_STORAGE_CONTAINER_NAME: "pagopa-d-weu-receipts-azure-blob-receipt-st-attach"
-    JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m -XX:+UseG1GC"
+    JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m"
+    QUARKUS_VERTX_CACHING: "false"
+    QUARKUS_VERTX_CLASSPATH_RESOLVING: "false"
   envFieldRef:
     APP_NAME: "metadata.labels['app.kubernetes.io/instance']"
     APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
