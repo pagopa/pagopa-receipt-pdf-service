@@ -53,17 +53,17 @@ microservice-chart:
     allowPrivilegeEscalation: false
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "0.25"
+      memory: "1024Mi"
+      cpu: "0.75"
     limits:
-      memory: "512Mi"
-      cpu: "0.25"
+      memory: "1024Mi"
+      cpu: "0.75"
   autoscaling:
     enable: true
     minReplica: 3
-    maxReplica: 10
+    maxReplica: 7
     pollingInterval: 10 # seconds
-    cooldownPeriod: 50 # seconds
+    cooldownPeriod: 120 # seconds
     triggers:
       - type: cpu
         metadata:
