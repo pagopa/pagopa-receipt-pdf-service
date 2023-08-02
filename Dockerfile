@@ -18,7 +18,11 @@ RUN chmod 777 /code/agent/config.yaml
 RUN  microdnf  install -y wget
 # install jmx agent
 RUN cd /code && \
-    wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.19.0/jmx_prometheus_javaagent-0.19.0.jar
+    wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.19.0/jmx_prometheus_javaagent-0.19.0.jar && \
+    curl -o 'opentelemetry-javaagent.jar' -L 'https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.25.1/opentelemetry-javaagent.jar'
+
+RUN chmod 777 /src/java-function-app/opentelemetry-javaagent.jar && \
+    cp /src/java-function-app/opentelemetry-javaagent.jar /home/site/wwwroot/opentelemetry-javaagent.jar
 
 # build the application
 RUN ./mvnw package -DskipTests=true -Dquarkus.application.name=$APP_NAME -Dquarkus.profile=$QUARKUS_PROFILE
