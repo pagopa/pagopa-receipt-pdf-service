@@ -1,4 +1,4 @@
-pagopareceiptpdfservice:
+microservice-chart:
   namespace: "receipts"
   nameOverride: ""
   fullnameOverride: ""
