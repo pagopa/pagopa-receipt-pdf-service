@@ -1,0 +1,14 @@
+{
+  "environment": [
+    {
+      "env": "uat",
+      "receiptCosmosDBURI": "https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/",
+      "receiptDatabaseID":"db",
+      "receiptContainerID":"receipts",
+      "blobStorageAccountURI": "https://pagopauweureceiptsfnsa.blob.core.windows.net/",
+      "blobStorageContainerID": "pagopa-u-weu-receipts-azure-blob-receipt-st-attach",
+      "blobStorageMaxRetry": 5,
+      "blobStorageTimeout" : 10
+    }
+  ]
+}
