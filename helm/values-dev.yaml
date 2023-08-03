@@ -72,6 +72,7 @@ microservice-chart:
           value: "75"
   fileConfig: {}
   envConfig:
+    APP_NAME: "pdf-receipt-service"
     APP_ENVIRONMENT: "dev"
     WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
     APP_LOGGING_LEVEL: 'DEBUG'
