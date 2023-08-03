@@ -1,6 +1,6 @@
 apiVersion: v2
-name: pagopa-afm-calculator
-description: Microservice that handles calculation for pagoPA Advanced Fees Management
+name: pagopareceiptpdfservice
+description: Microservice pagopa-receipt-pdf-service
 type: application
 version: 0.9.0
 appVersion: 0.3.0
