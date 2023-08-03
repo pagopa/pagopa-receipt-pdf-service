@@ -4,7 +4,7 @@
     "title": "PDF Receipt Service",
     "description": "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.3.7"
+    "version": "0.3.8"
   },
   "servers": [
     {
