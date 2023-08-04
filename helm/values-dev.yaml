@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: "0.3.8"
+    tag: "0.3.9"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -86,7 +86,7 @@ microservice-chart:
     OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopareceiptspdfserviceotl,deployment.environment=dev"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
     OTEL_LOGS_EXPORTER: none
-    OTEL_TRACES_SAMPLER: "always_on"    
+    OTEL_TRACES_SAMPLER: "always_on"
     JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -javaagent:/home/site/wwwroot/opentelemetry-javaagent.jar -Xmx1024m"
   envFieldRef:
   envSecret:
@@ -94,7 +94,7 @@ microservice-chart:
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
-    OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otel-token-header'    
+    OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otel-token-header'
   keyvault:
     name: "pagopa-d-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
@@ -124,7 +124,7 @@ microservice-chart:
       create: true
       image:
         repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-        tag: "0.3.8"
+        tag: "0.3.9"
         pullPolicy: Always
       envConfig: {}
       envSecret: {}
