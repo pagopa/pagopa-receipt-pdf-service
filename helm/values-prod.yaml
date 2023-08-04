@@ -82,6 +82,7 @@ microservice-chart:
     COSMOS_RECEIPT_CONTAINER_NAME: 'receipts'
     BLOB_STORAGE_ACCOUNT_ENDPOINT: 'https://pagopapweureceiptsfnsa.blob.core.windows.net'
     BLOB_STORAGE_CONTAINER_NAME: 'pagopa-p-weu-receipts-azure-blob-receipt-st-attach'
+    ENABLE_ECS_CONSOLE: "true"
     JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m"
   envFieldRef:
   envSecret:
