@@ -27,16 +27,12 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                           example =
                               """
                                   {
-                                    "errorId": "50905466-1881-457b-b42f-fb7b2bfb1610",
-                                    "httpStatusCode": 500,
-                                    "httpStatusDescription": "Internal Server Error",
-                                    "appErrorCode": "PDFS_603",
-                                    "errors": [
-                                      {
-                                        "message": "An unexpected error has occurred. Please contact support."
-                                      }
-                                    ]
-                                  }""")),
+                                     "type": "",
+                                     "title": "Internal Server Error",
+                                     "status": 500,
+                                     "detail": "An unexpected error has occurred. Please contact support.",
+                                     "instance": "PDFS_603"
+                                   }""")),
               @APIResponse(
                   name = "AppException400",
                   responseCode = "400",
@@ -45,37 +41,18 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                       @Content(
                           mediaType = MediaType.APPLICATION_JSON,
                           schema = @Schema(implementation = ErrorResponse.class),
-                          examples = {
+                          examples =
                             @ExampleObject(
                                 name = "Error",
                                 value =
                                     """
                                   {
-                                    "httpStatusCode": 400,
-                                    "httpStatusDescription": "Bad Request",
-                                    "appErrorCode": "PDFS_703",
-                                    "errors": [
-                                      {
-                                        "message": "The provided third party id [<td_id>] is invalid"
-                                      }
-                                    ]
-                                  }"""),
-                            @ExampleObject(
-                                name = "Errors with path",
-                                value =
-                                    """
-                                  {
-                                    "httpStatusCode": 400,
-                                    "httpStatusDescription": "Bad Request",
-                                    "appErrorCode": "PDFS_703",
-                                    "errors": [
-                                      {
-                                        "path": "<detail.path.if-exist>",
-                                        "message": "<detail.message>"
-                                      }
-                                    ]
-                                  }""")
-                          })),
+                                     "type": "",
+                                     "title": "Bad Request",
+                                     "status": 400,
+                                     "detail": "The provided third party id [<td_id>] is invalid",
+                                     "instance": "PDFS_703"
+                                   }"""))),
               @APIResponse(
                   name = "AppException404",
                   responseCode = "404",
@@ -87,15 +64,12 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                           example =
                               """
                                   {
-                                    "httpStatusCode": 404,
-                                    "httpStatusDescription": "Not Found",
-                                    "appErrorCode": "PDFS_900",
-                                    "errors": [
-                                      {
-                                        "message": "Third party id [<td_id>] not found"
-                                      }
-                                    ]
-                                  }""")),
+                                     "type": "",
+                                     "title": "Not Found",
+                                     "status": 404,
+                                     "detail": "Third party id [<td_id>] not found",
+                                     "instance": "PDFS_900"
+                                   }""")),
             }),
     info = @Info(title = "Receipt PDF service", version = "0.0.0-SNAPSHOT"))
 @Startup
