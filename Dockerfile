@@ -25,7 +25,7 @@ RUN cd /code && \
 RUN ./mvnw package -DskipTests=true -Dquarkus.application.name=$APP_NAME -Dquarkus.profile=$QUARKUS_PROFILE
 
 RUN mkdir -p /code/target/otel && \
-    chmod 777 /src/java-function-app/opentelemetry-javaagent.jar && \
+    chmod 777 /code/opentelemetry-javaagent.jar && \
     cp /code/opentelemetry-javaagent.jar /code/target/otel/opentelemetry-javaagent.jar
 
 RUN mkdir -p /code/target/jmx && \
