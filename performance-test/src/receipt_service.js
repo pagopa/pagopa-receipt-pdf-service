@@ -23,22 +23,27 @@ const receiptDatabaseID = `${vars.receiptDatabaseID}`;
 const receiptContainerID = `${vars.receiptContainerID}`;
 const receiptCosmosDBPrimaryKey = `${__ENV.RECEIPT_COSMOS_DB_SUBSCRIPTION_KEY}`;
 
+const blobStorageAccountURI = `${vars.blobStorageAccountURI}`;
+const blobStorageContainerID = `${vars.blobStorageContainerID}`;
+
 export function setup() {
     // 2. setup code
     //Save pdf on blob storage
-    let pdfName = "";
     let pdfUrl = "";
+    let pdfFile = converPdfToBase64("testPDF.pdf", "../resources/.testPDF.pdf");
+    let response  = uploadDocumentToAzure(blobStorageAccountURI, blobStorageContainerID, partitionId, pdfFile);
+    console.log("RESPONSE SAVE PDF", response, response.status, response.body);
 
     //Save receipt on CosmosDB
-    let response = createDocument(
+    response = createDocument(
         receiptCosmosDBURI,
         receiptDatabaseID,
         receiptContainerID,
         receiptCosmosDBPrimaryKey,
-        createReceipt(partitionId, pdfName, pdfUrl),
+        createReceipt(partitionId, partitionId, pdfUrl),
         partitionId
     );
-    console.log("RESPONSE CREATE DOCUMENT", response, response.status, response.body);
+    console.log("RESPONSE CREATE RECEIPT", response, response.status, response.body);
 }
 
 export default function (data) {
@@ -75,5 +80,7 @@ export function teardown(data) {
     let response = deleteDocument(receiptCosmosDBURI, receiptDatabaseID, receiptContainerID, receiptCosmosDBPrimaryKey, partitionId);
     console.log("RESPONSE DELETE RECEIPT", response, response.status, response.body);
     //Delete receipt from blob storage
+    response = deleteDocumentFromAzure(blobStorageAccountURI, blobStorageContainerID, partitionId);
+    console.log("RESPONSE DELETE PDF", response, response.status, response.body);
 
 }
