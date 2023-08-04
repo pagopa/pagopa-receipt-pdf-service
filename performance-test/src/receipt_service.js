@@ -1,6 +1,7 @@
 import { check } from 'k6';
 import { getAttachment, getAttachmentDetails } from './modules/receipt_service_client';
-import { createDocument, deleteDocument, createReceipt } from './modules/common';
+import { createReceipt } from './modules/common';
+import { createDocument, deleteDocument } from './modules/receipt_cosmos_client';
 
 export let options = JSON.parse(open(__ENV.TEST_TYPE));
 
