@@ -7,7 +7,8 @@
         </filter>
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <charset>${CONSOLE_LOG_CHARSET}</charset>
+            <!-- <charset>${CONSOLE_LOG_CHARSET}</charset> -->
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -19,7 +20,7 @@
                 <serviceEnvironment>${ENV}</serviceEnvironment>
             </encoder>
         </appender>
-    </if>>
+    </if>
 
     <appender name="ASYNC_STDOUT"
               class="ch.qos.logback.classic.AsyncAppender">
