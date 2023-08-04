@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@azure/storage-blob": "^12.15.0"
+  }
+}
