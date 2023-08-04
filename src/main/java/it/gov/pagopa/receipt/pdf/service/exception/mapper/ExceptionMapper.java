@@ -5,15 +5,12 @@ import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.MissingFiscalCodeHeaderException;
 import it.gov.pagopa.receipt.pdf.service.exception.PdfServiceException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.ErrorMessage;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_400;
 import static jakarta.ws.rs.core.Response.Status.*;
@@ -68,14 +65,10 @@ public class ExceptionMapper {
 
     private ErrorResponse buildErrorResponse(AppErrorCodeEnum errorCode, Response.Status status, String message) {
         return ErrorResponse.builder()
-                .appErrorCode(errorCode.getErrorCode())
-                .httpStatusCode(status.getStatusCode())
-                .httpStatusDescription(status.getReasonPhrase())
-                .errors(
-                        Collections.singletonList(
-                                ErrorMessage.builder()
-                                        .message(message)
-                                        .build())
-                ).build();
+                .title(status.getReasonPhrase())
+                .status(status.getStatusCode())
+                .detail(message)
+                .instance(errorCode.getErrorCode())
+                .build();
     }
 }

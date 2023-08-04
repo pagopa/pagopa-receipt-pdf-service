@@ -95,12 +95,11 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_901.getErrorCode(), response.getAppErrorCode());
-        assertEquals(BAD_REQUEST.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(BAD_REQUEST.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_901.getErrorCode(), response.getInstance());
+        assertEquals(BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(BAD_REQUEST.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
 
     }
 
@@ -123,12 +122,11 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_800.getErrorCode(), response.getAppErrorCode());
-        assertEquals(NOT_FOUND.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(NOT_FOUND.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_800.getErrorCode(), response.getInstance());
+        assertEquals(NOT_FOUND.getStatusCode(), response.getStatus());
+        assertEquals(NOT_FOUND.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
     }
 
     @Test
@@ -150,12 +148,11 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_700.getErrorCode(), response.getAppErrorCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_700.getErrorCode(), response.getInstance());
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
     }
 
     @Test
@@ -177,12 +174,11 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_400.getErrorCode(), response.getAppErrorCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_400.getErrorCode(), response.getInstance());
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
     }
 
     @Test
@@ -227,12 +223,11 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_901.getErrorCode(), response.getAppErrorCode());
-        assertEquals(BAD_REQUEST.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(BAD_REQUEST.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_901.getErrorCode(), response.getInstance());
+        assertEquals(BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(BAD_REQUEST.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
 
     }
 
@@ -255,12 +250,11 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_602.getErrorCode(), response.getAppErrorCode());
-        assertEquals(NOT_FOUND.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(NOT_FOUND.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_602.getErrorCode(), response.getInstance());
+        assertEquals(NOT_FOUND.getStatusCode(), response.getStatus());
+        assertEquals(NOT_FOUND.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
 
     }
 
@@ -283,12 +277,11 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_706.getErrorCode(), response.getAppErrorCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_706.getErrorCode(), response.getInstance());
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
 
     }
 
@@ -311,11 +304,10 @@ class AttachmentResourceTest {
         assertNotNull(responseString);
         ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
         assertNotNull(response);
-        assertEquals(PDFS_500.getErrorCode(), response.getAppErrorCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getHttpStatusCode());
-        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getHttpStatusDescription());
-        assertNotNull(response.getErrors());
-        assertNotNull(response.getErrors().get(0));
-        assertNotNull(response.getErrors().get(0).getMessage());
+        assertEquals(PDFS_500.getErrorCode(), response.getInstance());
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
     }
 }
