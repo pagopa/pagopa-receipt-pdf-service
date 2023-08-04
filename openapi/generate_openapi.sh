@@ -6,6 +6,6 @@ if [ $(npm list -g | grep -c api-spec-converter) -eq 0 ]; then
 fi
 
 # save openapi
-curl http://localhost:8080/v3/api-docs | python3 -m json.tool > ./openapi.json
+curl http://localhost:8080/q/openapi | python3 -m json.tool > ./openapi.json
 
 # UI mode http://localhost:8080/swagger-ui/index.html
