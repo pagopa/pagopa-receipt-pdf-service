@@ -5,7 +5,6 @@
       "receiptCosmosDBURI": "https://pagopa-d-weu-receipts-ds-cosmos-account.documents.azure.com:443/",
       "receiptDatabaseID":"db",
       "receiptContainerID":"receipts",
-      "blobStorageAccountURI": "https://pagopadweureceiptsfnsa.blob.core.windows.net/",
       "blobStorageContainerID": "pagopa-d-weu-receipts-azure-blob-receipt-st-attach",
 
       "receiptServiceURIBasePath": "https://api.dev.platform.pagopa.it/shared/pdf-engine/v1/messages",
