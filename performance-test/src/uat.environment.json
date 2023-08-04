@@ -7,8 +7,10 @@
       "receiptContainerID":"receipts",
       "blobStorageAccountURI": "https://pagopauweureceiptsfnsa.blob.core.windows.net/",
       "blobStorageContainerID": "pagopa-u-weu-receipts-azure-blob-receipt-st-attach",
-      "blobStorageMaxRetry": 5,
-      "blobStorageTimeout" : 10
+
+      "receiptServiceURIBasePath": "https://api.uat.platform.pagopa.it/shared/pdf-engine/v1/messages",
+      "receiptServiceGetAttachmentPath": "/getAttachment",
+      "receiptServiceGetAttachmentDetailsPath": "/getAttachmentDetails" 
     }
   ]
 }

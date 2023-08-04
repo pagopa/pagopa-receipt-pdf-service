@@ -32,7 +32,10 @@ where the mean of the environment variables is:
       "blobStorageAccountURI": "",
       "blobStorageContainerID": "",
       "blobStorageMaxRetry": 5,
-      "blobStorageTimeout" : 10
+      "blobStorageTimeout" : 10,
+      "receiptServiceURIBasePath": "",
+      "receiptServiceGetAttachmentPath": "/getAttachment",
+      "receiptServiceGetAttachmentDetailsPath": "/getAttachmentDetails" 
     }
   ]
 ```
@@ -50,3 +53,9 @@ where the mean of the environment variables is:
 `blobStorageMaxRetry`: BlobStorage max number of retry
 
 `blobStorageTimeout` : BlobStorage timeout between retries
+
+`receiptServiceURIBasePath`: Receipt Service URI base path
+
+`receiptServiceGetAttachmentPath`: Receipt Service getAttachment path
+
+`receiptServiceGetAttachmentDetailsPath`: Receipt Service getAttachmentDetails path 
