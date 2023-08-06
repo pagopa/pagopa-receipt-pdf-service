@@ -60,7 +60,7 @@ microservice-chart:
       cpu: "0.25"
   autoscaling:
     enable: true
-    minReplica: 3
+    minReplica: 1
     maxReplica: 10
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
@@ -83,7 +83,11 @@ microservice-chart:
     BLOB_STORAGE_ACCOUNT_ENDPOINT: 'https://pagopauweureceiptsfnsa.blob.core.windows.net'
     BLOB_STORAGE_CONTAINER_NAME: 'pagopa-u-weu-receipts-azure-blob-receipt-st-attach'
     ENABLE_ECS_CONSOLE: "true"
-    JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m"
+    OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopareceiptspdfserviceotl,deployment.environment=uat"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
+    OTEL_LOGS_EXPORTER: none
+    OTEL_TRACES_SAMPLER: "always_on"
+    JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -javaagent:/deployments/opentelemetry-javaagent.jar -Xmx1024m"
   envFieldRef:
   envSecret:
     # required
