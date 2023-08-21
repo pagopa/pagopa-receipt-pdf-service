@@ -6,6 +6,7 @@
       "receiptDatabaseID":"db",
       "receiptContainerID":"receipts",
       "blobStorageContainerID": "pagopa-d-weu-receipts-azure-blob-receipt-st-attach",
+      "blobStorageAccountName":"pagopadweureceiptsfnsa",
 
       "receiptServiceURIBasePath": "http://localhost:8080/messages",
       "receiptServiceGetAttachmentPath": "/getAttachment",

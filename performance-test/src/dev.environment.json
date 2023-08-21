@@ -6,6 +6,7 @@
       "receiptDatabaseID":"db",
       "receiptContainerID":"receipts",
       "blobStorageContainerID": "pagopa-d-weu-receipts-azure-blob-receipt-st-attach",
+      "blobStorageAccountName":"pagopadweureceiptsfnsa",
 
       "receiptServiceURIBasePath": "https://api.dev.platform.pagopa.it/shared/pdf-engine/v1/messages",
       "receiptServiceGetAttachmentPath": "/getAttachment",

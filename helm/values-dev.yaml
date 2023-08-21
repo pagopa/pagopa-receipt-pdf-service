@@ -90,7 +90,8 @@ microservice-chart:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
-    BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
+    BLOB_STORAGE_CONN_STRING: "blob-storage-account-connection-string",
+    BLOB_STORAGE_KEY: "blob-storage-account-key"
   keyvault:
     name: "pagopa-d-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"

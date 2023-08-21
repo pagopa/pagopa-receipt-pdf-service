@@ -6,7 +6,7 @@ services:
     volumes:
       - '${PWD}/src:/scripts'
     environment:
-      - BLOB_STORAGE_CONN_STRING=${blob_storage_conn_string}
+      - BLOB_STORAGE_KEY=${blob_storage_key}
       - COSMOS_RECEIPT_KEY=${cosmos_receipt_key}
       - VARS=${env}.environment.json
       - TEST_TYPE=/scripts/test-types/${type}.json
