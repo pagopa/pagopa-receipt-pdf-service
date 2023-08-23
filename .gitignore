@@ -35,6 +35,7 @@ hs_err_pid*
 **/.env
 .cache_ggshield
 yarn.lock
+package-lock.json
 
 # Helm
 /helm/charts/*
