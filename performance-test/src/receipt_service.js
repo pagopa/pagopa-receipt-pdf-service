@@ -1,86 +1,50 @@
 import { check } from 'k6';
-import { getAttachment, getAttachmentDetails } from './modules/receipt_service_client';
-import { createReceipt } from './modules/common';
-import { createDocument, deleteDocument } from './modules/receipt_cosmos_client';
-
-export let options = JSON.parse(open(__ENV.TEST_TYPE));
-
-const fiscalCode = "JHNDOE00A01F205N";
-const partitionId = "receipt-service-perf-test-id-1";
-let receiptId = "";
-let attachmentUrl = "";
+import { getToService } from './modules/receipt_service_client.js';
+import { SharedArray } from 'k6/data';
 
 const varsArray = new SharedArray('vars', function () {
     return JSON.parse(open(`./${__ENV.VARS}`)).environment;
 });
-const vars = varsArray[0];
-const receiptServiceURIBasePath = `${vars.receiptServiceURIBasePath}`;
-const receiptServiceGetAttachmentPath = `${vars.receiptServiceGetAttachmentPath}`;
-const receiptServiceGetAttachmentDetailsPath = `${vars.receiptServiceGetAttachmentDetailsPath}`;
+export const ENV_VARS = varsArray[0];
+export let options = JSON.parse(open(__ENV.TEST_TYPE));
 
-const receiptCosmosDBURI = `${vars.receiptCosmosDBURI}`;
-const receiptDatabaseID = `${vars.receiptDatabaseID}`;
-const receiptContainerID = `${vars.receiptContainerID}`;
-const receiptCosmosDBPrimaryKey = `${__ENV.COSMOS_RECEIPT_KEY}`;
+const fiscalCode = "JHNDOE00A01F205N";
+let receiptId = ENV_VARS.receiptTestId;
+let attachmentUrl = "";
 
-const blobStorageConnString = `${__ENV.BLOB_STORAGE_CONN_STRING}`;
-const blobStorageContainerID = `${vars.blobStorageContainerID}`;
+const receiptServiceURIBasePath = `${ENV_VARS.receiptServiceURIBasePath}`;
 
-export function setup() {
-    // 2. setup code
-    //Save pdf on blob storage
-    let pdfUrl = "";
-    let pdfFile = converPdfToBase64("testPDF.pdf", "../resources/.testPDF.pdf");
-    let response  = uploadDocumentToAzure(blobStorageConnString, blobStorageContainerID, partitionId, pdfFile);
-    console.log("RESPONSE SAVE PDF", response, response.status, response.body);
-
-    //Save receipt on CosmosDB
-    response = createDocument(
-        receiptCosmosDBURI,
-        receiptDatabaseID,
-        receiptContainerID,
-        receiptCosmosDBPrimaryKey,
-        createReceipt(partitionId, partitionId, pdfUrl),
-        partitionId
-    );
-    console.log("RESPONSE CREATE RECEIPT", response, response.status, response.body);
-}
-
-export default function (data) {
-    // 3. VU code
+export default function () {
     //getAttachmentDetails
-    let postURI = receiptServiceURIBasePath + receiptServiceGetAttachmentDetailsPath;
-    let response = getAttachmentDetails(postURI, { receiptId, fiscalCode });
+    let response = getToService(`${receiptServiceURIBasePath}/${receiptId}`, fiscalCode);
+    console.info("Receipt Service getAttachmentDetails call, Status " + response.status);
 
-    console.log("Receipt Service getAttachmentDetails call, Status " + response.status);
+    let responseBody = JSON.parse(response.body);
 
-    check(response, {
-        'Receipt Service getAttachmentDetails status is 200': (response) => response.status === 200,
-        'Receipt Service getAttachmentDetails body has attachment url': (response) => response?.body?.attachmentUrl
-    });
-
-    attachmentUrl = response.body.attachmentUrl;
-
-    //getAttachment
-    postURI = receiptServiceURIBasePath + receiptServiceGetAttachmentPath;
-    response = getAttachment(postURI, { receiptId, fiscalCode, attachmentUrl });
-
-    console.log("Receipt Service getAttachment call, Status " + response.status);
+    attachmentUrl = responseBody &&
+        responseBody.attachments.length > 0 &&
+        responseBody.attachments[0] &&
+        responseBody.attachments[0].url
 
     check(response, {
-        'Receipt Service getAttachment status is 200': (response) => response.status === 200,
-        'Receipt Service getAttachment content_type is the expected application/pdf': (response) => response.headers["Content-Type"] === "application/pdf",
-        'Receipt Service getAttachment body not null': (response) => response.body !== null
+        'Receipt Service getAttachmentDetails status is 200': () => response.status === 200,
+        'Receipt Service getAttachmentDetails body has attachment url': () =>
+            attachmentUrl
     });
-}
 
-export function teardown(data) {
-    // 4. teardown code
-    //Delete pdf from blob storage
-    let response = deleteDocument(receiptCosmosDBURI, receiptDatabaseID, receiptContainerID, receiptCosmosDBPrimaryKey, partitionId);
-    console.log("RESPONSE DELETE RECEIPT", response, response.status, response.body);
-    //Delete receipt from blob storage
-    response = deleteDocumentFromAzure(blobStorageConnString, blobStorageContainerID, partitionId);
-    console.log("RESPONSE DELETE PDF", response, response.status, response.body);
+    if (
+        attachmentUrl
+    ) {
+        //getAttachment
+        response = getToService(`${receiptServiceURIBasePath}/${receiptId}/${attachmentUrl}`, fiscalCode);
+
+        console.log("Receipt Service getAttachment call, Status " + response.status);
+
+        check(response, {
+            'Receipt Service getAttachment status is 200': (response) => response.status === 200,
+            'Receipt Service getAttachment content_type is the expected application/pdf': (response) => response.headers["Content-Type"] === "application/pdf",
+            'Receipt Service getAttachment body not null': (response) => response.body !== null
+        });
+    }
 
 }
