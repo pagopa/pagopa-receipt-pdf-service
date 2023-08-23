@@ -2,13 +2,13 @@ import http from 'k6/http';
 
 const subKey = `${__ENV.SUBSCRIPTION_KEY}`;
 
-export function postToService(url, request) {
-    const form = request;
+export function getToService(url, fiscalCode) {
 
-      let headers = { 
-        'Ocp-Apim-Subscription-Key': subKey
-    };
+  let headers = {
+    'Ocp-Apim-Subscription-Key': subKey,
+    fiscal_code: fiscalCode
+  };
 
-    return http.post(url, form, {headers});
+  return http.get(url, { headers, responseType: "text"});
 }
 
