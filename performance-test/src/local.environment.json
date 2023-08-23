@@ -7,10 +7,9 @@
       "receiptContainerID":"receipts",
       "blobStorageContainerID": "pagopa-d-weu-receipts-azure-blob-receipt-st-attach",
       "blobStorageAccountName":"pagopadweureceiptsfnsa",
+      "receiptTestId": "receipt-service-perf-test-id-1",
 
-      "receiptServiceURIBasePath": "http://localhost:8080/messages",
-      "receiptServiceGetAttachmentPath": "/getAttachment",
-      "receiptServiceGetAttachmentDetailsPath": "/getAttachmentDetails" 
+      "receiptServiceURIBasePath": "http://localhost:8080/messages"
     }
   ]
 }
