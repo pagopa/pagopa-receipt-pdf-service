@@ -1,20 +1,61 @@
-# Performance Tests with k6
+# K6 tests for _ReceiptPdfService_ project
 
-[k6](https://k6.io/) is a load testing tool. 👀
-See [here](https://k6.io/docs/get-started/installation/) to install it.
+[k6](https://k6.io/) is a load testing tool. 👀 See [here](https://k6.io/docs/get-started/installation/) to install it.
 
-## How to Run 🚀
+- [01. Receipt service](#01-receipt-service)
 
-To run k6 tests use the command:
+This is a set of [k6](https://k6.io) tests related to the _ReceiptPdfService_ initiative.
 
-``` shell
-k6 run --env VARS=local.environment.json --env TEST_TYPE=./test-types/load.json --env API_SUBSCRIPTION_KEY=<your-secret> <script-name>.js
+To invoke k6 test passing parameter use -e (or --env) flag:
+
+```
+-e MY_VARIABLE=MY_VALUE
 ```
 
-where
+## 01. Receipt service
 
-- _VARS_ is a environment file
-- _TEST_TYPE_ is a file in `/test-types` folder
-- _API_SUBSCRIPTION_KEY_ is your sub-key
+Test the receipt service: 
 
-`<script-name>.js` is the scenario to run with k6
+```
+k6 run --env VARS=local.environment.json --env TEST_TYPE=./test-types/load.json --env BLOB_STORAGE_KEY=<your-secret> --env COSMOS_RECEIPT_KEY=<your-secret> script.js //TODO SCRIPT NAME
+```
+
+where the mean of the environment variables is:
+
+```json
+  "environment": [
+    {
+      "env": "local",
+      "receiptCosmosDBURI": "",
+      "receiptDatabaseID":"",
+      "receiptContainerID":"",
+      "blobStorageAccountURI": "",
+      "blobStorageContainerID": "",
+      "blobStorageMaxRetry": 5,
+      "blobStorageTimeout" : 10,
+      "receiptServiceURIBasePath": "",
+      "receiptServiceGetAttachmentPath": "/getAttachment",
+      "receiptServiceGetAttachmentDetailsPath": "/getAttachmentDetails" 
+    }
+  ]
+```
+
+`receiptCosmosDBURI`: CosmosDB url to access Receipts CosmosDB REST API
+
+`receiptDatabaseID`: database name to access Receipts Cosmos DB REST API
+
+`receiptContainerID`: collection name to access Receipts Cosmos DB REST API
+
+`blobStorageAccountURI`: BlobStorage url to access Receipts Blob Storage REST API
+
+`blobStorageContainerID`: collection name to access Receipts Blob Storage REST API
+
+`blobStorageMaxRetry`: BlobStorage max number of retry
+
+`blobStorageTimeout` : BlobStorage timeout between retries
+
+`receiptServiceURIBasePath`: Receipt Service URI base path
+
+`receiptServiceGetAttachmentPath`: Receipt Service getAttachment path
+
+`receiptServiceGetAttachmentDetailsPath`: Receipt Service getAttachmentDetails path 

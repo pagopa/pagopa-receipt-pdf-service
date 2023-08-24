@@ -53,11 +53,11 @@ microservice-chart:
     allowPrivilegeEscalation: false
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "0.25"
+      memory: "1024Mi"
+      cpu: "0.75"
     limits:
-      memory: "512Mi"
-      cpu: "0.25"
+      memory: "1024Mi"
+      cpu: "0.75"
   autoscaling:
     enable: true
     minReplica: 1
@@ -65,11 +65,16 @@ microservice-chart:
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
     triggers:
-      - type: cpu
+       - type: cpu
         metadata:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
+      - type: memory
+        metadata:
+          # Required
+          type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+          value: "70"
   fileConfig: {}
   envConfig:
     APP_NAME: "pdf-receipt-service"
@@ -94,6 +99,8 @@ microservice-chart:
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
+    COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
+    BLOB_STORAGE_KEY: "blob-storage-account-key"
     OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
   keyvault:
     name: "pagopa-d-receipts-kv"
