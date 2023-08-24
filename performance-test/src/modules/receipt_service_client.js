@@ -1,6 +1,6 @@
 import http from 'k6/http';
 
-const subKey = `${__ENV.SUBSCRIPTION_KEY}`;
+const subKey = `${__ENV.OCP_APIM_SUBSCRIPTION_KEY}`;
 
 export function getToService(url, fiscalCode) {
 

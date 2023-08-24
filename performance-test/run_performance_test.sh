@@ -4,7 +4,7 @@ ENVIRONMENT=$1
 TYPE=$2
 SCRIPT=$3
 DB_NAME=$4
-SUBSCRIPTION_KEY=$5
+OCP_APIM_SUBSCRIPTION_KEY=$5
 
 if [ -z "$ENVIRONMENT" ]
 then
@@ -27,7 +27,7 @@ export env=${ENVIRONMENT}
 export type=${TYPE}
 export script=${SCRIPT}
 export db_name=${DB_NAME}
-export subscription_key=${SUBSCRIPTION_KEY}
+export ocp_apim_subscription_key=${OCP_APIM_SUBSCRIPTION_KEY}
 
 stack_name=$(cd .. && basename "$PWD")
 docker compose -p "${stack_name}-k6" up -d --remove-orphans --force-recreate --build

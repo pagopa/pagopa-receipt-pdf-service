@@ -98,8 +98,10 @@ microservice-chart:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
-    BLOB_STORAGE_CONN_STRING: "blob-storage-account-connection-string",
+    BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
+    COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
     BLOB_STORAGE_KEY: "blob-storage-account-key"
+    OCP_APIM_SUBSCRIPTION_KEY: "shared-apim-d-subscription-key" #TODO
     OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
   keyvault:
     name: "pagopa-d-receipts-kv"

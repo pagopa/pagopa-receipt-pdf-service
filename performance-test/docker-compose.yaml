@@ -6,7 +6,7 @@ services:
     volumes:
       - '${PWD}/src:/scripts'
     environment:
-      - SUBSCRIPTION_KEY=${subscription_key}
+      - OCP_APIM_SUBSCRIPTION_KEY=${ocp_apim_subscription_key}
       - VARS=${env}.environment.json
       - TEST_TYPE=/scripts/test-types/${type}.json
       - K6_OUT=influxdb=http://nginx:8086/${db_name}

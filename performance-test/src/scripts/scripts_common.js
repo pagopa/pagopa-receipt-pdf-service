@@ -5,8 +5,8 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
 //ENVIRONMENTAL VARIABLES
-const blobStorageConnString = process.env.BLOB_STORAGE_CONNECTION_STRING;
-const receiptCosmosDBConnString = process.env.RECEIPT_COSMOS_DB_CONNECTION_STRING;
+const blobStorageConnString = process.env.BLOB_STORAGE_CONN_STRING;
+const receiptCosmosDBConnString = process.env.COSMOS_RECEIPTS_CONN_STRING;
 
 const environmentString = process.env.ENVIRONMENT_STRING || "local";
 let environmentVars = require(`../${environmentString}.environment.json`)?.environment?.[0] || {};
