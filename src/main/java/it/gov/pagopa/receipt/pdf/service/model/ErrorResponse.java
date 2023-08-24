@@ -1,13 +1,11 @@
 package it.gov.pagopa.receipt.pdf.service.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
-import java.util.List;
 
 /**
  * Model class for the error response
@@ -15,22 +13,21 @@ import java.util.List;
 @Getter
 @Builder
 @Jacksonized
-@JsonPropertyOrder({"errorId", "httpStatusCode", "httpStatusDescription", "appErrorCode", "errors"})
+@JsonPropertyOrder({"type", "title", "status", "detail", "instance"})
 @RegisterForReflection
 public class ErrorResponse {
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  @Schema(example = "50905466-1881-457b-b42f-fb7b2bfb1610")
-  private String errorId;
-
-  @Schema(example = "500")
-  private int httpStatusCode;
+  private String type;
 
   @Schema(example = "Internal Server Error")
-  private String httpStatusDescription;
+  private String title;
+
+  @Schema(example = "500")
+  private int status;
+
+  @Schema(example = "An unexpected error has occurred. Please contact support.")
+  private String detail;
 
   @Schema(example = "PDFS-500")
-  private String appErrorCode;
-
-  private List<ErrorMessage> errors;
+  private String instance;
 }

@@ -87,5 +87,5 @@ Then('response has a {int} Http status', function (expectedStatus) {
 });
 
 Then('application error code is {string}', function (expectedAppErrorCode) {
-  assert.strictEqual(this.response.data.appErrorCode, expectedAppErrorCode);
+  assert.strictEqual(this.response.data.instance, expectedAppErrorCode);
 });
