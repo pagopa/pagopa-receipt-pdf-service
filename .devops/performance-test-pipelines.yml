@@ -50,7 +50,7 @@ steps:
       docker pull grafana/k6
     displayName: Pull k6 image
   - script: |
-      docker build -f DockerfilePre -t exec-node .
+      docker build -f ./DockerfilePre -t exec-node .
       docker run --rm --name initToRunk6 \
       -e BLOB_STORAGE_CONN_STRING=${BLOB_STORAGE_CONN_STRING} \
       -e COSMOS_RECEIPTS_CONN_STRING=${COSMOS_RECEIPTS_CONN_STRING} \
@@ -69,7 +69,7 @@ steps:
       OCP_APIM_SUBSCRIPTION_KEY: ${{ variables.API_SUBSCRIPTION_KEY }}
   - script: |
       cd src
-      docker build -f DockerfilePost -t exec-node .
+      docker build -f ./DockerfilePost -t exec-node .
       docker run --rm --name initToRunk6 \
       -e BLOB_STORAGE_CONN_STRING=${BLOB_STORAGE_CONN_STRING} \
       -e COSMOS_RECEIPTS_CONN_STRING=${COSMOS_RECEIPTS_CONN_STRING} \
