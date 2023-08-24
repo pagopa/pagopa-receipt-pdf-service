@@ -4,7 +4,7 @@ import { blobContainerClient, receiptContainer, PARTITION_ID } from "./scripts_c
 const deleteDocumentFromAzure = async () => {
     const response = await blobContainerClient.deleteBlob(PARTITION_ID);
     if (response._response.status !== 202) {
-        throw new Error(`Error deleting ${PARTITION_ID}`);
+        throw new Error(`Error deleting PDF ${PARTITION_ID}`);
     }
 
     return response;
@@ -20,7 +20,7 @@ async function deleteDocumentFromReceiptsDatastore() {
         return await receiptContainer.item(PARTITION_ID, PARTITION_ID).delete();
     } catch (error) {
         if (error.code !== 404) {
-            throw new Error(`Error deleting ${PARTITION_ID}`);
+            throw new Error(`Error deleting receipt ${PARTITION_ID}`);
         }
     }
 }

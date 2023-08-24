@@ -1,4 +1,4 @@
-import { blobContainerClient,createReceipt, receiptContainer, PARTITION_ID } from "./scripts_common.js";
+import { blobContainerClient,createReceipt, receiptContainer, PARTITION_ID, receiptCosmosDBContainerId } from "./scripts_common.js";
 
 //UPLOAD PDF TO BLOB STORAGE
 const uploadDocumentToAzure = async () => {
@@ -24,7 +24,7 @@ async function createDocumentInReceiptsDatastore() {
       return await receiptContainer.items.create(event);
   } catch (err) {
     throw new Error(
-      `Error saving receipt ${PARTITION_ID} to container ${receiptContainer.containerName}`
+      `Error saving receipt ${PARTITION_ID} to container ${receiptCosmosDBContainerId}`
     );
   }
 }
