@@ -78,11 +78,9 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             logger.error(errMsg);
             throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_702, errMsg);
         }
-        if (receiptDocument.getEventData().getPayerFiscalCode() == null
-                || receiptDocument.getEventData().getDebtorFiscalCode() == null) {
-            String errMsg = String.format("The retrieved receipt with id: %s, has null payer (%s) or debtor (%s) fiscal code",
+        if (receiptDocument.getEventData().getDebtorFiscalCode() == null ) {
+            String errMsg = String.format("The retrieved receipt with id: %s, has null debtor (%s) fiscal code",
                     thirdPartyId,
-                    receiptDocument.getEventData().getPayerFiscalCode(),
                     receiptDocument.getEventData().getDebtorFiscalCode()
             );
             logger.error(errMsg);
