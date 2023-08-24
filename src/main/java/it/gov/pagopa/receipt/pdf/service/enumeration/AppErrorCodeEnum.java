@@ -20,7 +20,7 @@ public enum AppErrorCodeEnum {
     PDFS_700("PDFS_700", "Fiscal code not authorized to access the requested receipts details"),
     PDFS_701("PDFS_701", "The retrieved receipt is null"),
     PDFS_702("PDFS_702", "The retrieved receipt has null event data"),
-    PDFS_703("PDFS_703", "The retrieved receipt has null payer/debtor fiscal codes"),
+    PDFS_703("PDFS_703", "The retrieved receipt has null debtor fiscal code"),
     PDFS_704("PDFS_704", "The retrieved receipt has null debtor attachment info"),
     PDFS_705("PDFS_705", "The retrieved receipt has null payer attachment info"),
     PDFS_706("PDFS_706", "Fiscal code not authorized to access the requested receipt document"),

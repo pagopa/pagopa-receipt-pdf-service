@@ -11,10 +11,11 @@ import it.gov.pagopa.receipt.pdf.service.model.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.io.File;
-import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Collections;
 
 @ApplicationScoped
 public class AttachmentsServiceImpl implements AttachmentsService {
@@ -40,8 +41,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
       throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
     }
 
-    if (isReceiptUnique(receiptDocument)
-        || receiptDocument.getEventData().getDebtorFiscalCode().equals(requestFiscalCode)) {
+    if (receiptDocument.getEventData().getDebtorFiscalCode().equals(requestFiscalCode)) {
       return buildAttachmentDetails(receiptDocument, receiptDocument.getMdAttach());
     }
     return buildAttachmentDetails(receiptDocument, receiptDocument.getMdAttachPayer());
@@ -83,8 +83,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     if (receiptDocument.getEventData().getDebtorFiscalCode() == null) {
       String errMsg =
           String.format(
-              "The retrieved receipt with id: %s, has null debtor (%s) fiscal code",
-              thirdPartyId, receiptDocument.getEventData().getDebtorFiscalCode());
+              "The retrieved receipt with id: %s, has null debtor fiscal code",
+              thirdPartyId);
       logger.error(errMsg);
       throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_703, errMsg);
     }
@@ -99,7 +99,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     if (!isReceiptUnique(receiptDocument) && receiptDocument.getMdAttachPayer() == null) {
       String errMsg =
           String.format(
-              "The retrieved receipt with id: %s, has null attachment info for payer",
+              "The retrieved receipt with id: %s, has different debtor and payer fiscal codes but has null attachment info for payer",
               thirdPartyId);
       logger.error(errMsg);
       throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_705, errMsg);
@@ -122,8 +122,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
   }
 
   private boolean isFiscalCodeNotAuthorized(String requestFiscalCode, Receipt receiptDocument) {
-    return !receiptDocument.getEventData().getDebtorFiscalCode().equals(requestFiscalCode)
-        && !receiptDocument.getEventData().getPayerFiscalCode().equals(requestFiscalCode);
+    return !requestFiscalCode.equals(receiptDocument.getEventData().getDebtorFiscalCode())
+            && !requestFiscalCode.equals(receiptDocument.getEventData().getPayerFiscalCode());
   }
 
   private boolean isFiscalCodeNotAuthorized(
@@ -142,9 +142,10 @@ public class AttachmentsServiceImpl implements AttachmentsService {
   }
 
   private boolean isReceiptUnique(Receipt receiptDocument) {
-    return receiptDocument
-        .getEventData()
-        .getDebtorFiscalCode()
-        .equals(receiptDocument.getEventData().getPayerFiscalCode());
+    return receiptDocument.getEventData().getPayerFiscalCode() == null ||
+            receiptDocument
+                    .getEventData()
+                    .getDebtorFiscalCode()
+                    .equals(receiptDocument.getEventData().getPayerFiscalCode());
   }
 }

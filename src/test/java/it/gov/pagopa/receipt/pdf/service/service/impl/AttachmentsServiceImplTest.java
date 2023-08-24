@@ -125,26 +125,6 @@ class AttachmentsServiceImplTest {
 
     @Test
     @SneakyThrows
-    void getAttachmentDetailsFailPayerFiscalCodeNull() {
-        Receipt receipt = Receipt.builder()
-                .eventData(
-                        EventData.builder()
-                                .debtorFiscalCode(UUID.randomUUID().toString())
-                                .build()
-                )
-                .numRetry(0)
-                .build();
-
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
-
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
-
-        assertNotNull(e);
-        assertEquals(AppErrorCodeEnum.PDFS_703, e.getErrorCode());
-    }
-
-    @Test
-    @SneakyThrows
     void getAttachmentDetailsFailMdAttachNull() {
         Receipt receipt = Receipt.builder()
                 .eventData(
