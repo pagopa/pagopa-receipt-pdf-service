@@ -101,6 +101,7 @@ microservice-chart:
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
     COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
     BLOB_STORAGE_KEY: "blob-storage-account-key"
+    OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
   keyvault:
     name: "pagopa-u-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
