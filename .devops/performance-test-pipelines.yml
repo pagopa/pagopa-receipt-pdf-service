@@ -28,7 +28,7 @@ parameters:
     displayName: "DB name"
     type: string
     values:
-      - pagopa_receipt_pdf_datastorek6
+      - pagopa_receipt_pdf_servicek6
 variables:
   ${{ if eq(parameters['ENVIRONMENT'], 'dev') }}:
     poolImage: 'pagopa-dev-loadtest-linux'

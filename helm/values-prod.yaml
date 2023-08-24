@@ -39,7 +39,7 @@ microservice-chart:
   ingress:
     create: true
     host: "weuprod.receipts.internal.platform.pagopa.it"
-    path: /pagopa-receipt-pdf-datastore/(.*) #
+    path: /pagopa-receipt-pdf-service/(.*) #
     servicePort: 8080
   serviceAccount:
     create: false
@@ -53,15 +53,15 @@ microservice-chart:
     allowPrivilegeEscalation: false
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "0.25"
+      memory: "1512Mi"
+      cpu: "1"
     limits:
-      memory: "512Mi"
-      cpu: "0.25"
+      memory: "1512Mi"
+      cpu: "1"
   autoscaling:
     enable: true
     minReplica: 3
-    maxReplica: 10
+    maxReplica: 8
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
     triggers:
@@ -70,6 +70,11 @@ microservice-chart:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
+      - type: memory
+        metadata:
+          # Required
+          type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+          value: "70"
   fileConfig: {}
   envConfig:
     APP_ENVIRONMENT: "prod"
