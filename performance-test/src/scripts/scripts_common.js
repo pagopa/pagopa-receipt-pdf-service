@@ -13,7 +13,7 @@ let environmentVars = require(`../${environmentString}.environment.json`)?.envir
 
 const blobStorageContainerID = environmentVars.blobStorageContainerID;
 const receiptCosmosDBDatabaseId = environmentVars.receiptDatabaseID;
-const receiptCosmosDBContainerId = environmentVars.receiptContainerID;
+export const receiptCosmosDBContainerId = environmentVars.receiptContainerID;
 
 //CONSTANTS
 export const PARTITION_ID = environmentVars.receiptTestId;
