@@ -33,13 +33,13 @@ variables:
   ${{ if eq(parameters['ENVIRONMENT'], 'dev') }}:
     poolImage: 'pagopa-dev-loadtest-linux'
     API_SUBSCRIPTION_KEY: "$(DEV_API_SUBSCRIPTION_KEY)"
-    blobStorageConnectionString : "$(DEV_BLOB_STORAGE_CONN_STRING)"
-    receiptCosmosConnectionString: "$(DEV_COSMOS_RECEIPTS_CONN_STRING)"
+    blobStorageConnectionString : "$(DEV_BLOB_STORAGE_CONNECTION_STRING)"
+    receiptCosmosConnectionString: "$(DEV_RECEIPT_COSMOS_DB_CONNECTION_STRING)"
   ${{ if eq(parameters['ENVIRONMENT'], 'uat') }}:
     poolImage: 'pagopa-uat-loadtest-linux'
     API_SUBSCRIPTION_KEY: "$(UAT_API_SUBSCRIPTION_KEY)"
-    blobStorageConnectionString : "$(UAT_BLOB_STORAGE_CONN_STRING)"
-    receiptCosmosConnectionString: "$(UAT_COSMOS_RECEIPTS_CONN_STRING)"
+    blobStorageConnectionString : "$(UAT_BLOB_STORAGE_CONNECTION_STRING)"
+    receiptCosmosConnectionString: "$(UAT_RECEIPT_COSMOS_DB_CONNECTION_STRING)"
 
 pool:
   name: $(poolImage)

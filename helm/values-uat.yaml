@@ -101,7 +101,6 @@ microservice-chart:
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
     COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
     BLOB_STORAGE_KEY: "blob-storage-account-key"
-    OCP_APIM_SUBSCRIPTION_KEY: "shared-apim-d-subscription-key" #TODO
   keyvault:
     name: "pagopa-u-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
