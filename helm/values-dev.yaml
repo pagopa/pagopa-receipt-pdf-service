@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: "0.3.14"
+    tag: "0.4.0-fix-chk-getReceipt"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -100,7 +100,6 @@ microservice-chart:
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
     COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
-    BLOB_STORAGE_KEY: "blob-storage-account-key"
     OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
   keyvault:
     name: "pagopa-d-receipts-kv"
@@ -131,7 +130,7 @@ microservice-chart:
       create: true
       image:
         repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-        tag: "0.3.14"
+        tag: "0.4.0-fix-chk-getReceipt"
         pullPolicy: Always
       envConfig: {}
       envSecret: {}
