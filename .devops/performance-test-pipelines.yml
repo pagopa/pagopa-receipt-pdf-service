@@ -50,7 +50,8 @@ steps:
       docker pull grafana/k6
     displayName: Pull k6 image
   - script: |
-      node pre_condition_script.js
+      npm install
+      node ./scripts/pre_condition_script.js
     env:
       COSMOS_RECEIPTS_CONN_STRING: ${{ variables.receiptCosmosConnectionString }}
       BLOB_STORAGE_CONN_STRING: ${{ variables.blobStorageConnectionString }}
@@ -62,7 +63,8 @@ steps:
     env:
       OCP_APIM_SUBSCRIPTION_KEY: ${{ variables.API_SUBSCRIPTION_KEY }}
   - script: |
-      node teardown_script.js
+      cd src
+      node ./scripts/teardown_script.js
     env:
       COSMOS_RECEIPTS_CONN_STRING: ${{ variables.receiptCosmosConnectionString }}
       BLOB_STORAGE_CONN_STRING: ${{ variables.blobStorageConnectionString }}
