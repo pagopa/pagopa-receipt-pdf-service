@@ -3,7 +3,7 @@ import { blobContainerClient,createReceipt, receiptContainer, PARTITION_ID } fro
 //UPLOAD PDF TO BLOB STORAGE
 const uploadDocumentToAzure = async () => {
   const blockBlobClient = blobContainerClient.getBlockBlobClient(PARTITION_ID);
-  const response = await blockBlobClient.uploadFile("/Users/svariant/Work/PagoPa/ReceiptGenPDF/pagopa-receipt-pdf-service/performance-test/src/resources/testPDF.pdf");
+  const response = await blockBlobClient.uploadFile("./resources/testPDF.pdf");
   if (response._response.status !== 201) {
     throw new Error(
       `Error uploading document ${blockBlobClient.name} to container ${blockBlobClient.containerName}`
