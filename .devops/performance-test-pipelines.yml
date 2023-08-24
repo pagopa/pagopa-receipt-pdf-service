@@ -50,8 +50,7 @@ steps:
       docker pull grafana/k6
     displayName: Pull k6 image
   - script: |
-      echo $PWD
-      ls
+      cd ./performance-test/src
       docker build -f ./DockerfilePre -t exec-node .
       docker run --rm --name initToRunk6 \
       -e BLOB_STORAGE_CONN_STRING=${BLOB_STORAGE_CONN_STRING} \
@@ -70,7 +69,7 @@ steps:
     env:
       OCP_APIM_SUBSCRIPTION_KEY: ${{ variables.API_SUBSCRIPTION_KEY }}
   - script: |
-      cd src
+      cd ./performance-test/src
       docker build -f ./DockerfilePost -t exec-node .
       docker run --rm --name initToRunk6 \
       -e BLOB_STORAGE_CONN_STRING=${BLOB_STORAGE_CONN_STRING} \
