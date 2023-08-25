@@ -77,7 +77,7 @@ jobs:
         shell: bash
         id: run_integration_test
         run: |
-          export SUBKEY=${{ secrets.SUBSCRIPTION_ID }}
+          export SUBKEY=${{ secrets.SUBKEY }}
           export CANARY=${{ inputs.canary }}
           export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
           export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
