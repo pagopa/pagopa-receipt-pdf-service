@@ -13,7 +13,7 @@ Feature: Retrieve receipt attachments
   
   Scenario: Execute a request to getAttachmentDetails service with fiscal code not matching the resource
     Given a receipt with id "receipt-service-int-test-id-2" and debtorFiscalCode "VALID_FISCALCODE" stored on receipts datastore
-    When an Http GET request is sent to the receipt-service getAttachmentDetails with path value "receipt-service-int-test-id-2" and fiscal_code param with value "INVALID_FISCAL_CODE"
+    When an Http GET request is sent to the receipt-service getAttachmentDetails with path value "receipt-service-int-test-id-2" and fiscal_code param with value "INVALID_FISCCODE"
     Then response has a 500 Http status
     And application error code is "PDFS_700"
 
@@ -37,7 +37,7 @@ Feature: Retrieve receipt attachments
   Scenario: Execute a request to getAttachment service with fiscal code not matching the resource
     Given a receipt with id "receipt-service-int-test-id-4" and debtorFiscalCode "VALID_FISCALCODE" and mdAttachmentName "VALID_ATTACHMENT_NAME.pdf" stored on receipts datastore
     Given a pdf with name "VALID_ATTACHMENT_NAME.pdf" stored on Blob Storage
-    When an Http GET request is sent to the receipt-service getAttachment with path value "receipt-service-int-test-id-4" and "VALID_ATTACHMENT_NAME.pdf" and fiscal_code param with value "INVALID_FISCAL_CODE"
+    When an Http GET request is sent to the receipt-service getAttachment with path value "receipt-service-int-test-id-4" and "VALID_ATTACHMENT_NAME.pdf" and fiscal_code param with value "INVALID_FISCCODE"
     Then response has a 500 Http status
     And application error code is "PDFS_706"
 
