@@ -1,56 +1,42 @@
-name: Code Review
+name: Integration Tests
 
-# Controls when the workflow will run
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - synchronize
-      - reopened
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '00 08 * * *'
 
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        description: Select the Environment
+        options:
+          - dev
+          - uat
+          - prod
+      canary:
+        description: 'run the tests on canary version'
+        required: false
+        type: boolean
+        default: false
+      notify:
+        required: false
+        type: boolean
+        description: 'send the slack notification'
+        default: true
 
-env:
-  PROJECT_KEY: pagopa_pagopa-receipt-pdf-service
 
 permissions:
   id-token: write
   contents: read
   deployments: write
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  code-review:
-    name: Code Review
-    # The type of runner that the job will run on
+  integration_test:
+    name: Test ${{(github.event.inputs == null && 'dev') || inputs.environment }}
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      - uses: actions/checkout@v2.3.4
-      - name: Code Review
-        uses: ./.github/maven_code_review
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          sonar_token: ${{ secrets.SONAR_TOKEN }}
-          project_key: ${{env.PROJECT_KEY}}
-          jdk_version: 17
-          maven_version: 3.9.3
-          coverage_exclusions: "**/config/*,**/*Mock*,**/model/**,**/entity/*,**/producer/**,**/enumeration/**"
-          cpd_exclusions: "**/model/**,**/entity/*"
-
-  smoke-test:
-    name: Smoke Test
-    runs-on: ubuntu-latest
-    environment:
-      name: dev
+    environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
     steps:
       - name: Checkout
         id: checkout
@@ -65,39 +51,43 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: Run Service on Docker
-        shell: bash
-        id: run_service_docker
-        run: |
-          cd ./docker
-          chmod +x ./run_docker.sh
-          ./run_docker.sh local
-
       - name: Run Integration Tests
         shell: bash
-        id: run_integration_test
         run: |
           export SUBKEY=${{ secrets.SUBKEY }}
           export CANARY=${{ inputs.canary }}
           export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
           export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
           export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
-
-
+          
           cd ./integration-test
           chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh local
+          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+
+#   notify:
+#     needs: [ integration_test ]
+#     runs-on: ubuntu-latest
+#     name: Notify
+#     if: ${{ always() && inputs.notify == 'true' }}
+#     steps:
+#       - name: Report Status
+#         if: ${{ inputs.notify }}
+#         uses: ravsamhq/notify-slack-action@v2
+#         with:
+#           status: ${{ needs.integration_test.result }}
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#           notify_when: 'failure,skipped'
+#           notification_title: '<{run_url}|Scheduled Integration Test> has {status_message}'
+#           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
+#           footer: 'Linked to <{workflow_url}| workflow file>'
+#         env:
+#           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   delete_github_deployments:
     runs-on: ubuntu-latest
-    needs: smoke-test
+    needs: integration_test
     if: ${{ always() }}
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
       - name: Delete Previous deployments
         uses: actions/github-script@v6
         env:

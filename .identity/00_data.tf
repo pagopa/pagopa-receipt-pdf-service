@@ -46,3 +46,8 @@ data "azurerm_cosmosdb_account" "receipts_cosmos" {
   name                = "pagopa-${var.env_short}-${local.location_short}-receipts-ds-cosmos-account"
   resource_group_name = "pagopa-${var.env_short}-${local.location_short}-receipts-rg"
 }
+
+data "azurerm_key_vault_secret" "key_vault_integration_test_subkey" {
+  name         = "apikey-service-receipt" # "integration-test-subkey"
+  key_vault_id = data.azurerm_key_vault.key_vault_domain.id
+}
