@@ -40,6 +40,7 @@ public class AttachmentResource {
   private static final String THIRD_PARTY_ID_PARAM = "tp_id";
   private static final String REGEX = "[\n\r]";
   private static final String REPLACEMENT = "_";
+  private static final int FISCAL_CODE_LENGTH = 16;
 
   @Inject private AttachmentsService attachmentsService;
 
@@ -69,17 +70,16 @@ public class AttachmentResource {
       @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
       @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
       // @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode)
-      throws MissingFiscalCodeHeaderException, ReceiptNotFoundException, InvalidReceiptException,
+      throws InvalidFiscalCodeHeaderException, ReceiptNotFoundException, InvalidReceiptException,
           FiscalCodeNotAuthorizedException {
 
     // replace new line and tab from user input to avoid log injection
     thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
 
     logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
-    if (requestFiscalCode == null) {
-      String errMsg = "Fiscal code header is null";
-      logger.error(errMsg);
-      throw new MissingFiscalCodeHeaderException(PDFS_901, errMsg);
+    if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
+      String errMsg = String.format("Fiscal code header is null or not valid: %s", requestFiscalCode);
+      throw new InvalidFiscalCodeHeaderException(PDFS_901, errMsg);
     }
     // replace new line and tab from user input to avoid log injection
     requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
@@ -113,7 +113,7 @@ public class AttachmentResource {
       @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
       @PathParam("attachment_url") String attachmentUrl,
       @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
-          throws MissingFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
+          throws InvalidFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
           InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException {
 
     // replace new line and tab from user input to avoid log injection
@@ -124,10 +124,9 @@ public class AttachmentResource {
             "Received get attachment with name {} for receipt with id {}",
             attachmentUrl,
             thirdPartyId);
-    if (requestFiscalCode == null) {
-      String errMsg = "Fiscal code header is null";
-      logger.error(errMsg);
-      throw new MissingFiscalCodeHeaderException(PDFS_901, errMsg);
+    if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
+      String errMsg = String.format("Fiscal code header is null or not valid: %s", requestFiscalCode);
+      throw new InvalidFiscalCodeHeaderException(PDFS_901, errMsg);
     }
     // replace new line and tab from user input to avoid log injection
     requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);

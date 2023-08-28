@@ -2,7 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.exception.mapper;
 
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.exception.MissingFiscalCodeHeaderException;
+import it.gov.pagopa.receipt.pdf.service.exception.InvalidFiscalCodeHeaderException;
 import it.gov.pagopa.receipt.pdf.service.exception.PdfServiceException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
@@ -20,11 +20,11 @@ public class ExceptionMapper {
     private final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 
     @ServerExceptionMapper
-    public RestResponse<ErrorResponse> mapMissingFiscalCodeHeaderException(MissingFiscalCodeHeaderException missingFiscalCodeHeaderException) {
+    public RestResponse<ErrorResponse> mapMissingFiscalCodeHeaderException(InvalidFiscalCodeHeaderException invalidFiscalCodeHeaderException) {
         Response.Status status = BAD_REQUEST;
         String message = "The provided fiscal code is invalid.";
-        logger.error(message, missingFiscalCodeHeaderException);
-        return RestResponse.status(status, buildErrorResponse(missingFiscalCodeHeaderException.getErrorCode(), status, message));
+        logger.error(message, invalidFiscalCodeHeaderException);
+        return RestResponse.status(status, buildErrorResponse(invalidFiscalCodeHeaderException.getErrorCode(), status, message));
     }
 
     @ServerExceptionMapper
