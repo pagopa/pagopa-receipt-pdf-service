@@ -48,6 +48,6 @@ data "azurerm_cosmosdb_account" "receipts_cosmos" {
 }
 
 data "azurerm_key_vault_secret" "key_vault_integration_test_subkey" {
-  name         = "integration-test-subkey"
-  key_vault_id = data.azurerm_key_vault.key_vault.id
+  name         = "apikey-service-receipt" # "integration-test-subkey"
+  key_vault_id = data.azurerm_key_vault.key_vault_domain.id
 }
