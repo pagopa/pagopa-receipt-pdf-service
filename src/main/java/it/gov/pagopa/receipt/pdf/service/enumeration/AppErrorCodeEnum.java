@@ -27,7 +27,7 @@ public enum AppErrorCodeEnum {
 
     PDFS_800("PDFS_800", "Receipt not found with the provided third party id"),
 
-    PDFS_901("PDFS_901", "Invalid fiscal code header");
+    PDFS_901("PDFS_901", "Invalid fiscal code header, null or length not equal to 16");
 
     private final String errorCode;
     private final String errorMessage;

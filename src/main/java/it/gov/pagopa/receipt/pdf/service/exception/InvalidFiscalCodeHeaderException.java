@@ -5,7 +5,7 @@ import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 /**
  * Thrown in case the request do not have the fiscal code header
  */
-public class MissingFiscalCodeHeaderException extends PdfServiceException {
+public class InvalidFiscalCodeHeaderException extends PdfServiceException {
 
     /**
      * Constructs new exception with provided error code and message
@@ -13,7 +13,7 @@ public class MissingFiscalCodeHeaderException extends PdfServiceException {
      * @param errorCode Error code
      * @param message   Detail message
      */
-    public MissingFiscalCodeHeaderException(AppErrorCodeEnum errorCode, String message) {
+    public InvalidFiscalCodeHeaderException(AppErrorCodeEnum errorCode, String message) {
         super(errorCode, message);
     }
 
@@ -24,7 +24,7 @@ public class MissingFiscalCodeHeaderException extends PdfServiceException {
      * @param message   Detail message
      * @param cause     Exception causing the constructed one
      */
-    public MissingFiscalCodeHeaderException(AppErrorCodeEnum errorCode, String message, Throwable cause) {
+    public InvalidFiscalCodeHeaderException(AppErrorCodeEnum errorCode, String message, Throwable cause) {
         super(errorCode, message, cause);
     }
 }

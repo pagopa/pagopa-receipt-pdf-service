@@ -31,6 +31,7 @@ class AttachmentResourceTest {
 
     private static final String THIRD_PARTY_ID = "test-id";
     private static final String FISCAL_CODE = "AAAAAAAAAAAAAAAA";
+    private static final String INVALID_FISCAL_CODE = "tooShort";
     private static final String ATTACHMENT_URL = "url";
 
     @InjectMock(convertScopes = true)
@@ -84,6 +85,31 @@ class AttachmentResourceTest {
     void getAttachmentDetailsFailMissingFiscalCodeHeader() {
         String responseString =
                 given()
+                        .when().get("/messages/" + THIRD_PARTY_ID)
+                        .then()
+                        .statusCode(400)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_901.getErrorCode(), response.getInstance());
+        assertEquals(BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(BAD_REQUEST.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
+
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentDetailsFailInvalidFiscalCodeHeader() {
+        String responseString =
+                given()
+                        .queryParam("fiscal_code", INVALID_FISCAL_CODE)
                         .when().get("/messages/" + THIRD_PARTY_ID)
                         .then()
                         .statusCode(400)
@@ -212,6 +238,31 @@ class AttachmentResourceTest {
     void getAttachmentFailMissingFiscalCodeHeader() {
         String responseString =
                 given()
+                        .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
+                        .then()
+                        .statusCode(400)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+
+        assertNotNull(responseString);
+        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
+        assertNotNull(response);
+        assertEquals(PDFS_901.getErrorCode(), response.getInstance());
+        assertEquals(BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(BAD_REQUEST.getReasonPhrase(), response.getTitle());
+        assertNotNull(response.getDetail());
+        assertNotNull(response.getTitle());
+
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentFailInvalidFiscalCodeHeader() {
+        String responseString =
+                given()
+                        .queryParam("fiscal_code", INVALID_FISCAL_CODE)
                         .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
                         .then()
                         .statusCode(400)
