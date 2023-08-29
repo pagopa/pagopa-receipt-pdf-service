@@ -13,18 +13,11 @@ on:
         options:
           - dev
           - uat
-          - prod
       canary:
         description: 'run the tests on canary version'
         required: false
         type: boolean
         default: false
-      notify:
-        required: false
-        type: boolean
-        description: 'send the slack notification'
-        default: true
-
 
 permissions:
   id-token: write
@@ -68,10 +61,10 @@ jobs:
     needs: [ integration_test ]
     runs-on: ubuntu-latest
     name: Notify
-    if: ${{ always() && inputs.notify == 'true' }}
+    if: always()
     steps:
       - name: Report Status
-        if: ${{ inputs.notify }}
+        if: always()
         uses: ravsamhq/notify-slack-action@v2
         with:
           status: ${{ needs.integration_test.result }}
