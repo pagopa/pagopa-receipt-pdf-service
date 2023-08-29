@@ -70,7 +70,7 @@ jobs:
           status: ${{ needs.integration_test.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: 'failure,skipped'
-          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message}'
+          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message} in ${{inputs.environment}} env' 
           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to <{workflow_url}| workflow file>'
         env:
