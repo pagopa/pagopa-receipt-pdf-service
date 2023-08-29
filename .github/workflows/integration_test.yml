@@ -64,24 +64,24 @@ jobs:
           chmod +x ./run_integration_test.sh
           ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
 
-#   notify:
-#     needs: [ integration_test ]
-#     runs-on: ubuntu-latest
-#     name: Notify
-#     if: ${{ always() && inputs.notify == 'true' }}
-#     steps:
-#       - name: Report Status
-#         if: ${{ inputs.notify }}
-#         uses: ravsamhq/notify-slack-action@v2
-#         with:
-#           status: ${{ needs.integration_test.result }}
-#           token: ${{ secrets.GITHUB_TOKEN }}
-#           notify_when: 'failure,skipped'
-#           notification_title: '<{run_url}|Scheduled Integration Test> has {status_message}'
-#           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
-#           footer: 'Linked to <{workflow_url}| workflow file>'
-#         env:
-#           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  notify:
+    needs: [ integration_test ]
+    runs-on: ubuntu-latest
+    name: Notify
+    if: ${{ always() && inputs.notify == 'true' }}
+    steps:
+      - name: Report Status
+        if: ${{ inputs.notify }}
+        uses: ravsamhq/notify-slack-action@v2
+        with:
+          status: ${{ needs.integration_test.result }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notify_when: 'failure,skipped'
+          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message}'
+          message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
+          footer: 'Linked to <{workflow_url}| workflow file>'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   delete_github_deployments:
     runs-on: ubuntu-latest
