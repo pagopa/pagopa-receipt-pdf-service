@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   integration_test:
-    name: Test ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+    name: Test
     runs-on: ubuntu-latest
     environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
     steps:
@@ -47,15 +47,11 @@ jobs:
       - name: Run Integration Tests
         shell: bash
         run: |
-          export SUBKEY=${{ secrets.SUBKEY }}
           export CANARY=${{ inputs.canary }}
-          export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
-          export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
-          export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }} ${{ secrets.API_SUBSCRIPTION_KEY }}
 
   notify:
     needs: [ integration_test ]
@@ -70,9 +66,9 @@ jobs:
           status: ${{ needs.integration_test.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: 'failure,skipped'
-          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message}'
-          message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
-          footer: 'Linked to <{workflow_url}| workflow file>'
+          notification_title: '{workflow} has {status_message}'
+          message_format: '{emoji} <{workflow_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
+          footer: 'Linked to Repo <{repo_url}|{repo}>'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
