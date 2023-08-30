@@ -2,7 +2,7 @@ name: Integration Tests
 
 on:
   schedule:
-    - cron: '* 09 * * *'
+    - cron: '* 10 * * *'
 
   workflow_dispatch:
     inputs:
@@ -13,7 +13,6 @@ on:
         options:
           - dev
           - uat
-        default: uat
       canary:
         description: 'run the tests on canary version'
         required: false
@@ -56,7 +55,7 @@ jobs:
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+          ./run_integration_test.sh ${{( github.event.inputs == null && 'uat') || inputs.environment }}
 
   notify:
     needs: [ integration_test ]
@@ -71,7 +70,7 @@ jobs:
           status: ${{ needs.integration_test.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: 'failure,skipped'
-          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message} in ${{inputs.environment}} env' 
+          notification_title: "<{run_url}|Scheduled Integration Test> has {status_message} in ${{( github.event.inputs == null && 'dev') || inputs.environment }} env" 
           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to <{workflow_url}| workflow file>'
         env:
