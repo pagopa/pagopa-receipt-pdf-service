@@ -2,7 +2,7 @@ name: Integration Tests
 
 on:
   schedule:
-    - cron: '* 10 * * *'
+    - cron: '* 08 * * *'
 
   workflow_dispatch:
     inputs:
@@ -55,7 +55,7 @@ jobs:
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh ${{( github.event.inputs == null && 'uat') || inputs.environment }}
+          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
 
   notify:
     needs: [ integration_test ]
