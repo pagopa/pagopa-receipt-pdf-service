@@ -7,5 +7,4 @@ COPY ./ ./
 
 RUN yarn install
 
-ENTRYPOINT ["yarn", "start-precondition"]
-
+ENTRYPOINT ["yarn", "test:uat"]

@@ -55,16 +55,6 @@ jobs:
     environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
     steps:
 
-      - name: Intall npm yarn
-        shell: bash
-        run: |
-          echo "Npm ..."
-          apt-get -y install npm
-          echo "Yarn ..."
-          npm install --global yarn
-          echo "DONE!"
-
-
       - name: Checkout
         id: checkout
         uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
@@ -78,6 +68,19 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
+      # - name: Run Integration Tests
+      #   shell: bash
+      #   run: |
+      #     export SUBKEY=${{ secrets.SUBKEY }}
+      #     export CANARY=${{ inputs.canary }}
+      #     export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
+      #     export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
+      #     export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
+          
+      #     cd ./integration-test
+      #     chmod +x ./run_integration_test.sh
+      #     ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+
       - name: Run Integration Tests
         shell: bash
         run: |
@@ -88,8 +91,19 @@ jobs:
           export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
           
           cd ./integration-test
-          chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+          docker build -f ./DockerfileInteg -t exec-node .
+          docker run --rm --name integTest \
+          -e SUBKEY=${SUBKEY} \
+          -e CANARY=${CANARY} \
+          -e CUCUMBER_PUBLISH_TOKEN="${CUCUMBER_PUBLISH_TOKEN}" \
+          -e RECEIPTS_STORAGE_CONN_STRING="${RECEIPTS_STORAGE_CONN_STRING}" \
+          -e RECEIPTS_COSMOS_CONN_STRING="${RECEIPTS_COSMOS_CONN_STRING}" \
+          exec-node 
+
+          
+          # cd ./integration-test
+          # chmod +x ./run_integration_test.sh
+          # ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
 
   notify:
     needs: [ create_runner, integration_test ]
