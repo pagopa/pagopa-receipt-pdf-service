@@ -58,6 +58,11 @@ jobs:
         id: checkout
         uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
 
+      - name: Run Integration Tests Before
+        shell: bash
+        run: |
+          echo "Run Integration Tests Before"
+
       - name: Login
         id: login
         # from https://github.com/Azure/login/commits/master
