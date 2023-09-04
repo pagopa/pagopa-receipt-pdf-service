@@ -68,42 +68,37 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      # - name: Run Integration Tests
-      #   shell: bash
-      #   run: |
-      #     export SUBKEY=${{ secrets.SUBKEY }}
-      #     export CANARY=${{ inputs.canary }}
-      #     export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
-      #     export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
-      #     export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
-          
-      #     cd ./integration-test
-      #     chmod +x ./run_integration_test.sh
-      #     ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+      - name: Intall yarn
+        shell: bash
+        run: |
+          curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+          echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+          apt install yarn
+
 
       - name: Run Integration Tests
         shell: bash
         run: |
-          export SUBKEY=${{ secrets.SUBKEY }}
-          export CANARY=${{ inputs.canary }}
-          export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
-          export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
-          export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
-          
-          cd ./integration-test
-          docker build -f ./DockerfileInteg -t exec-node .
-          docker run --rm --name integTest \
-          -e SUBKEY=${SUBKEY} \
-          -e CANARY=${CANARY} \
-          -e CUCUMBER_PUBLISH_TOKEN="${CUCUMBER_PUBLISH_TOKEN}" \
-          -e RECEIPTS_STORAGE_CONN_STRING="${RECEIPTS_STORAGE_CONN_STRING}" \
-          -e RECEIPTS_COSMOS_CONN_STRING="${RECEIPTS_COSMOS_CONN_STRING}" \
-          exec-node 
-
+          # export SUBKEY=${{ secrets.SUBKEY }}
+          # export CANARY=${{ inputs.canary }}
+          # export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
+          # export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
+          # export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
           
           # cd ./integration-test
-          # chmod +x ./run_integration_test.sh
-          # ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+          # docker build -f ./DockerfileInteg -t exec-node .
+          # docker run --rm --name integTest \
+          # -e SUBKEY=${SUBKEY} \
+          # -e CANARY=${CANARY} \
+          # -e CUCUMBER_PUBLISH_TOKEN="${CUCUMBER_PUBLISH_TOKEN}" \
+          # -e RECEIPTS_STORAGE_CONN_STRING="${RECEIPTS_STORAGE_CONN_STRING}" \
+          # -e RECEIPTS_COSMOS_CONN_STRING="${RECEIPTS_COSMOS_CONN_STRING}" \
+          # exec-node 
+
+          
+          cd ./integration-test
+          chmod +x ./run_integration_test.sh
+          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
 
   notify:
     needs: [ create_runner, integration_test ]
