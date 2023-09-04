@@ -54,14 +54,20 @@ jobs:
     runs-on: [ self-hosted, "${{ needs.create_runner.outputs.runner_name }}" ]
     environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
     steps:
+
+      - name: Intall npm yarn
+        shell: bash
+        run: |
+          echo "Npm ..."
+          apt-get -y install npm
+          echo "Yarn ..."
+          npm install --global yarn
+          echo "DONE!"
+
+
       - name: Checkout
         id: checkout
         uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
-
-      - name: Run Integration Tests Before
-        shell: bash
-        run: |
-          echo "Run Integration Tests Before"
 
       - name: Login
         id: login
