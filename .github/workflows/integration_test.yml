@@ -37,7 +37,7 @@ jobs:
       - name: Create GitHub Runner
         id: create_github_runner
         # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-create-action
-        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@main
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@PRDP-123-gha-integration-test-selfhost-runner
         with:
           client_id: ${{ secrets.CLIENT_ID }}
           tenant_id: ${{ secrets.TENANT_ID }}
@@ -45,8 +45,6 @@ jobs:
           container_app_environment_name: ${{ vars.CONTAINER_APP_ENVIRONMENT_NAME }}
           resource_group_name: ${{ vars.CONTAINER_APP_ENVIRONMENT_RESOURCE_GROUP_NAME }} # RG of the runner
           pat_token: ${{ secrets.BOT_TOKEN_GITHUB }}
-          # self_hosted_runner_image_tag: "v1.4.1"
-
 
   integration_test:
     needs: [ create_runner ]
@@ -68,13 +66,10 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: Intall yarn
+      - name: Check yarn and node
         shell: bash
         run: |
-          curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-          echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-          sudo apt install yarn
-
+          node -v && yarn -v
 
       - name: Run Integration Tests
         shell: bash
