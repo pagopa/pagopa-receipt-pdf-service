@@ -37,7 +37,6 @@ jobs:
       - name: Create GitHub Runner
         id: create_github_runner
         # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-create-action
-        # uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@PRDP-123-gha-integration-test-selfhost-runner
         uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@main
         with:
           client_id: ${{ secrets.CLIENT_ID }}
@@ -68,30 +67,14 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: Check yarn and node
-        shell: bash
-        run: |
-          node -v && yarn -v
-
       - name: Run Integration Tests
         shell: bash
         run: |
-          # export SUBKEY=${{ secrets.SUBKEY }}
-          # export CANARY=${{ inputs.canary }}
-          # export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
-          # export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
-          # export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
-          
-          # cd ./integration-test
-          # docker build -f ./DockerfileInteg -t exec-node .
-          # docker run --rm --name integTest \
-          # -e SUBKEY=${SUBKEY} \
-          # -e CANARY=${CANARY} \
-          # -e CUCUMBER_PUBLISH_TOKEN="${CUCUMBER_PUBLISH_TOKEN}" \
-          # -e RECEIPTS_STORAGE_CONN_STRING="${RECEIPTS_STORAGE_CONN_STRING}" \
-          # -e RECEIPTS_COSMOS_CONN_STRING="${RECEIPTS_COSMOS_CONN_STRING}" \
-          # exec-node 
-
+          export SUBKEY=${{ secrets.SUBKEY }}
+          export CANARY=${{ inputs.canary }}
+          export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
+          export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
+          export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
