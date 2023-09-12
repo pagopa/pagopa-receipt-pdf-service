@@ -2,7 +2,7 @@ name: Integration Tests
 
 on:
   schedule:
-    - cron: '00 08 * * *'
+    - cron: '00 06 * * *'
 
   workflow_dispatch:
     inputs:
@@ -30,7 +30,7 @@ jobs:
     name: Create Runner
     runs-on: ubuntu-22.04
     environment:
-      name: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+      name: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
     outputs:
       runner_name: ${{ steps.create_github_runner.outputs.runner_name }}
     steps:
@@ -49,9 +49,9 @@ jobs:
 
   integration_test:
     needs: [ create_runner ]
-    name: Test ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+    name: Test ${{(github.event.inputs == null && 'uat') || inputs.environment }}
     runs-on: [ self-hosted, "${{ needs.create_runner.outputs.runner_name }}" ]
-    environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+    environment: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
     steps:
 
       - name: Checkout
@@ -78,7 +78,7 @@ jobs:
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+          ./run_integration_test.sh ${{( github.event.inputs == null && 'uat') || inputs.environment }}
 
   notify:
     needs: [ create_runner, integration_test ]
@@ -93,7 +93,7 @@ jobs:
           status: ${{ needs.integration_test.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: 'failure,skipped'
-          notification_title: "<{run_url}|Scheduled Integration Test> has {status_message} in ${{( github.event.inputs == null && 'dev') || inputs.environment }} env" 
+          notification_title: "<{run_url}|Scheduled Integration Test> has {status_message} in ${{( github.event.inputs == null && 'uat') || inputs.environment }} env" 
           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to <{workflow_url}| workflow file>'
         env:
@@ -138,7 +138,7 @@ jobs:
     needs: [ create_runner, integration_test ]
     if: ${{ always() }}
     runs-on: ubuntu-22.04
-    environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+    environment: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
     steps:
       - name: Cleanup GitHub Runner
         id: cleanup_github_runner
