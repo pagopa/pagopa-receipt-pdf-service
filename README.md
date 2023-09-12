@@ -76,7 +76,7 @@ You can run your application in dev mode that enables live coding using:
 
 #### Set environment variables
 
-`docker build --build-arg QUARKUS_PROFILE=prod --build-arg APP_NAME=pagopa-receip-pdf-service -t pagopa-receip-pdf-service .`
+`docker build --build-arg QUARKUS_PROFILE=prod --build-arg APP_NAME=pagopa-receipt-pdf-service -t pagopa-receipt -pdf-service .`
 
 `cp .env.example .env`
 
@@ -86,7 +86,7 @@ and replace in `.env` with correct values
 
 then type :
 
-`docker run -p 8080:8080 --env-file=./.env pagopa-receip-pdf-service`
+`docker run -p 8080:8080 --env-file=./.env pagopa-receipt-pdf-service`
 
 ## Develop Locally 💻
 
