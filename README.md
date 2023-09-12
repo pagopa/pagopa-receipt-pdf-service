@@ -11,6 +11,9 @@ Expose APIs that will be used by IO to retrieve the PDF receipts
 - [Api Documentation 📖](#api-documentation-)
 - [Technology Stack 📚](#technology-stack-)
 - [Start Project Locally 🚀](#start-project-locally-)
+  * [Run locally with Docker](#run-locally-with-docker)
+    + [Prerequisites](#prerequisites)
+    + [Run docker container](#run-docker-container)
   * [Running the application in dev mode](#running-the-application-in-dev-mode)
 - [Develop Locally 💻](#develop-locally-)
   * [Prerequisites](#prerequisites)
@@ -65,6 +68,26 @@ You can run your application in dev mode that enables live coding using:
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only
 > at http://localhost:8080/q/dev/.
 
+### Run locally with Docker
+
+#### Prerequisites
+
+- docker
+
+#### Set environment variables
+
+`docker build --build-arg QUARKUS_PROFILE=prod --build-arg APP_NAME=pagopa-receip-pdf-service -t pagopa-receip-pdf-service .`
+
+`cp .env.example .env`
+
+and replace in `.env` with correct values
+
+#### Run docker container
+
+then type :
+
+`docker run -p 8080:8080 --env-file=./.env pagopa-receip-pdf-service`
+
 ## Develop Locally 💻
 
 ### Prerequisites
@@ -93,6 +116,6 @@ Typing `mvn clean verify`
 
 Made with ❤️ by PagoPa S.p.A.
 
-### Mainteiners
+### Maintainers
 
 See `CODEOWNERS` file
