@@ -38,7 +38,7 @@ jobs:
         id: create_github_runner
         # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-create-action
         # uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@PRDP-123-gha-integration-test-selfhost-runner
-        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@main
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@v1.5.0nodevers
         with:
           client_id: ${{ secrets.CLIENT_ID }}
           tenant_id: ${{ secrets.TENANT_ID }}
