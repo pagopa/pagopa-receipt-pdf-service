@@ -2,7 +2,7 @@ name: Integration Tests
 
 on:
   schedule:
-    - cron: '00 08 * * *'
+    - cron: '00 06 * * *'
 
   workflow_dispatch:
     inputs:
@@ -26,11 +26,34 @@ permissions:
 
 
 jobs:
-  integration_test:
-    name: Test ${{(github.event.inputs == null && 'dev') || inputs.environment }}
-    runs-on: ubuntu-latest
-    environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+  create_runner:
+    name: Create Runner
+    runs-on: ubuntu-22.04
+    environment:
+      name: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
+    outputs:
+      runner_name: ${{ steps.create_github_runner.outputs.runner_name }}
     steps:
+      - name: Create GitHub Runner
+        id: create_github_runner
+        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-create-action
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@main
+        with:
+          client_id: ${{ secrets.CLIENT_ID }}
+          tenant_id: ${{ secrets.TENANT_ID }}
+          subscription_id: ${{ secrets.SUBSCRIPTION_ID }}
+          container_app_environment_name: ${{ vars.CONTAINER_APP_ENVIRONMENT_NAME }}
+          resource_group_name: ${{ vars.CONTAINER_APP_ENVIRONMENT_RESOURCE_GROUP_NAME }} # RG of the runner
+          pat_token: ${{ secrets.BOT_TOKEN_GITHUB }}
+          self_hosted_runner_image_tag: "v1.6.0"
+
+  integration_test:
+    needs: [ create_runner ]
+    name: Test ${{(github.event.inputs == null && 'uat') || inputs.environment }}
+    runs-on: [ self-hosted, "${{ needs.create_runner.outputs.runner_name }}" ]
+    environment: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
+    steps:
+
       - name: Checkout
         id: checkout
         uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
@@ -55,11 +78,11 @@ jobs:
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
-          ./run_integration_test.sh ${{( github.event.inputs == null && 'dev') || inputs.environment }}
+          ./run_integration_test.sh ${{( github.event.inputs == null && 'uat') || inputs.environment }}
 
   notify:
-    needs: [ integration_test ]
-    runs-on: ubuntu-latest
+    needs: [ create_runner, integration_test ]
+    runs-on: [ self-hosted, "${{ needs.create_runner.outputs.runner_name }}" ]
     name: Notify
     if: always()
     steps:
@@ -70,7 +93,7 @@ jobs:
           status: ${{ needs.integration_test.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: 'failure,skipped'
-          notification_title: "<{run_url}|Scheduled Integration Test> has {status_message} in ${{( github.event.inputs == null && 'dev') || inputs.environment }} env" 
+          notification_title: "<{run_url}|Scheduled Integration Test> has {status_message} in ${{( github.event.inputs == null && 'uat') || inputs.environment }} env" 
           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to <{workflow_url}| workflow file>'
         env:
@@ -109,3 +132,22 @@ jobs:
                 });
               })
             );
+      
+  cleanup_runner:
+    name: Cleanup Runner
+    needs: [ create_runner, integration_test ]
+    if: ${{ always() }}
+    runs-on: ubuntu-22.04
+    environment: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
+    steps:
+      - name: Cleanup GitHub Runner
+        id: cleanup_github_runner
+        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-cleanup-action
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-cleanup-action@0ee2f58fd46d10ac7f00bce4304b98db3dbdbe9a
+        with:
+          client_id: ${{ secrets.CLIENT_ID }}
+          tenant_id: ${{ secrets.TENANT_ID }}
+          subscription_id: ${{ secrets.SUBSCRIPTION_ID }}
+          resource_group_name: ${{ vars.CONTAINER_APP_ENVIRONMENT_RESOURCE_GROUP_NAME }}
+          runner_name: ${{ needs.create_runner.outputs.runner_name }}
+          pat_token: ${{ secrets.BOT_TOKEN_GITHUB }}
