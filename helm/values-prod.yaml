@@ -39,7 +39,7 @@ microservice-chart:
   ingress:
     create: true
     host: "weuprod.receipts.internal.platform.pagopa.it"
-    path: /pagopa-receipt-pdf-service/(.*) #
+    path: /pagopa-receipt-pdf-service/(.*)
     servicePort: 8080
   serviceAccount:
     create: false
@@ -63,7 +63,7 @@ microservice-chart:
     minReplica: 2
     maxReplica: 10
     pollingInterval: 10 # seconds
-    cooldownPeriod: 50 # seconds
+    cooldownPeriod: 120 # seconds
     triggers:
       - type: cpu
         metadata:
