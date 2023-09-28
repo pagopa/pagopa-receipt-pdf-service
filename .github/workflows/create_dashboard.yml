@@ -11,6 +11,16 @@ on:
       - '.opex/**'
 
   workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        description: Select the Environment
+        options:
+          - dev
+          - uat
+          - prod
+        default: prod
 
 permissions:
   id-token: write
@@ -25,7 +35,7 @@ jobs:
 
     strategy:
       matrix:
-        environment: [prod]
+        environment: ${{(github.event.inputs == null && 'prod') || inputs.environment }}
     environment:
       name: ${{ matrix.environment }}
     # Steps represent a sequence of tasks that will be executed as part of the job
