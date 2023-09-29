@@ -2,8 +2,10 @@ oa3_spec: ./openapi/openapi.json
 name: opex_pagopa-pdf-receipt-service
 location: West Europe
 timespan: 5m
-data_source: /subscriptions/26abc801-0d8f-4a6e-ac5f-8e81bcc09112/resourceGroups/pagopa-u-api-rg/providers/Microsoft.ApiManagement/service/pagopa-u-apim
-resource_type: api-management
+# data_source: /subscriptions/26abc801-0d8f-4a6e-ac5f-8e81bcc09112/resourceGroups/pagopa-u-api-rg/providers/Microsoft.ApiManagement/service/pagopa-u-apim
+# resource_type: api-management
+data_source: /subscriptions/26abc801-0d8f-4a6e-ac5f-8e81bcc09112/resourceGroups/pagopa-u-vnet-rg/providers/Microsoft.Network/applicationGateways/pagopa-u-app-gw
+resource_type: app-gateway
 action_groups:
 overrides:
   hosts: # Use these hosts instead of those inside the OpenApi spec
