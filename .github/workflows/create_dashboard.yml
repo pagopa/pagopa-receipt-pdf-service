@@ -64,12 +64,12 @@ jobs:
       - uses: pagopa/opex-dashboard-action@main
         with:
           template: ${{ env.TEMPLATE_DIR }}
-          config: .opex/${{ matrix.product }}/env/${{ matrix.environment }}/config.yaml
+          config: .opex/env/${{ matrix.environment }}/config.yaml
 
       # we need to set env variables in the folder /azure-dashboard
       - name: Copy Environments
         run: |
-          cp -R .opex/${{ matrix.product }}/env ./${TEMPLATE_DIR}
+          cp -R .opex/env ./${TEMPLATE_DIR}
       # now is possible to launch the command: terraform apply
       - name: Terraform Apply
         shell: bash
