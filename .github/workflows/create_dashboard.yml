@@ -11,16 +11,9 @@ on:
       - '.opex/**'
 
   workflow_dispatch:
-    inputs:
-      environment:
-        required: true
-        type: choice
-        description: Select the Environment
-        options:
-          - dev
-          - uat
-          - prod
-        default: prod
+
+env:
+  TEMPLATE_DIR: azure-dashboard
 
 permissions:
   id-token: write
@@ -36,6 +29,7 @@ jobs:
     strategy:
       matrix:
         environment: ['uat']
+        product: [internal, node]
     environment:
       name: ${{ matrix.environment }}
     # Steps represent a sequence of tasks that will be executed as part of the job
