@@ -2,15 +2,29 @@ name: Create Dashboard
 
 # Controls when the workflow will run
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - './openapi/openapi.json'
-      - '.github/workflows/create_dashboard.yaml'
-      - '.opex/**'
-
   workflow_dispatch:
+    inputs:
+      api-name:
+        description: 'Api name for which create dashboards and alerts'
+        required: true
+        type: choice
+        options:
+          - pdf-receipt-service
+      environment:
+        description: 'Environment for which create dashboards and alerts'
+        required: true
+        type: choice
+        options:
+          - uat
+          - prod
+      config-options:
+        description: 'JSON string containing env properties that will be replaced into opex config.yaml file before dashboard generation'
+        type: string
+        required: false
+
+  repository_dispatch:
+    types:
+      - create-dashboard
 
 env:
   TEMPLATE_DIR: azure-dashboard
@@ -25,11 +39,8 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
 
-    strategy:
-      matrix:
-        environment: [uat]
     environment:
-      name: ${{ matrix.environment }}
+      name: ${{ inputs.environment }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout
@@ -38,45 +49,51 @@ jobs:
         uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
         with:
           persist-credentials: false
+      - name: Read create dashboard parameters
+        id: read_parameters
+        uses: actions/github-script@v6.3.3
+        env:
+          API_NAME: ${{ github.event.client_payload.api-name || inputs.api-name }}
+          ENVIRONMENT: ${{ github.event.client_payload.environment || inputs.environment }}
+        with:
+          script: |
+             const { API_NAME, ENVIRONMENT } = process.env
+              var apiName = API_NAME.trim();
+              var environment = ENVIRONMENT.trim();
+              core.info(`Api name ${apiName}, environment: ${environment}`);
+                if (!apiName || !environment) {
+                throw `Could not create dashboard, cannot find parameters for api name and environment...`;
+              }
+              core.setOutput("apiName", apiName);
+              core.setOutput("environment", environment);
 
-      - name: Read terraform version
-        id: read-version
-        shell: bash
+      - name: Replace opex config file parameters
+        id: replace_opex_file_parameters
+        env:
+          CONFIG_FILE: .opex/${{ steps.read_parameters.outputs.apiName }}/env/${{ steps.read_parameters.outputs.environment }}/config.yaml
+          CONFIG_OPTIONS: ${{ github.event.client_payload.config-options || inputs.config-options }}
         run: |
-          echo "TERRAFORM_VERSION=`cat .terraform-version`" >> $GITHUB_ENV
-      - name: Setup Terraform
-        # from https://github.com/hashicorp/setup-terraform/commits/main
-        uses: hashicorp/setup-terraform@8feba2b913ea459066180f9cb177f58a881cf146
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          echo "📝 Replacing config yaml placeholders"
+          echo "Properties to be set: $CONFIG_OPTIONS into file $CONFIG_FILE"
+          for property in $(echo $CONFIG_OPTIONS | yq -o shell); do
+            IFS='=' read -r -a split <<< "$property"
+            key=${split[0]}
+            value=$(echo ${split[1]}|sed "s/'//g")
+            echo "Replacing key: [$key] with value: [$value]"
+            sed -i "s/\${$key}/$value/" $CONFIG_FILE
+          done
+          echo "Modified config file"
+          cat $CONFIG_FILE
 
-      - name: Login
-        id: login
-        # from https://github.com/Azure/login/commits/master
-        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+      # this action create a folder named /azure-dashboard
+      # from https://github.com/pagopa/opex-dashboard-azure-action/commits/main
+      - uses: pagopa/opex-dashboard-azure-action@3ad80a5e4a2d5a8f342615637072f21b687320ce
         with:
+          environment: ${{ steps.read_parameters.outputs.environment }}
+          api-name: ${{ steps.read_parameters.outputs.apiName }}
+          config: .opex/${{ steps.read_parameters.outputs.apiName }}/env/${{ steps.read_parameters.outputs.environment }}/config.yaml
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
-
-      # this action create a folder named /azure-dashboard
-      # - uses: pagopa/opex-dashboard-action@f39cecdd530f46451057c599fcf57c1fc3fa345e
-      - uses: pagopa/opex-dashboard-action@main
-        with:
-          template: ${{ env.TEMPLATE_DIR }}
-          config: .opex/env/${{ matrix.environment }}/config.yaml
-
-      # we need to set env variables in the folder /azure-dashboard
-      - name: Copy Environments
-        run: |
-          cp -R .opex/env ./${TEMPLATE_DIR}
-      # now is possible to launch the command: terraform apply
-      - name: Terraform Apply
-        shell: bash
-        run: |
-          cd ./${TEMPLATE_DIR}
-          export ARM_CLIENT_ID="${{ secrets.CLIENT_ID }}"
-          export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
-          export ARM_TENANT_ID=$(az account show --query tenantId --output tsv)
-          export ARM_USE_OIDC=true
-          bash ./terraform.sh apply ${{ matrix.environment }} -auto-approve
+          # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
+          docker-version: sha256:04d8ead53c772d23b094c2a395292dc159e6f2905e1b13b5f828f31eac6eb27f
