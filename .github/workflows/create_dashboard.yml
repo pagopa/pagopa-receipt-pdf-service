@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'openapi/openapi.json'
+      - './openapi/openapi.json'
       - '.github/workflows/create_dashboard.yaml'
       - '.opex/**'
 
@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        environment: ['uat']
+        environment: [uat]
     environment:
       name: ${{ matrix.environment }}
     # Steps represent a sequence of tasks that will be executed as part of the job
