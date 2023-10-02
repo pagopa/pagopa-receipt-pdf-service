@@ -2,7 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.client;
 
 
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.Receipt;
+import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 
 /**
  * Interface of the client for the receipt's Cosmos database used to retrieve the Receipts details

@@ -6,7 +6,7 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.Receipt;
+import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
