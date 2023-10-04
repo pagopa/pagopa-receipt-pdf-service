@@ -7,7 +7,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.Receipt;
+import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;

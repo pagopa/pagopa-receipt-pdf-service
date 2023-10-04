@@ -1,7 +1,10 @@
-package it.gov.pagopa.receipt.pdf.service.model;
+package it.gov.pagopa.receipt.pdf.service.model.receipt;
 
 import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Model class for the receipt
