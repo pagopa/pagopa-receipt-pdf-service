@@ -2,6 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
@@ -9,21 +10,31 @@ import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedExcept
 import it.gov.pagopa.receipt.pdf.service.exception.InvalidReceiptException;
 import it.gov.pagopa.receipt.pdf.service.model.Attachment;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
+import it.gov.pagopa.receipt.pdf.service.model.SearchTokenRequest;
+import it.gov.pagopa.receipt.pdf.service.model.SearchTokenResponse;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.EventData;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class AttachmentsServiceImplTest {
@@ -31,14 +42,35 @@ class AttachmentsServiceImplTest {
     private static final String FISCAL_CODE_A = "AAAAAAAAAAAAAAAA";
     private static final String FISCAL_CODE_B = "BBBBBBBBBBBBBBBB";
 
+    private static final String TOKEN_A = "TOKEN_A";
+    private static final String TOKEN_B = "TOKEN_B";
+
     @InjectMock(convertScopes = true)
     private ReceiptCosmosClient cosmosClientMock;
 
     @InjectMock(convertScopes = true)
     private ReceiptBlobClient receiptBlobClientMock;
 
+    @InjectMock(convertScopes = true)
+    @RestClient
+    private PDVTokenizerClient restClientMock;
+
     @Inject
     private AttachmentsService sut;
+
+    @BeforeEach
+    public void init() {
+      Mockito.reset(cosmosClientMock, receiptBlobClientMock, restClientMock);
+
+      when(restClientMock.searchToken(
+          eq(new SearchTokenRequest(FISCAL_CODE_A))))
+          .thenReturn(new SearchTokenResponse(TOKEN_A));
+      when(restClientMock.searchToken(
+          eq(new SearchTokenRequest(FISCAL_CODE_B))))
+          .thenReturn(new SearchTokenResponse(TOKEN_B));
+
+    }
+
 
     @Test
     @SneakyThrows
@@ -312,8 +344,8 @@ class AttachmentsServiceImplTest {
                 .id(id)
                 .eventData(
                         EventData.builder()
-                                .debtorFiscalCode(FISCAL_CODE_A)
-                                .payerFiscalCode(FISCAL_CODE_B)
+                                .debtorFiscalCode(TOKEN_A)
+                                .payerFiscalCode(TOKEN_B)
                                 .build()
                 )
                 .mdAttach(
@@ -337,8 +369,8 @@ class AttachmentsServiceImplTest {
                 .id(id)
                 .eventData(
                         EventData.builder()
-                                .debtorFiscalCode(FISCAL_CODE_A)
-                                .payerFiscalCode(FISCAL_CODE_A)
+                                .debtorFiscalCode(TOKEN_A)
+                                .payerFiscalCode(TOKEN_A)
                                 .build()
                 )
                 .mdAttach(
@@ -350,4 +382,5 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
     }
+
 }

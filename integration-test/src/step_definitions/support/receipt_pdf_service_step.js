@@ -23,12 +23,12 @@ After(async function () {
 
 //getAttachmentDetails
 
-Given('a receipt with id {string} and debtorFiscalCode {string} stored on receipts datastore', async function (id, fiscalCode) {
+Given('a receipt with id {string} and token {string} for debtorFiscalCode {string} stored on receipts datastore', async function (id, token, fiscalCode) {
   this.receiptId = id;
   // prior cancellation to avoid dirty cases
   await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
 
-  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, fiscalCode);
+  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, token);
   assert.strictEqual(cosmosResponse.statusCode, 201);
 });
 
@@ -49,12 +49,12 @@ Then('response body contains receipt id {string}', function (receiptId) {
 //getAttachment
 
 
-Given('a receipt with id {string} and debtorFiscalCode {string} and mdAttachmentName {string} stored on receipts datastore', async function (id, fiscalCode, blobName) {
+Given('a receipt with id {string} and token {string} for debtorFiscalCode {string} and mdAttachmentName {string} stored on receipts datastore', async function (id, fiscalCode, blobName) {
   this.receiptId = id;
   // prior cancellation to avoid dirty cases
   await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
 
-  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, fiscalCode, blobName);
+  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, token, blobName);
   assert.strictEqual(cosmosResponse.statusCode, 201);
 });
 

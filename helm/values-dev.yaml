@@ -98,6 +98,7 @@ microservice-chart:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
+    TOKENIZER_API_KEY: "tokenizer-api-key"
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
     COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
     OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
