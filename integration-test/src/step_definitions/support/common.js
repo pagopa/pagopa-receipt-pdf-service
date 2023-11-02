@@ -57,16 +57,15 @@ function createReceipt(id, fiscalCode, pdfName) {
 	}
 	return receipt
 }
-
-function createToken(fiscalCode) {
+async function createToken(fiscalCode) {
     let token_api_key = process.env.TOKENIZER_API_KEY;
   	let headers = {
   	  "x-api-key": token_api_key
   	};
 
-  	return axios.put(tokenizer_url+'/search', { "pii": fiscalCode }, { headers })
+  	return await axios.put(tokenizer_url, { "pii": fiscalCode }, { headers })
   		.then(res => {
-  			return res;
+  			return res.data;
   		})
   		.catch(error => {
   			return error.response;

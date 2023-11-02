@@ -1,7 +1,7 @@
 const assert = require('assert');
 const { Given, When, Then, After } = require('@cucumber/cucumber');
-const {getAttachment, getAttachmentDetails} = require("./common.js");
-const { createDocumentInReceiptsDatastore, deleteDocumentFromReceiptsDatastore, createToken } = require("./receipts_datastore_client.js");
+const {createReceipt, getAttachmentDetails, getAttachment, createToken} = require("./common.js");
+const { createDocumentInReceiptsDatastore, deleteDocumentFromReceiptsDatastore } = require("./receipts_datastore_client.js");
 const { createBlobPdf, deleteReceiptAttachment } = require("./receipts_blob_storage_client.js");
 
 const content = "Hello world!";
