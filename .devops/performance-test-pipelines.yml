@@ -33,11 +33,13 @@ variables:
   ${{ if eq(parameters['ENVIRONMENT'], 'dev') }}:
     poolImage: 'pagopa-dev-loadtest-linux'
     API_SUBSCRIPTION_KEY: "$(DEV_API_SUBSCRIPTION_KEY)"
+    tokenizerApiKey: "$(DEV_TOKENIZER_API_KEY)"
     blobStorageConnectionString : "$(DEV_BLOB_STORAGE_CONNECTION_STRING)"
     receiptCosmosConnectionString: "$(DEV_RECEIPT_COSMOS_DB_CONNECTION_STRING)"
   ${{ if eq(parameters['ENVIRONMENT'], 'uat') }}:
     poolImage: 'pagopa-uat-loadtest-linux'
     API_SUBSCRIPTION_KEY: "$(UAT_API_SUBSCRIPTION_KEY)"
+    tokenizerApiKey: "$(UAT_TOKENIZER_API_KEY)"
     blobStorageConnectionString : "$(UAT_BLOB_STORAGE_CONNECTION_STRING)"
     receiptCosmosConnectionString: "$(UAT_RECEIPT_COSMOS_DB_CONNECTION_STRING)"
 
@@ -56,12 +58,14 @@ steps:
       -e BLOB_STORAGE_CONN_STRING=${BLOB_STORAGE_CONN_STRING} \
       -e COSMOS_RECEIPTS_CONN_STRING=${COSMOS_RECEIPTS_CONN_STRING} \
       -e ENVIRONMENT_STRING="${ENVIRONMENT_STRING}" \
+      -e TOKENIZER_API_KEY="${TOKENIZER_API_KEY}" \
       exec-node 
     displayName: Precondition run perf test
     env:
       COSMOS_RECEIPTS_CONN_STRING: ${{ variables.receiptCosmosConnectionString }}
       BLOB_STORAGE_CONN_STRING: ${{ variables.blobStorageConnectionString }}
       ENVIRONMENT_STRING: ${{ parameters.ENVIRONMENT }}
+      TOKENIZER_API_KEY: ${{ variables.tokenizerApiKey }}
   - script: |
       cd ./performance-test
       sh ./run_performance_test.sh ${{ parameters.ENVIRONMENT }} ${{ parameters.TEST_TYPE }} ${{ parameters.SCRIPT }} ${{ parameters.DB_NAME}} $OCP_APIM_SUBSCRIPTION_KEY
@@ -75,9 +79,12 @@ steps:
       -e BLOB_STORAGE_CONN_STRING=${BLOB_STORAGE_CONN_STRING} \
       -e COSMOS_RECEIPTS_CONN_STRING=${COSMOS_RECEIPTS_CONN_STRING} \
       -e ENVIRONMENT_STRING="${ENVIRONMENT_STRING}" \
+      -e TOKENIZER_API_KEY="${TOKENIZER_API_KEY}" \
       exec-node       
     displayName: Teardown run perf test   
     env:
       COSMOS_RECEIPTS_CONN_STRING: ${{ variables.receiptCosmosConnectionString }}
       BLOB_STORAGE_CONN_STRING: ${{ variables.blobStorageConnectionString }}
       ENVIRONMENT_STRING: ${{ parameters.ENVIRONMENT }}
+      TOKENIZER_API_KEY: ${{ variables.tokenizerApiKey }}
+

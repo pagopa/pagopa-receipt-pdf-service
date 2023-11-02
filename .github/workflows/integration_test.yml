@@ -75,6 +75,7 @@ jobs:
           export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
           export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
           export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
+          export TOKENIZER_API_KEY='${{ secrets.TOKENIZER_API_KEY }}'
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh

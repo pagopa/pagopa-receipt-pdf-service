@@ -9,7 +9,8 @@
       "blobStorageAccountName":"pagopauweureceiptsfnsa",
       "receiptTestId": "receipt-service-perf-test-id-1",
 
-      "receiptServiceURIBasePath": "https://api.uat.platform.pagopa.it/receipts/service/v1/messages"
+      "receiptServiceURIBasePath": "https://api.uat.platform.pagopa.it/receipts/service/v1/messages",
+      "tokenizerUrl": "https://api.uat.tokenizer.pdv.pagopa.it/tokenizer/v1/token"
     }
   ]
 }
