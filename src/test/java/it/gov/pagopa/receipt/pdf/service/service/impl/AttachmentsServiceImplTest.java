@@ -45,6 +45,8 @@ class AttachmentsServiceImplTest {
     private static final String TOKEN_A = "TOKEN_A";
     private static final String TOKEN_B = "TOKEN_B";
 
+    private static final String MISSING_FISCAL_CODE = "MISSING_FISCAL_CODE";
+
     @InjectMock(convertScopes = true)
     private ReceiptCosmosClient cosmosClientMock;
 
@@ -68,6 +70,9 @@ class AttachmentsServiceImplTest {
       when(restClientMock.searchToken(
           eq(new SearchTokenRequest(FISCAL_CODE_B))))
           .thenReturn(new SearchTokenResponse(TOKEN_B));
+      when(restClientMock.searchToken(
+          eq(new SearchTokenRequest(MISSING_FISCAL_CODE))))
+          .thenThrow(new RuntimeException());
 
     }
 
@@ -338,6 +343,37 @@ class AttachmentsServiceImplTest {
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
     }
+
+  @Test
+  @SneakyThrows
+  void getAttachmentDetailsFailWithMissingToken() {
+    String id = UUID.randomUUID().toString();
+    String fileNameDebtor = "file1.pdf";
+    String fileNamePayer = "file2.pdf";
+    Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
+
+    doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+
+    assertThrows(
+        FiscalCodeNotAuthorizedException.class,
+        () -> sut.getAttachmentsDetails(anyString(), MISSING_FISCAL_CODE));
+  }
+
+  @Test
+  @SneakyThrows
+  void getAttachmentFailWithMissingToken() {
+    String id = UUID.randomUUID().toString();
+    String fileNameDebtor = "file1.pdf";
+    Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
+
+    doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+    doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+    assertThrows(
+        FiscalCodeNotAuthorizedException.class,
+        () -> sut.getAttachment(anyString(), MISSING_FISCAL_CODE, fileNameDebtor));
+
+  }
 
     private Receipt buildReceiptWithDifferentPayerDebtor(String id, String fileNameDebtor, String fileNamePayer) {
         return Receipt.builder()
