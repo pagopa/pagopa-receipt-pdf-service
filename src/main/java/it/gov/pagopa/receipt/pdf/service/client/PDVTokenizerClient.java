@@ -20,9 +20,9 @@ public interface PDVTokenizerClient {
 
   @POST
   @Path("/search")
-  @Retry(delay = 800L, delayUnit = ChronoUnit.MILLIS, maxRetries = 3,
+  @Retry(delay = 1000L, delayUnit = ChronoUnit.MILLIS, maxRetries = 3,
       retryOn = TooManyRequestsException.class)
-  @ExponentialBackoff
+  @ExponentialBackoff(maxDelay = 60000L, factor = 2)
   @ClientHeaderParam(name = "x-api-key", value = "${pdv.tokenizer.apiKey}")
   SearchTokenResponse searchToken(SearchTokenRequest searchTokenRequest);
 
