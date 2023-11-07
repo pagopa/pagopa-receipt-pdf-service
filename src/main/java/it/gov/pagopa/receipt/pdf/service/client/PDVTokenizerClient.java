@@ -19,7 +19,7 @@ public interface PDVTokenizerClient {
 
   @POST
   @Path("/search")
-  @Retry(delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 5,
+  @Retry(delay = 800L, delayUnit = ChronoUnit.MILLIS, maxRetries = 3,
       retryOn = TooManyRequestsException.class)
   @ExponentialBackoff
   @ClientHeaderParam(name = "x-api-key", value = "${pdv.tokenizer.apiKey}")
@@ -28,7 +28,7 @@ public interface PDVTokenizerClient {
   @ClientExceptionMapper
   static RuntimeException toException(Response response) {
     if (response.getStatus() == 429) {
-      return new TooManyRequestsException("The remote service responded with HTTP 500");
+      return new TooManyRequestsException("The remote service responded with HTTP 429");
     }
     return null;
   }
