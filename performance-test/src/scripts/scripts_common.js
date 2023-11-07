@@ -38,25 +38,22 @@ export function createToken(fiscalCode) {
   	  "x-api-key": token_api_key
   	};
 
-  	return http.put(tokenizer_url+'/search', { "pii": fiscalCode }, { headers })
-  		.then(res => {
-  			return res;
-  		})
-  		.catch(error => {
-  			return error.response;
-  		});
+  	return http.put(tokenizer_url+'/search',
+  	 { "pii": fiscalCode }, { headers });
 
 }
 
 export function createReceipt(id, pdfName, pdfUrl) {
   let tokenResponse = createToken("JHNDOE00A01F205N");
+  let responseBody = JSON.parse(response.body);
+
 	let receipt =
 	{
     "id" : id,
 		"eventId": id,
 		"eventData": {
-			"payerFiscalCode": tokenResponse.token,
-			"debtorFiscalCode": tokenResponse.token
+			"payerFiscalCode": responseBody.token,
+			"debtorFiscalCode": responseBody.token
 		},
         "mdAttach":{
             name: pdfName,
