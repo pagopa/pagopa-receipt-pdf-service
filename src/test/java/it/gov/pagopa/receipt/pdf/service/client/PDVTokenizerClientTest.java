@@ -1,5 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.client;
 
+import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.exception.PDVTokenizerClientException;
 import it.gov.pagopa.receipt.pdf.service.exception.TooManyRequestsException;
 import jakarta.ws.rs.core.Response;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@QuarkusTest
 class PDVTokenizerClientTest {
 
   @Test

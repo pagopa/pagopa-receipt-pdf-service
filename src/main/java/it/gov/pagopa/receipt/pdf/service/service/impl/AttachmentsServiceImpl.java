@@ -42,22 +42,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
-      SearchTokenResponse searchTokenResponse = null;
-
-        try {
-          searchTokenResponse =
-              pdvTokenizerClient.searchToken(new SearchTokenRequest(requestFiscalCode));
-          if (searchTokenResponse == null || searchTokenResponse.getToken() == null) {
-            throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
-          }
-        } catch (Exception e) {
-          String errMsg =
-              String.format(
-                  "Could not recover fiscal code token for authentication in the request with id: %s",
-                  thirdPartyId);
-          logger.error(errMsg);
-          throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
-        }
+      SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);;
 
         String token = searchTokenResponse.getToken();
 
@@ -82,24 +67,9 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             BlobStorageClientException, AttachmentNotFoundException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
-      SearchTokenResponse searchTokenResponse = null;
+      SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
 
-      try {
-        searchTokenResponse =
-            pdvTokenizerClient.searchToken(new SearchTokenRequest(requestFiscalCode));
-        if (searchTokenResponse == null || searchTokenResponse.getToken() == null) {
-          throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
-        }
-      } catch (Exception e) {
-        String errMsg =
-            String.format(
-                "Could not recover fiscal code token for authentication in the request with id: %s",
-                thirdPartyId);
-        logger.error(errMsg);
-        throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
-      }
-
-        if (isFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, receiptDocument)) {
+      if (isFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, receiptDocument)) {
             String errMsg =
                     String.format(
                             "Fiscal code is not authorized to access the receipts with name: %s, for receipt with id %s",
@@ -111,7 +81,27 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl);
     }
 
-    private Receipt getReceipt(String thirdPartyId)
+  private SearchTokenResponse getSearchTokenResponse(String thirdPartyId, String requestFiscalCode)
+      throws FiscalCodeNotAuthorizedException {
+    SearchTokenResponse searchTokenResponse;
+    try {
+      searchTokenResponse =
+          pdvTokenizerClient.searchToken(new SearchTokenRequest(requestFiscalCode));
+      if (searchTokenResponse == null || searchTokenResponse.getToken() == null) {
+        throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
+      }
+    } catch (Exception e) {
+      String errMsg =
+          String.format(
+              "Could not recover fiscal code token for authentication in the request with id: %s",
+              thirdPartyId);
+      logger.error(errMsg);
+      throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
+    }
+    return searchTokenResponse;
+  }
+
+  private Receipt getReceipt(String thirdPartyId)
             throws ReceiptNotFoundException, InvalidReceiptException {
         Receipt receiptDocument = cosmosClient.getReceiptDocument(thirdPartyId);
 

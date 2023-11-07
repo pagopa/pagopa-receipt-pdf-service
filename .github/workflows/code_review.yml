@@ -43,7 +43,7 @@ jobs:
           project_key: ${{env.PROJECT_KEY}}
           jdk_version: 17
           maven_version: 3.9.3
-          coverage_exclusions: "**/config/*,**/*Mock*,**/model/**,**/entity/*,**/producer/**,**/enumeration/**"
+          coverage_exclusions: "**/config/*,**/*Mock*,**/model/**,**/entity/*,**/producer/**,**/enumeration/**,**/exception/**"
           cpd_exclusions: "**/model/**,**/entity/*"
 
   smoke-test:
