@@ -2,7 +2,8 @@ package it.gov.pagopa.receipt.pdf.service.client;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.smallrye.faulttolerance.api.ExponentialBackoff;
-import it.gov.pagopa.receipt.pdf.service.client.exceptions.TooManyRequestsException;
+import it.gov.pagopa.receipt.pdf.service.exception.PDVTokenizerClientException;
+import it.gov.pagopa.receipt.pdf.service.exception.TooManyRequestsException;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenRequest;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenResponse;
 import jakarta.ws.rs.POST;
@@ -29,6 +30,9 @@ public interface PDVTokenizerClient {
   static RuntimeException toException(Response response) {
     if (response.getStatus() == 429) {
       return new TooManyRequestsException("The remote service responded with HTTP 429");
+    } else if (response.getStatus() != 200) {
+      return new PDVTokenizerClientException("Tokenizer client returned status "  +
+       response.getStatus());
     }
     return null;
   }

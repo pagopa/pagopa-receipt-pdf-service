@@ -1,4 +1,4 @@
-package it.gov.pagopa.receipt.pdf.service.client.exceptions;
+package it.gov.pagopa.receipt.pdf.service.exception;
 
 public class TooManyRequestsException extends RuntimeException {
 
