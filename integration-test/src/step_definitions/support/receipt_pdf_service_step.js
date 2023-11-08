@@ -1,6 +1,6 @@
 const assert = require('assert');
 const { Given, When, Then, After } = require('@cucumber/cucumber');
-const {getAttachment, getAttachmentDetails} = require("./common.js");
+const {createReceipt, getAttachmentDetails, getAttachment, createToken} = require("./common.js");
 const { createDocumentInReceiptsDatastore, deleteDocumentFromReceiptsDatastore } = require("./receipts_datastore_client.js");
 const { createBlobPdf, deleteReceiptAttachment } = require("./receipts_blob_storage_client.js");
 
@@ -14,11 +14,12 @@ After(async function () {
   }
   if (this.blobName != null) {
     await deleteReceiptAttachment(this.blobName);
-}
+  }
 
   this.receiptId = null;
   this.blobName = null;
   this.response = null;
+
 });
 
 //getAttachmentDetails
@@ -28,7 +29,9 @@ Given('a receipt with id {string} and debtorFiscalCode {string} stored on receip
   // prior cancellation to avoid dirty cases
   await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
 
-  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, fiscalCode);
+  let pdvResponse = await createToken(fiscalCode);
+
+  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, pdvResponse.token);
   assert.strictEqual(cosmosResponse.statusCode, 201);
 });
 
@@ -54,7 +57,9 @@ Given('a receipt with id {string} and debtorFiscalCode {string} and mdAttachment
   // prior cancellation to avoid dirty cases
   await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
 
-  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, fiscalCode, blobName);
+  let pdvResponse = await createToken(fiscalCode);
+
+  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, pdvResponse.token, blobName);
   assert.strictEqual(cosmosResponse.statusCode, 201);
 });
 

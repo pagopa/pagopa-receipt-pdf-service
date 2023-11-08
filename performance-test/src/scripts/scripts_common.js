@@ -1,6 +1,7 @@
 import { BlobServiceClient } from "@azure/storage-blob";
 import { CosmosClient } from "@azure/cosmos";
 import { createRequire } from 'node:module';
+import http from 'k6/http';
 
 const require = createRequire(import.meta.url);
 
@@ -14,6 +15,7 @@ let environmentVars = require(`../${environmentString}.environment.json`)?.envir
 const blobStorageContainerID = environmentVars.blobStorageContainerID;
 const receiptCosmosDBDatabaseId = environmentVars.receiptDatabaseID;
 export const receiptCosmosDBContainerId = environmentVars.receiptContainerID;
+export tokenizer_url = environmentVars.tokenizerUrl;
 
 //CONSTANTS
 export const PARTITION_ID = environmentVars.receiptTestId;
@@ -29,14 +31,29 @@ const client = new CosmosClient(receiptCosmosDBConnString);
 export const receiptContainer = client.database(receiptCosmosDBDatabaseId).container(receiptCosmosDBContainerId);
 
 //METHODS
+
+export function createToken(fiscalCode) {
+    let token_api_key = process.env.TOKENIZER_API_KEY;
+  	let headers = {
+  	  "x-api-key": token_api_key
+  	};
+
+  	return http.put(tokenizer_url+'/search',
+  	 { "pii": fiscalCode }, { headers });
+
+}
+
 export function createReceipt(id, pdfName, pdfUrl) {
+  let tokenResponse = createToken("JHNDOE00A01F205N");
+  let responseBody = JSON.parse(response.body);
+
 	let receipt =
 	{
-        "id" : id,
+    "id" : id,
 		"eventId": id,
 		"eventData": {
-			"payerFiscalCode": "JHNDOE00A01F205N",
-			"debtorFiscalCode": "JHNDOE00A01F205N"
+			"payerFiscalCode": responseBody.token,
+			"debtorFiscalCode": responseBody.token
 		},
         "mdAttach":{
             name: pdfName,

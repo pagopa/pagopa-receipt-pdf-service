@@ -2,6 +2,7 @@ const axios = require("axios");
 
 const uri = process.env.SERVICE_URI;
 const environment = process.env.ENVIRONMENT;
+const tokenizer_url = process.env.TOKENIZER_URL;
 
 axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = process.env.SUBKEY || ""; // for all requests
 if (process.env.canary) {
@@ -56,7 +57,22 @@ function createReceipt(id, fiscalCode, pdfName) {
 	}
 	return receipt
 }
+async function createToken(fiscalCode) {
+    let token_api_key = process.env.TOKENIZER_API_KEY;
+  	let headers = {
+  	  "x-api-key": token_api_key
+  	};
+
+  	return await axios.put(tokenizer_url, { "pii": fiscalCode }, { headers })
+  		.then(res => {
+  			return res.data;
+  		})
+  		.catch(error => {
+  			return error.response;
+  		});
+
+}
 
 module.exports = {
-	createReceipt, getAttachmentDetails, getAttachment
+	createReceipt, getAttachmentDetails, getAttachment, createToken
 }

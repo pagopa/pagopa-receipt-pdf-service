@@ -92,12 +92,18 @@ microservice-chart:
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
+    TOKENIZER_URL: "https://api.uat.tokenizer.pdv.pagopa.it"
     JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -javaagent:/deployments/opentelemetry-javaagent.jar -javaagent:/deployments/applicationinsights-agent.jar -Xmx1024m"
+    TOKENIZER_MAX_RETRY: "3"
+    TOKENIZER_DELAY: "200"
+    TOKENIZER_EXPB_MAX_DELAY: "6000"
+    TOKENIZER_EXPB_FACTOR: "2"
   envFieldRef:
   envSecret:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-u-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
+    TOKENIZER_API_KEY: "tokenizer-api-key"
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
     COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
     OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
