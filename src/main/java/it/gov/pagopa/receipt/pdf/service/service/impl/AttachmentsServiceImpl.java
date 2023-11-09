@@ -95,7 +95,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
           String.format(
               "Could not recover fiscal code token for authentication in the request with id: %s",
               thirdPartyId);
-      logger.error(errMsg);
+      logger.error(errMsg, e);
       throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
     }
     return searchTokenResponse;
