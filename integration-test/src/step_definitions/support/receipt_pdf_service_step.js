@@ -30,6 +30,7 @@ Given('a receipt with id {string} and debtorFiscalCode {string} stored on receip
   await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
 
   let pdvResponse = await createToken(fiscalCode);
+  await createToken('INVALID_FISCCODE');
 
   let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, pdvResponse.token);
   assert.strictEqual(cosmosResponse.statusCode, 201);
@@ -58,6 +59,7 @@ Given('a receipt with id {string} and debtorFiscalCode {string} and mdAttachment
   await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
 
   let pdvResponse = await createToken(fiscalCode);
+  await createToken('INVALID_FISCCODE');
 
   let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, pdvResponse.token, blobName);
   assert.strictEqual(cosmosResponse.statusCode, 201);
