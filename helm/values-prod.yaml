@@ -92,7 +92,7 @@ microservice-chart:
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
-    TOKENIZER_URL: "https://api.tokenizer.pdv.pagopa.it/tokenizer/v1"
+    TOKENIZER_URL: "https://api.tokenizer.pdv.pagopa.it"
     JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -javaagent:/deployments/opentelemetry-javaagent.jar -javaagent:/deployments/applicationinsights-agent.jar -Xmx1024m"
     TOKENIZER_MAX_RETRY: "3"
     TOKENIZER_DELAY: "200"
