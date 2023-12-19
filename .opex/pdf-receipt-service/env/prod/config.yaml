@@ -18,9 +18,9 @@ overrides:
         response_time_threshold: 1 # Default: 1
         response_time_evaluation_frequency: 10 # Default: 10
         response_time_evaluation_time_window: 30 # Default: 20
-        response_time_event_occurrences: 5 # Default: 1
+        response_time_event_occurrences: 20 # Default: 1
     - /receipts/service/v1/messages/{tp_id}:
         response_time_threshold: 1 # Default: 1
         response_time_evaluation_frequency: 10 # Default: 10
         response_time_evaluation_time_window: 30 # Default: 20
-        response_time_event_occurrences: 5 # Default: 1
+        response_time_event_occurrences: 20 # Default: 1
