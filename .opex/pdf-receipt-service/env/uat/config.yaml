@@ -10,5 +10,16 @@ action_groups:
   - /subscriptions/26abc801-0d8f-4a6e-ac5f-8e81bcc09112/resourceGroups/pagopa-u-monitor-rg/providers/microsoft.insights/actionGroups/PagoPA
   - /subscriptions/26abc801-0d8f-4a6e-ac5f-8e81bcc09112/resourceGroups/pagopa-u-monitor-rg/providers/microsoft.insights/actionGroups/SlackPagoPA
 overrides:
-  hosts: # Use these hosts instead of those inside the OpenApi spec
-    - api.uat.platform.pagopa.it
+  hosts:
+    - api.platform.pagopa.it
+  endpoints:
+    - /receipts/service/v1/messages/{tp_id}/{attachment_url}:
+        response_time_threshold: 1 # Default: 1
+        response_time_evaluation_frequency: 10 # Default: 10
+        response_time_evaluation_time_window: 30 # Default: 20
+        response_time_event_occurrences: 5 # Default: 1
+    - /receipts/service/v1/messages/{tp_id}:
+        response_time_threshold: 1 # Default: 1
+        response_time_evaluation_frequency: 10 # Default: 10
+        response_time_evaluation_time_window: 30 # Default: 20
+        response_time_event_occurrences: 5 # Default: 1
