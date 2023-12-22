@@ -185,6 +185,37 @@ class AttachmentsServiceImplTest {
         assertEquals(AppErrorCodeEnum.PDFS_704, e.getErrorCode());
     }
 
+  @Test
+  @SneakyThrows
+  void getAttachmentDetailsFailMdAttachOnAnonym() {
+    String id = UUID.randomUUID().toString();
+    String fileNameDebtor = "file1.pdf";
+    String urlDebtor = "file/file1";
+    Receipt receipt = Receipt.builder()
+        .id(id)
+        .eventData(
+            EventData.builder()
+                .debtorFiscalCode("ANONIMO")
+                .payerFiscalCode(UUID.randomUUID().toString())
+                .build()
+        )
+        .mdAttach(
+            ReceiptMetadata.builder()
+                .name(fileNameDebtor)
+                .url(urlDebtor)
+                .build()
+        )
+        .numRetry(0)
+        .build();
+
+    doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+
+    InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
+
+    assertNotNull(e);
+    assertEquals(AppErrorCodeEnum.PDFS_705, e.getErrorCode());
+  }
+
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailMdAttachPayerNull() {
