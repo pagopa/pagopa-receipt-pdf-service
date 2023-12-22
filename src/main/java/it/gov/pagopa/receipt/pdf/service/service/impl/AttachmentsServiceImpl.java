@@ -124,7 +124,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             logger.error(errMsg);
             throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_703, errMsg);
         }
-        if (receiptDocument.getMdAttach() == null) {
+        if (receiptDocument.getMdAttach() == null && (!"ANONIMO".equals(receiptDocument.getEventData().getDebtorFiscalCode()))) {
             String errMsg =
                     String.format(
                             "The retrieved receipt with id: %s, has null attachment info for debtor",
@@ -166,7 +166,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             String requestFiscalCode, String attachmentUrl, Receipt receiptDocument) {
         String debtorFiscalCode = receiptDocument.getEventData().getDebtorFiscalCode();
         String payerFiscalCode = receiptDocument.getEventData().getPayerFiscalCode();
-        String debtorFileName = receiptDocument.getMdAttach().getName();
+        String debtorFileName = !"ANONIMO".equals(receiptDocument.getEventData().getDebtorFiscalCode()) ?
+            receiptDocument.getMdAttach().getName() : "";
 
         if (requestFiscalCode.equals(debtorFiscalCode) && debtorFileName.equals(attachmentUrl)) {
             return false;
