@@ -1,0 +1,27 @@
+oa3_spec: ./openapi/openapi.json
+name: opex_pagopa-pdf-receipt-service-apimv2
+location: West Europe
+timespan: 5m
+# data_source: /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-u-vnet-rg/providers/Microsoft.Network/applicationGateways/pagopa-p-app-gw
+# resource_type: app-gateway
+# data_source: /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-api-rg/providers/Microsoft.ApiManagement/service/pagopa-p-apim
+data_source: /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-api-rg/providers/Microsoft.ApiManagement/service/pagopa-p-weu-core-apim-v2
+resource_type: api-management
+action_groups:
+  - /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-monitor-rg/providers/microsoft.insights/actionGroups/PagoPA
+  - /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-monitor-rg/providers/microsoft.insights/actionGroups/SlackPagoPA
+  - /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-monitor-rg/providers/microsoft.insights/actionGroups/Opsgenie
+overrides:
+  hosts:
+    - api.platform.pagopa.it
+  endpoints:
+    /receipts/service/v1/messages/{tp_id}/{attachment_url}:
+      response_time_threshold: 3 # Default: 1
+      response_time_evaluation_frequency: 10 # Default: 10
+      response_time_evaluation_time_window: 30 # Default: 20
+      response_time_event_occurrences: 30 # Default: 1
+    /receipts/service/v1/messages/{tp_id}:
+      response_time_threshold: 2 # Default: 1
+      response_time_evaluation_frequency: 10 # Default: 10
+      response_time_evaluation_time_window: 30 # Default: 20
+      response_time_event_occurrences: 30 # Default: 1
