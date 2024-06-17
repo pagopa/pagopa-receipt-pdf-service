@@ -2,6 +2,14 @@ name: Create Dashboard
 
 # Controls when the workflow will run
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'openapi/**'
+      - '.github/workflows/create_dashboard.yaml'
+      - '.opex/**'
+
   workflow_dispatch:
 
 permissions:
@@ -18,7 +26,8 @@ jobs:
     strategy:
       matrix:
         environment: [prod]
-        product: [pdf-receipt-service, pdf-receipt-service-apimv2]
+        product: [internal, node, internal_apim_v2, node_apim_v2]
+        version: [v1, v2]
       max-parallel: 1
     environment:
       name: ${{ matrix.environment }}
@@ -35,9 +44,9 @@ jobs:
       - uses: pagopa/opex-dashboard-azure-action@v1.1.2
         with:
           environment: ${{ matrix.environment }}
-          api-name: ${{ matrix.product }}
-          config: .opex/${{ matrix.product }}/env/${{ matrix.environment }}/config.yaml
-          client-id: ${{ secrets.CLIENT_ID }}
+          api-name: ${{ matrix.product }}/${{ matrix.version }}
+          config: .opex/${{ matrix.product }}/${{ matrix.version }}/env/${{ matrix.environment }}/config.yaml
+          client-id: ${{ secrets.CD_CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
