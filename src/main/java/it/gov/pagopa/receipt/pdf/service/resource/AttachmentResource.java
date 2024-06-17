@@ -79,7 +79,7 @@ public class AttachmentResource {
         // replace new line and tab from user input to avoid log injection
         thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
 
-        logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
+        logger.debug("Received get attachment details for receipt with id {}", thirdPartyId);
         if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
             String errMsg = "Fiscal code header is null or not valid";
             throw new InvalidFiscalCodeHeaderException(PDFS_901, errMsg);
@@ -123,7 +123,7 @@ public class AttachmentResource {
         thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
         attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
 
-        logger.info(
+        logger.debug(
                 "Received get attachment with name {} for receipt with id {}",
                 attachmentUrl,
                 thirdPartyId);
