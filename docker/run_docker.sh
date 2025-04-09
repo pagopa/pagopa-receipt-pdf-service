@@ -64,6 +64,6 @@ until [ "$(curl -s -w '%{http_code}' -o /dev/null "$url")" -eq 200 ]; do
 
     printf '.'
     attempt_counter=$((attempt_counter + 1))
-    sleep 5
+    sleep 10
 done
 echo -e "\nService Started"
