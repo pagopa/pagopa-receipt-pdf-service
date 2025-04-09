@@ -40,7 +40,7 @@ public class AttachmentResource {
 
     private static final String FISCAL_CODE_HEADER = "fiscal_code";
     private static final String THIRD_PARTY_ID_PARAM = "tp_id";
-    private static final String REGEX = "[\n\r]";
+    private static final String REGEX = "[^a-zA-Z0-9]"; // allow only alphanumeric characters
     private static final String REPLACEMENT = "_";
     private static final int FISCAL_CODE_LENGTH = 16;
 
@@ -84,7 +84,7 @@ public class AttachmentResource {
             String errMsg = "Fiscal code header is null or not valid";
             throw new InvalidFiscalCodeHeaderException(PDFS_901, errMsg);
         }
-        // replace new line and tab from user input to avoid log injection
+        // sanitize input to allow only alphanumeric characters
         requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
 
         AttachmentsDetailsResponse attachmentDetails =
