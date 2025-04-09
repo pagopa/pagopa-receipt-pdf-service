@@ -53,14 +53,17 @@ docker compose -p "${stack_name}" up -d --remove-orphans --force-recreate --buil
 printf 'Waiting for the service'
 attempt_counter=0
 max_attempts=50
-until [ "$(curl -s -w '%{http_code}' -o /dev/null "http://localhost:8080/q/health/live")" -eq 200 ]; do
-    if [ ${attempt_counter} -eq ${max_attempts} ];then
-      echo "Max attempts reached"
-      exit 1
+url="http://localhost:8080/q/health/live"
+
+until [ "$(curl -s -w '%{http_code}' -o /dev/null "$url")" -eq 200 ]; do
+    if [ ${attempt_counter} -eq ${max_attempts} ]; then
+        echo -e "\nMax attempts reached. Service not available."
+        echo "Check if the service is running on the correct port and health check endpoint."
+        exit 1
     fi
 
     printf '.'
-    attempt_counter=$((attempt_counter+1))
+    attempt_counter=$((attempt_counter + 1))
     sleep 5
 done
-echo 'Service Started'
+echo -e "\nService Started"
