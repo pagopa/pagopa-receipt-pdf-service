@@ -46,7 +46,7 @@ public class InfoResource {
   @Produces(MediaType.APPLICATION_JSON)
   @GET
   public InfoResponse info() {
-    logger.info("Info environment: [{}] - name: [{}] - version: [{}]", environment, name, version);
+    logger.debug("Info environment: [{}] - name: [{}] - version: [{}]", environment, name, version);
 
     return InfoResponse.builder()
         .name(name)
