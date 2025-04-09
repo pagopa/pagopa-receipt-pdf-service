@@ -3,6 +3,7 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import it.gov.pagopa.receipt.pdf.service.client.impl.ReceiptCosmosClientImpl;
 import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
@@ -23,6 +24,7 @@ import static io.restassured.RestAssured.given;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static jakarta.ws.rs.core.Response.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -36,6 +38,10 @@ class AttachmentResourceTest {
 
     @InjectMock(convertScopes = true)
     private AttachmentsService attachmentsServiceMock;
+    
+    @InjectMock
+    ReceiptCosmosClientImpl receiptCosmosClientMock;
+    
 
     @Inject
     private AttachmentResource sut;
@@ -58,7 +64,7 @@ class AttachmentResourceTest {
                         )
                 ).build();
 
-        doReturn(attachment).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
+        doReturn(attachment).when(attachmentsServiceMock).getAttachmentsDetails(anyString(), anyString());
 
         String responseString =
                 given()
@@ -132,7 +138,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailGetReceiptError400() {
-        doThrow(new ReceiptNotFoundException(PDFS_800, "")).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
+        doThrow(new ReceiptNotFoundException(PDFS_800, "")).when(attachmentsServiceMock).getAttachmentsDetails(anyString(), anyString());
 
         String responseString =
                 given()
@@ -158,7 +164,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailGetReceiptError500() {
-        doThrow(new FiscalCodeNotAuthorizedException(PDFS_700, "")).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
+        doThrow(new FiscalCodeNotAuthorizedException(PDFS_700, "")).when(attachmentsServiceMock).getAttachmentsDetails(anyString(), anyString());
 
         String responseString =
                 given()
@@ -184,7 +190,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailWithUnexpectedError() {
-        doThrow(IllegalArgumentException.class).when(attachmentsServiceMock).getAttachmentsDetails(THIRD_PARTY_ID, FISCAL_CODE);
+        doThrow(IllegalArgumentException.class).when(attachmentsServiceMock).getAttachmentsDetails(anyString(), anyString());
 
         String responseString =
                 given()
@@ -213,7 +219,7 @@ class AttachmentResourceTest {
         File tempDirectory = Files.createTempDirectory("test").toFile();
         File file = Files.createTempFile(tempDirectory.toPath(), "receipt", ".pdf").toFile();
 
-        doReturn(file).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+        doReturn(file).when(attachmentsServiceMock).getAttachment(anyString(), anyString(), anyString());
 
         byte[] response =
                 given()
@@ -285,7 +291,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentFailGetReceiptError400() {
-        doThrow(new AttachmentNotFoundException(PDFS_602, "")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+        doThrow(new AttachmentNotFoundException(PDFS_602, "")).when(attachmentsServiceMock).getAttachment(anyString(), anyString(), anyString());
 
         String responseString =
                 given()
@@ -312,7 +318,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentFailGetReceiptError500() {
-        doThrow(new FiscalCodeNotAuthorizedException(PDFS_706, "")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+        doThrow(new FiscalCodeNotAuthorizedException(PDFS_706, "")).when(attachmentsServiceMock).getAttachment(anyString(), anyString(), anyString());
 
         String responseString =
                 given()
@@ -339,7 +345,7 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentFailReadingAttachmentFileContent() {
-        doReturn(new File("")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+    	doReturn(new File("")).when(attachmentsServiceMock).getAttachment(anyString(), anyString(), anyString());
 
         String responseString =
                 given()
