@@ -55,7 +55,7 @@ jobs:
     steps:
       - name: Get semver
         id: get_semver
-        uses: pagopa/github-actions-template/semver-setup@v1.4.2
+        uses: pagopa/github-actions-template/semver-setup@0018ad6b766a082c35ec88cd9f18de6b54fd59d1 # v1.4.2
 
       - if: ${{ github.event.inputs.environment == null || github.event.inputs.environment == 'dev' }}
         run: echo "ENVIRNOMENT=dev" >> $GITHUB_ENV
@@ -84,7 +84,7 @@ jobs:
     steps:
       - name: Make Release
         id: release
-        uses: pagopa/github-actions-template/maven-release@v1.5.2
+        uses: pagopa/github-actions-template/maven-release@d91a1fd0b913c9830589be5d86cdb71c90813fae # v1.5.4
         with:
           semver: ${{ needs.setup.outputs.semver }}
           github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
@@ -99,7 +99,7 @@ jobs:
     steps:
       - name: Build and Push
         id: semver
-        uses: pagopa/github-actions-template/ghcr-build-push@v1.4.2
+        uses: pagopa/github-actions-template/ghcr-build-push@d91a1fd0b913c9830589be5d86cdb71c90813fae # v1.5.4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.version }}
@@ -111,13 +111,9 @@ jobs:
     name: Deploy on AKS
     needs: [ setup, release, image ]
     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
-    strategy:
-      matrix:
-        environment: [ dev, uat, prod ]
     uses: ./.github/workflows/deploy_with_github_runner.yml
     with:
-      environment: ${{ matrix.environment }}
-      target: ${{ needs.setup.outputs.environment }}
+      environment: ${{ needs.setup.outputs.environment }}
     secrets: inherit
 
   notify:
