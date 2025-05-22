@@ -1,5 +1,5 @@
 ## Stage 1 : build with maven builder image with native capabilities
-FROM quay.io/quarkus/ubi-quarkus-graalvmce-builder-image:22.3-java17 AS build
+FROM quay.io/quarkus/ubi-quarkus-graalvmce-builder-image:22.3-java17@sha256:dd138e760d0f048fec1957cab1b2c824c57b6e9db7f58464ceb37fc0c76fc071 AS build
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
@@ -39,7 +39,7 @@ RUN mkdir -p /code/target/jmx && \
 RUN chmod 777 /code/jmx_prometheus_javaagent-0.19.0.jar && \
     cp /code/jmx_prometheus_javaagent-0.19.0.jar /code/target/jmx/jmx_prometheus_javaagent-0.19.0.jar
 
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.14
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.14@sha256:79585ca02551ecff9d368905d7ce387232b9fd328256e7a715ae3c4ec7b086d3
 
 ENV LANGUAGE='en_US:en'
 
