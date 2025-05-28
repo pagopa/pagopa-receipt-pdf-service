@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: "0.10.4-2-PIDM-482-workload-identity"
+    tag: "0.10.5"
     pullPolicy: Always
   livenessProbe:
     httpGet:
