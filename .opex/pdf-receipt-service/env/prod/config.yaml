@@ -13,13 +13,14 @@ action_groups:
 overrides:
   hosts:
     - api.platform.pagopa.it
+  base_path: "/receipts/{product}/{version}"
   endpoints:
-    /receipts/service/v1/messages/{tp_id}/{attachment_url}:
+    GET /receipts/service/v1/messages/{tp_id}/{attachment_url}:
       response_time_threshold: 3 # Default: 1
       response_time_evaluation_frequency: 10 # Default: 10
       response_time_evaluation_time_window: 30 # Default: 20
       response_time_event_occurrences: 30 # Default: 1
-    /receipts/service/v1/messages/{tp_id}:
+    GET /receipts/service/v1/messages/{tp_id}:
       response_time_threshold: 2 # Default: 1
       response_time_evaluation_frequency: 10 # Default: 10
       response_time_evaluation_time_window: 30 # Default: 20
