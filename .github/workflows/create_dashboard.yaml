@@ -50,7 +50,7 @@ jobs:
           venv/bin/opex_dashboard generate \
             --template-name azure-dashboard \
             --package ./dashboard \
-            --config-file .opex/${{ matrix.product }}/env/${{ matrix.environment }}/config.yaml
+            --config-file .opex/pdf-receipt-service/env/prod/config.yaml
 
       # we need to set env variables in the folder /azure-dashboard
       - name: Copy Environments
