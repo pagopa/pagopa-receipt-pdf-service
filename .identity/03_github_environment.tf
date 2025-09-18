@@ -82,7 +82,7 @@ resource "github_actions_secret" "secret_bot_token" {
 
   repository      = local.github.repository
   secret_name     = "BOT_TOKEN_GITHUB"
-  plaintext_value = data.azurerm_key_vault_secret.key_vault_bot_token.value
+  plaintext_value = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
@@ -94,9 +94,15 @@ resource "github_actions_secret" "secret_cucumber_token" {
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
-resource "github_actions_secret" "secret_slack_webhook" {
-
+resource "github_actions_secret" "secret_slack_webhook_deploy" {
   repository      = local.github.repository
-  secret_name     = "SLACK_WEBHOOK_URL"
+  secret_name     = "SLACK_WEBHOOK_URL_DEPLOY"
+  plaintext_value = data.azurerm_key_vault_secret.key_vault_deploy_webhook_slack.value
+}
+
+#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
+resource "github_actions_secret" "secret_slack_webhook_integration_test" {
+  repository      = local.github.repository
+  secret_name     = "SLACK_WEBHOOK_URL_INTEGRATION_TEST"
   plaintext_value = data.azurerm_key_vault_secret.key_vault_integration_test_webhook_slack.value
 }
