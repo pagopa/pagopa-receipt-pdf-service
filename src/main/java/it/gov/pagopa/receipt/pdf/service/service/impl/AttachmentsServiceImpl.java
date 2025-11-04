@@ -27,15 +27,22 @@ public class AttachmentsServiceImpl implements AttachmentsService {
 
     private final Logger logger = LoggerFactory.getLogger(AttachmentsServiceImpl.class);
 
-    @Inject
-    private ReceiptCosmosClient cosmosClient;
+    private final ReceiptCosmosClient cosmosClient;
+
+    private final PDVTokenizerClient pdvTokenizerClient;
+
+    private final ReceiptBlobClient receiptBlobClient;
 
     @Inject
-    @RestClient
-    private PDVTokenizerClient pdvTokenizerClient;
-
-    @Inject
-    private ReceiptBlobClient receiptBlobClient;
+    public AttachmentsServiceImpl(
+            ReceiptCosmosClient cosmosClient,
+            @RestClient PDVTokenizerClient pdvTokenizerClient,
+            ReceiptBlobClient receiptBlobClient
+    ) {
+        this.cosmosClient = cosmosClient;
+        this.pdvTokenizerClient = pdvTokenizerClient;
+        this.receiptBlobClient = receiptBlobClient;
+    }
 
     @CacheResult(cacheName = "getAttachmentsDetails")
     @Override
