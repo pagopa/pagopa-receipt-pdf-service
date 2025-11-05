@@ -1,5 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
+import io.quarkus.cache.CacheResult;
 import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
@@ -26,23 +27,31 @@ public class AttachmentsServiceImpl implements AttachmentsService {
 
     private final Logger logger = LoggerFactory.getLogger(AttachmentsServiceImpl.class);
 
-    @Inject
-    private ReceiptCosmosClient cosmosClient;
+    private final ReceiptCosmosClient cosmosClient;
+
+    private final PDVTokenizerClient pdvTokenizerClient;
+
+    private final ReceiptBlobClient receiptBlobClient;
 
     @Inject
-    @RestClient
-    private PDVTokenizerClient pdvTokenizerClient;
+    public AttachmentsServiceImpl(
+            ReceiptCosmosClient cosmosClient,
+            @RestClient PDVTokenizerClient pdvTokenizerClient,
+            ReceiptBlobClient receiptBlobClient
+    ) {
+        this.cosmosClient = cosmosClient;
+        this.pdvTokenizerClient = pdvTokenizerClient;
+        this.receiptBlobClient = receiptBlobClient;
+    }
 
-    @Inject
-    private ReceiptBlobClient receiptBlobClient;
-
+    @CacheResult(cacheName = "getAttachmentsDetails")
     @Override
     public AttachmentsDetailsResponse getAttachmentsDetails(
             String thirdPartyId, String requestFiscalCode)
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
-      SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);;
+      SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
 
         String token = searchTokenResponse.getToken();
 
