@@ -17,12 +17,12 @@ microservice-chart:
     httpGet:
       path: /q/health/ready
       port: 8080
-    initialDelaySeconds: 90
-    failureThreshold: 10
-    periodSeconds: 20
+    initialDelaySeconds: 30
+    failureThreshold: 6
+    periodSeconds: 10
   deployment:
     create: true
-    replicas: 3
+    replicas: 3 # equals to HPA min
     strategy:
       type: RollingUpdate
       rollingUpdate:
@@ -73,7 +73,7 @@ microservice-chart:
     minReplica: 3
     maxReplica: 10
     pollingInterval: 10 # seconds
-    cooldownPeriod: 120 # seconds
+    cooldownPeriod: 50 # seconds
     triggers:
       - type: cpu
         metadata:
