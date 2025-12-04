@@ -25,7 +25,14 @@ public enum AppErrorCodeEnum {
     PDFS_705("PDFS_705", "The retrieved receipt has null payer attachment info"),
     PDFS_706("PDFS_706", "Fiscal code not authorized to access the requested receipt document"),
 
+    PDFS_707("PDFS_707", "The retrieved cart is null"),
+    PDFS_708("PDFS_708", "The retrieved cart has null payload"),
+    PDFS_709("PDFS_709", "The retrieved cart has null debtors fiscal code"),
+    PDFS_710("PDFS_710", "The retrieved cart has null debtors attachment info"),
+    PDFS_711("PDFS_711", "The retrieved cart has null payer attachment info"),
+
     PDFS_800("PDFS_800", "Receipt not found with the provided third party id"),
+    PDFS_801("PDFS_801", "Cart not found with the provided third party id"),
 
     PDFS_901("PDFS_901", "Invalid fiscal code header, null or length not equal to 16");
 

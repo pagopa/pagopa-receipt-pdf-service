@@ -10,6 +10,8 @@ import it.gov.pagopa.receipt.pdf.service.model.Attachment;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenRequest;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenResponse;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartPayment;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Objects;
 
 @ApplicationScoped
 public class AttachmentsServiceImpl implements AttachmentsService {
@@ -51,7 +54,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
 
-      SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
+        SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
 
         String token = searchTokenResponse.getToken();
 
@@ -74,43 +77,67 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     public File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException,
             BlobStorageClientException, AttachmentNotFoundException {
-        Receipt receiptDocument = getReceipt(thirdPartyId);
+        if (thirdPartyId.contains("_CART_")) {
+            var partial = thirdPartyId.split("_CART_");
 
-      SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
 
-      if (isFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, receiptDocument)) {
-            String errMsg =
-                    String.format(
-                            "Fiscal code is not authorized to access the receipts with name: %s, for receipt with id %s",
-                            attachmentUrl, thirdPartyId);
-            logger.error(errMsg);
-            throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_706, errMsg);
+            String cartId = partial[0];
+            String eventId = "PAYER";
+            if (partial.length > 1) {
+                eventId = partial[1];
+            }
+
+            CartForReceipt cartForReceipt = getCartReceipt(cartId);
+            SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
+            if (isFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, eventId, cartForReceipt)) {
+                String errMsg =
+                        String.format(
+                                "Fiscal code is not authorized to access the receipts with name: %s, for cart with id %s",
+                                attachmentUrl, thirdPartyId);
+                logger.error(errMsg);
+                throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_706, errMsg);
+            }
+
+        } else {
+
+            Receipt receiptDocument = getReceipt(thirdPartyId);
+            SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
+
+            if (isFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, receiptDocument)) {
+                String errMsg =
+                        String.format(
+                                "Fiscal code is not authorized to access the receipts with name: %s, for receipt with id %s",
+                                attachmentUrl, thirdPartyId);
+                logger.error(errMsg);
+                throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_706, errMsg);
+            }
         }
+
 
         return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl);
     }
 
-  private SearchTokenResponse getSearchTokenResponse(String thirdPartyId, String requestFiscalCode)
-      throws FiscalCodeNotAuthorizedException {
-    SearchTokenResponse searchTokenResponse;
-    try {
-      searchTokenResponse =
-          pdvTokenizerClient.searchToken(new SearchTokenRequest(requestFiscalCode));
-      if (searchTokenResponse == null || searchTokenResponse.getToken() == null) {
-        throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
-      }
-    } catch (Exception e) {
-      String errMsg =
-          String.format(
-              "Could not recover fiscal code token for authentication in the request with id: %s",
-              thirdPartyId);
-      logger.error(errMsg, e);
-      throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
+    private SearchTokenResponse getSearchTokenResponse(String thirdPartyId, String requestFiscalCode)
+            throws FiscalCodeNotAuthorizedException {
+        SearchTokenResponse searchTokenResponse;
+        try {
+            searchTokenResponse =
+                    pdvTokenizerClient.searchToken(new SearchTokenRequest(requestFiscalCode));
+            if (searchTokenResponse == null || searchTokenResponse.getToken() == null) {
+                throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
+            }
+        } catch (Exception e) {
+            String errMsg =
+                    String.format(
+                            "Could not recover fiscal code token for authentication in the request with id: %s",
+                            thirdPartyId);
+            logger.error(errMsg, e);
+            throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
+        }
+        return searchTokenResponse;
     }
-    return searchTokenResponse;
-  }
 
-  private Receipt getReceipt(String thirdPartyId)
+    private Receipt getReceipt(String thirdPartyId)
             throws ReceiptNotFoundException, InvalidReceiptException {
         Receipt receiptDocument = cosmosClient.getReceiptDocument(thirdPartyId);
 
@@ -152,6 +179,63 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         return receiptDocument;
     }
 
+    private CartForReceipt getCartReceipt(String cartId) throws ReceiptNotFoundException, InvalidReceiptException {
+        CartForReceipt cartForReceipt = cosmosClient.getCartForReceiptDocument(cartId);
+
+        if (cartForReceipt == null) {
+            String errMsg = String.format("The retrieved cart with id: %s, is null", cartId);
+            logger.error(errMsg);
+            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_707, errMsg);
+        }
+        if (cartForReceipt.getPayload() == null) {
+            String errMsg =
+                    String.format("The retrieved receipt with id: %s, has null payload", cartId);
+            logger.error(errMsg);
+            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_708, errMsg);
+        }
+
+        var allDebtorsAreNull = cartForReceipt.getPayload().getCart().stream()
+                .filter(Objects::nonNull)
+                .map(CartPayment::getDebtorFiscalCode)
+                .noneMatch(Objects::nonNull);
+
+        if (allDebtorsAreNull) {
+            String errMsg =
+                    String.format(
+                            "The retrieved cart with id: %s, has null debtors fiscal code",
+                            cartId);
+            logger.error(errMsg);
+            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_709, errMsg);
+        }
+
+        var allDebtorsAttachAreNull = cartForReceipt.getPayload().getCart().stream()
+                .filter(Objects::nonNull)
+                .map(CartPayment::getMdAttach)
+                .filter(Objects::nonNull)
+                .map(ReceiptMetadata::getName)
+                .noneMatch(Objects::nonNull);
+
+        if (allDebtorsAttachAreNull) {
+            String errMsg =
+                    String.format(
+                            "The retrieved cart with id: %s, has null attachment info for debtors",
+                            cartId);
+            logger.error(errMsg);
+            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_710, errMsg);
+        }
+
+
+        if (cartForReceipt.getPayload().getMdAttachPayer() == null) {
+            String errMsg =
+                    String.format(
+                            "The retrieved cart with id: %s, has null attachment info for payer",
+                            cartId);
+            logger.error(errMsg);
+            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_711, errMsg);
+        }
+        return cartForReceipt;
+    }
+
     private AttachmentsDetailsResponse buildAttachmentDetails(
             Receipt receiptDocument, ReceiptMetadata receiptMetadata) {
         return AttachmentsDetailsResponse.builder()
@@ -176,7 +260,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         String debtorFiscalCode = receiptDocument.getEventData().getDebtorFiscalCode();
         String payerFiscalCode = receiptDocument.getEventData().getPayerFiscalCode();
         String debtorFileName = !"ANONIMO".equals(receiptDocument.getEventData().getDebtorFiscalCode()) ?
-            receiptDocument.getMdAttach().getName() : "";
+                receiptDocument.getMdAttach().getName() : "";
 
         if (requestFiscalCode.equals(debtorFiscalCode) && debtorFileName.equals(attachmentUrl)) {
             return false;
@@ -185,6 +269,54 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             return true;
         }
         return !receiptDocument.getMdAttachPayer().getName().equals(attachmentUrl);
+    }
+
+    /**
+     * This method checks if the fiscal code is authorized to access the attachment
+     *
+     * @param requestFiscalCode the fiscal code to check
+     * @param attachmentUrl the attachment url to get
+     * @param eventId the event id
+     * @param cartForReceipt the cart for receipt
+     * @return true if the fiscal code is not authorized, false otherwise
+     */
+    private boolean isFiscalCodeNotAuthorized(
+            String requestFiscalCode, String attachmentUrl, String eventId, CartForReceipt cartForReceipt) {
+
+        // check null cart or payload
+        if (cartForReceipt == null || cartForReceipt.getPayload() == null) {
+            return true;
+        }
+
+
+        if (eventId.equals("PAYER")) {
+            // if third_party_id is a payer then check payer attachment
+
+            boolean isPayerAuthorized = cartForReceipt.getPayload().getMdAttachPayer() != null
+                    && attachmentUrl.equals(cartForReceipt.getPayload().getMdAttachPayer().getName())
+                    && requestFiscalCode.equals(cartForReceipt.getPayload().getPayerFiscalCode());
+
+            return !isPayerAuthorized;
+
+        } else {
+            // else check debtor attachment
+
+            boolean isDebtorAuthorized = cartForReceipt.getPayload().getCart() != null
+                    && cartForReceipt.getPayload().getCart().stream()
+                    .filter(elem ->
+                            elem != null
+                                    && elem.getMdAttach() != null
+                                    && attachmentUrl.equals(elem.getMdAttach().getName()))
+                    .allMatch(elem ->
+                            requestFiscalCode.equals(elem.getDebtorFiscalCode())
+                                    && eventId.equals(elem.getBizEventId())
+                    );
+
+            return !isDebtorAuthorized;
+
+        }
+
+
     }
 
     private boolean isReceiptUnique(Receipt receiptDocument) {
