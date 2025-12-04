@@ -26,6 +26,9 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
     @Inject
     private CosmosContainer cosmosContainer;
 
+    @Inject
+    private CosmosContainer cartForReceiptsContainer;
+
     /**
      * Retrieve receipt document from CosmosDB database
      *
@@ -53,11 +56,11 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         String query = String.format("SELECT * FROM c WHERE c.eventId = '%s'", cartId);
 
         //Query the container
-        CosmosPagedIterable<CartForReceipt> queryResponse = cosmosContainer
+        CosmosPagedIterable<CartForReceipt> queryResponse = cartForReceiptsContainer
                 .queryItems(query, new CosmosQueryRequestOptions(), CartForReceipt.class);
 
         if (!queryResponse.iterator().hasNext()) {
-            String errMsg = String.format("Cart with id %s not found in the defined container: %s", cartId, cosmosContainer.getId());
+            String errMsg = String.format("Cart with id %s not found in the defined container: %s", cartId, cartForReceiptsContainer.getId());
             logger.error(errMsg);
             throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
         }
