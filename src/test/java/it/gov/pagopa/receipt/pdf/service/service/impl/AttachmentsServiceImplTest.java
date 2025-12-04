@@ -12,6 +12,9 @@ import it.gov.pagopa.receipt.pdf.service.model.Attachment;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenRequest;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenResponse;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartPayment;
+import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.EventData;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
@@ -19,22 +22,18 @@ import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.Mockito;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @QuarkusTest
 class AttachmentsServiceImplTest {
@@ -62,17 +61,17 @@ class AttachmentsServiceImplTest {
 
     @BeforeEach
     public void init() {
-      Mockito.reset(cosmosClientMock, receiptBlobClientMock, restClientMock);
+        Mockito.reset(cosmosClientMock, receiptBlobClientMock, restClientMock);
 
-      when(restClientMock.searchToken(
-          eq(new SearchTokenRequest(FISCAL_CODE_A))))
-          .thenReturn(new SearchTokenResponse(TOKEN_A));
-      when(restClientMock.searchToken(
-          eq(new SearchTokenRequest(FISCAL_CODE_B))))
-          .thenReturn(new SearchTokenResponse(TOKEN_B));
-      when(restClientMock.searchToken(
-          eq(new SearchTokenRequest(MISSING_FISCAL_CODE))))
-          .thenThrow(new RuntimeException());
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(FISCAL_CODE_A))))
+                .thenReturn(new SearchTokenResponse(TOKEN_A));
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(FISCAL_CODE_B))))
+                .thenReturn(new SearchTokenResponse(TOKEN_B));
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(MISSING_FISCAL_CODE))))
+                .thenThrow(new RuntimeException());
 
     }
 
@@ -185,36 +184,36 @@ class AttachmentsServiceImplTest {
         assertEquals(AppErrorCodeEnum.PDFS_704, e.getErrorCode());
     }
 
-  @Test
-  @SneakyThrows
-  void getAttachmentDetailsFailMdAttachOnAnonym() {
-    String id = UUID.randomUUID().toString();
-    String fileNameDebtor = "file1.pdf";
-    String urlDebtor = "file/file1";
-    Receipt receipt = Receipt.builder()
-        .id(id)
-        .eventData(
-            EventData.builder()
-                .debtorFiscalCode("ANONIMO")
-                .payerFiscalCode(UUID.randomUUID().toString())
-                .build()
-        )
-        .mdAttach(
-            ReceiptMetadata.builder()
-                .name(fileNameDebtor)
-                .url(urlDebtor)
-                .build()
-        )
-        .numRetry(0)
-        .build();
+    @Test
+    @SneakyThrows
+    void getAttachmentDetailsFailMdAttachOnAnonym() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        String urlDebtor = "file/file1";
+        Receipt receipt = Receipt.builder()
+                .id(id)
+                .eventData(
+                        EventData.builder()
+                                .debtorFiscalCode("ANONIMO")
+                                .payerFiscalCode(UUID.randomUUID().toString())
+                                .build()
+                )
+                .mdAttach(
+                        ReceiptMetadata.builder()
+                                .name(fileNameDebtor)
+                                .url(urlDebtor)
+                                .build()
+                )
+                .numRetry(0)
+                .build();
 
-    doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-    InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
-    assertNotNull(e);
-    assertEquals(AppErrorCodeEnum.PDFS_705, e.getErrorCode());
-  }
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_705, e.getErrorCode());
+    }
 
     @Test
     @SneakyThrows
@@ -375,36 +374,103 @@ class AttachmentsServiceImplTest {
         assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
     }
 
-  @Test
-  @SneakyThrows
-  void getAttachmentDetailsFailWithMissingToken() {
-    String id = UUID.randomUUID().toString();
-    String fileNameDebtor = "file1.pdf";
-    String fileNamePayer = "file2.pdf";
-    Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
+    @Test
+    @SneakyThrows
+    void getAttachmentDetailsFailWithMissingToken() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-    doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
 
-    assertThrows(
-        FiscalCodeNotAuthorizedException.class,
-        () -> sut.getAttachmentsDetails(anyString(), MISSING_FISCAL_CODE));
-  }
+        assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachmentsDetails(anyString(), MISSING_FISCAL_CODE));
+    }
 
-  @Test
-  @SneakyThrows
-  void getAttachmentFailWithMissingToken() {
-    String id = UUID.randomUUID().toString();
-    String fileNameDebtor = "file1.pdf";
-    Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
+    @Test
+    @SneakyThrows
+    void getAttachmentFailWithMissingToken() {
+        String id = UUID.randomUUID().toString();
+        String fileNameDebtor = "file1.pdf";
+        Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
-    doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
-    doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
-    assertThrows(
-        FiscalCodeNotAuthorizedException.class,
-        () -> sut.getAttachment(anyString(), MISSING_FISCAL_CODE, fileNameDebtor));
+        assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachment(anyString(), MISSING_FISCAL_CODE, fileNameDebtor));
 
-  }
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentCartPayerSuccess() {
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        String payerFiscalCode = "12345";
+        CartForReceipt cart = CartForReceipt.builder()
+                .payload(Payload.builder()
+                        .payerFiscalCode(TOKEN_A)
+                        .mdAttachPayer(ReceiptMetadata.builder()
+                                .name(fileNamePayer)
+                                .build())
+                        .cart(List.of(CartPayment.builder()
+                                        .debtorFiscalCode("98765")
+                                        .mdAttach(ReceiptMetadata.builder()
+                                                .name(fileNameDebtor)
+                                                .build())
+                                .build()))
+                        .build())
+                .build();
+
+        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(payerFiscalCode))))
+                .thenReturn(new SearchTokenResponse(TOKEN_A));
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+
+        File result = sut.getAttachment("test_CART_", payerFiscalCode, fileNamePayer);
+
+        assertNotNull(result);
+    }
+    @Test
+    @SneakyThrows
+    void getAttachmentCartDebtorSuccess() {
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        String payerFiscalCode = "12345";
+        CartForReceipt cart = CartForReceipt.builder()
+                .payload(Payload.builder()
+                        .payerFiscalCode(TOKEN_A)
+                        .mdAttachPayer(ReceiptMetadata.builder()
+                                .name(fileNamePayer)
+                                .build())
+                        .cart(List.of(CartPayment.builder()
+                                        .debtorFiscalCode("98765")
+                                        .mdAttach(ReceiptMetadata.builder()
+                                                .name(fileNameDebtor)
+                                                .build())
+                                .build()))
+                        .build())
+                .build();
+
+        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(payerFiscalCode))))
+                .thenReturn(new SearchTokenResponse(TOKEN_A));
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+
+        File result = sut.getAttachment("test_CART_biz1", payerFiscalCode, fileNamePayer);
+
+        assertNotNull(result);
+    }
 
     private Receipt buildReceiptWithDifferentPayerDebtor(String id, String fileNameDebtor, String fileNamePayer) {
         return Receipt.builder()
