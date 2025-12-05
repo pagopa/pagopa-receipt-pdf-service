@@ -500,7 +500,7 @@ class AttachmentsServiceImplTest {
     }
     @Test
     @SneakyThrows
-    void getAttachmentCarPayloadtNull() {
+    void getAttachmentCarPayloadNull() {
         String fileNameDebtor = "file1.pdf";
         String fileNamePayer = "file2.pdf";
         String payerFiscalCode = "12345";
@@ -580,6 +580,79 @@ class AttachmentsServiceImplTest {
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_709, e.getErrorCode());
     }
+
+
+    @Test
+    @SneakyThrows
+    void getAttachmentCartPayerUnauthorized() {
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        String payerFiscalCode = "12345";
+        CartForReceipt cart = CartForReceipt.builder()
+                .payload(Payload.builder()
+                        .payerFiscalCode("wrong cf")
+                        .mdAttachPayer(ReceiptMetadata.builder()
+                                .name(fileNamePayer)
+                                .build())
+                        .cart(List.of(CartPayment.builder()
+                                .debtorFiscalCode("98765")
+                                .mdAttach(ReceiptMetadata.builder()
+                                        .name(fileNameDebtor)
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+
+        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(payerFiscalCode))))
+                .thenReturn(new SearchTokenResponse(TOKEN_A));
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+
+        FiscalCodeNotAuthorizedException e = assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachment("test_CART_", payerFiscalCode, fileNamePayer));
+
+        assertNotNull(e);
+    }
+
+
+    @Test
+    @SneakyThrows
+    void getAttachmentCartDebtorUnauthorized() {
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        String payerFiscalCode = "12345";
+        CartForReceipt cart = CartForReceipt.builder()
+                .payload(Payload.builder()
+                        .payerFiscalCode(TOKEN_A)
+                        .mdAttachPayer(ReceiptMetadata.builder()
+                                .name(fileNamePayer)
+                                .build())
+                        .cart(List.of(CartPayment.builder()
+                                .debtorFiscalCode(TOKEN_B)
+                                .mdAttach(ReceiptMetadata.builder()
+                                        .name(fileNameDebtor)
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+
+        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(payerFiscalCode))))
+                .thenReturn(new SearchTokenResponse(TOKEN_B));
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+
+        FiscalCodeNotAuthorizedException e = assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachment("test_CART_biz1", "wrong", fileNamePayer));
+
+        assertNotNull(e);    }
 
     private Receipt buildReceiptWithDifferentPayerDebtor(String id, String fileNameDebtor, String fileNamePayer) {
         return Receipt.builder()
