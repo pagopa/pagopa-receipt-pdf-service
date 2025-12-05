@@ -142,7 +142,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     @Override
     public File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException,
-            BlobStorageClientException, AttachmentNotFoundException {
+            BlobStorageClientException, AttachmentNotFoundException, InvalidCartException, CartNotFoundException {
 
         if (thirdPartyId.contains(CART)) {
             handleCartAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
@@ -167,7 +167,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         }
     }
 
-    private void handleCartAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
+    private void handleCartAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl) throws FiscalCodeNotAuthorizedException, InvalidCartException, CartNotFoundException {
         var partial = thirdPartyId.split(CART);
 
         String cartId = partial[0];
@@ -250,19 +250,19 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         return receiptDocument;
     }
 
-    private CartForReceipt getCartReceipt(String cartId) throws ReceiptNotFoundException, InvalidReceiptException {
+    private CartForReceipt getCartReceipt(String cartId) throws CartNotFoundException, InvalidCartException {
         CartForReceipt cartForReceipt = cosmosClient.getCartForReceiptDocument(cartId);
 
         if (cartForReceipt == null) {
             String errMsg = String.format("The retrieved cart with id: %s, is null", cartId);
             logger.error(errMsg);
-            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_707, errMsg);
+            throw new InvalidCartException(AppErrorCodeEnum.PDFS_707, errMsg);
         }
-        if (cartForReceipt.getPayload() == null) {
+        if (cartForReceipt.getPayload() == null || cartForReceipt.getPayload().getCart() == null) {
             String errMsg =
                     String.format("The retrieved receipt with id: %s, has null payload", cartId);
             logger.error(errMsg);
-            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_708, errMsg);
+            throw new InvalidCartException(AppErrorCodeEnum.PDFS_708, errMsg);
         }
 
         var allDebtorsAreNull = cartForReceipt.getPayload().getCart().stream()
@@ -276,7 +276,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                             "The retrieved cart with id: %s, has null debtors fiscal code",
                             cartId);
             logger.error(errMsg);
-            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_709, errMsg);
+            throw new InvalidCartException(AppErrorCodeEnum.PDFS_709, errMsg);
         }
 
         var allDebtorsAttachAreNull = cartForReceipt.getPayload().getCart().stream()
@@ -292,7 +292,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                             "The retrieved cart with id: %s, has null attachment info for debtors",
                             cartId);
             logger.error(errMsg);
-            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_710, errMsg);
+            throw new InvalidCartException(AppErrorCodeEnum.PDFS_710, errMsg);
         }
 
 
@@ -302,7 +302,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                             "The retrieved cart with id: %s, has null attachment info for payer",
                             cartId);
             logger.error(errMsg);
-            throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_711, errMsg);
+            throw new InvalidCartException(AppErrorCodeEnum.PDFS_711, errMsg);
         }
         return cartForReceipt;
     }

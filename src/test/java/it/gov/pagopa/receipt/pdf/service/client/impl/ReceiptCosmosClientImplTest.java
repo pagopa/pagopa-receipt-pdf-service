@@ -6,6 +6,7 @@ import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
+import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
@@ -75,7 +76,7 @@ class ReceiptCosmosClientImplTest {
     void getCartForReceiptDocumentNotFound() {
         doReturn(false).when(iteratorMock).hasNext();
 
-        ReceiptNotFoundException e = assertThrows(ReceiptNotFoundException.class, () -> sut.getCartForReceiptDocument("id"));
+        CartNotFoundException e = assertThrows(CartNotFoundException.class, () -> sut.getCartForReceiptDocument("id"));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_801, e.getErrorCode());

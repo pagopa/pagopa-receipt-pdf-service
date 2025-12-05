@@ -117,7 +117,7 @@ public class AttachmentResource {
             @PathParam("attachment_url") String attachmentUrl,
             @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
             throws InvalidFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
-            InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException {
+            InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException, InvalidCartException, CartNotFoundException {
 
         // replace new line and tab from user input to avoid log injection
         thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
