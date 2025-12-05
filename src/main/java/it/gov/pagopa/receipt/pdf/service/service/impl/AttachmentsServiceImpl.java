@@ -57,8 +57,9 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
 
         if (thirdPartyId.contains(CART)) {
-         return  handleCartAttachmentDetails(thirdPartyId, requestFiscalCode );
-        } else {
+            return  handleCartAttachmentDetails(thirdPartyId, requestFiscalCode );
+        }
+        else {
             return  handleSingleReceiptAttachmentDetails(thirdPartyId, requestFiscalCode);
         }
 
