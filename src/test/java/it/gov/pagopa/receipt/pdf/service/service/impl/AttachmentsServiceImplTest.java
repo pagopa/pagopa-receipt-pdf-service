@@ -419,10 +419,10 @@ class AttachmentsServiceImplTest {
                                 .name(fileNamePayer)
                                 .build())
                         .cart(List.of(CartPayment.builder()
-                                        .debtorFiscalCode("98765")
-                                        .mdAttach(ReceiptMetadata.builder()
-                                                .name(fileNameDebtor)
-                                                .build())
+                                .debtorFiscalCode("98765")
+                                .mdAttach(ReceiptMetadata.builder()
+                                        .name(fileNameDebtor)
+                                        .build())
                                 .build()))
                         .build())
                 .build();
@@ -453,10 +453,10 @@ class AttachmentsServiceImplTest {
                                 .name(fileNamePayer)
                                 .build())
                         .cart(List.of(CartPayment.builder()
-                                        .debtorFiscalCode("98765")
-                                        .mdAttach(ReceiptMetadata.builder()
-                                                .name(fileNameDebtor)
-                                                .build())
+                                .debtorFiscalCode("98765")
+                                .mdAttach(ReceiptMetadata.builder()
+                                        .name(fileNameDebtor)
+                                        .build())
                                 .build()))
                         .build())
                 .build();
@@ -498,6 +498,7 @@ class AttachmentsServiceImplTest {
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_707, e.getErrorCode());
     }
+
     @Test
     @SneakyThrows
     void getAttachmentCarPayloadNull() {
@@ -551,6 +552,7 @@ class AttachmentsServiceImplTest {
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_708, e.getErrorCode());
     }
+
     @Test
     @SneakyThrows
     void getAttachmentCarDebtorNull() {
@@ -560,7 +562,7 @@ class AttachmentsServiceImplTest {
         CartForReceipt cart = CartForReceipt.builder()
                 .payload(Payload.builder()
                         .cart(List.of(CartPayment.builder()
-                                        .debtorFiscalCode(null)
+                                .debtorFiscalCode(null)
                                 .build()))
                         .build())
                 .build();
@@ -652,7 +654,82 @@ class AttachmentsServiceImplTest {
                 FiscalCodeNotAuthorizedException.class,
                 () -> sut.getAttachment("test_CART_biz1", "wrong", fileNamePayer));
 
-        assertNotNull(e);    }
+        assertNotNull(e);
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentCartDebtorAttachNull() {
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        String payerFiscalCode = "12345";
+        CartForReceipt cart = CartForReceipt.builder()
+                .payload(Payload.builder()
+                        .payerFiscalCode(TOKEN_A)
+                        .mdAttachPayer(ReceiptMetadata.builder()
+                                .name(fileNamePayer)
+                                .build())
+                        .cart(List.of(CartPayment.builder()
+                                .debtorFiscalCode(TOKEN_B)
+                                .mdAttach(ReceiptMetadata.builder()
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+
+        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(payerFiscalCode))))
+                .thenReturn(new SearchTokenResponse(TOKEN_B));
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+
+        InvalidCartException e = assertThrows(
+                InvalidCartException.class,
+                () -> sut.getAttachment("test_CART_biz1", payerFiscalCode, fileNamePayer));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_710, e.getErrorCode());
+
+    }
+
+
+    @Test
+    @SneakyThrows
+    void getAttachmentCartPayerAttachNull() {
+        String fileNameDebtor = "file1.pdf";
+        String fileNamePayer = "file2.pdf";
+        String payerFiscalCode = "12345";
+        CartForReceipt cart = CartForReceipt.builder()
+                .payload(Payload.builder()
+                        .payerFiscalCode(TOKEN_A)
+                        .mdAttachPayer(null)
+                        .cart(List.of(CartPayment.builder()
+                                .debtorFiscalCode(TOKEN_B)
+                                .mdAttach(ReceiptMetadata.builder()
+                                        .name(fileNameDebtor)
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+
+        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+
+        when(restClientMock.searchToken(
+                eq(new SearchTokenRequest(payerFiscalCode))))
+                .thenReturn(new SearchTokenResponse(TOKEN_B));
+        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
+
+
+        InvalidCartException e = assertThrows(
+                InvalidCartException.class,
+                () -> sut.getAttachment("test_CART_biz1", payerFiscalCode, fileNamePayer));
+
+        assertNotNull(e);
+        assertEquals(AppErrorCodeEnum.PDFS_711, e.getErrorCode());
+
+    }
 
     private Receipt buildReceiptWithDifferentPayerDebtor(String id, String fileNameDebtor, String fileNamePayer) {
         return Receipt.builder()
