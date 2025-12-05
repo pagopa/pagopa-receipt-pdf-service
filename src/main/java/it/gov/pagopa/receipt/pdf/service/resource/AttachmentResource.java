@@ -74,7 +74,7 @@ public class AttachmentResource {
             @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
         // @RestHeader(FISCAL_CODE_HEADER) String requestFiscalCode)
             throws InvalidFiscalCodeHeaderException, ReceiptNotFoundException, InvalidReceiptException,
-            FiscalCodeNotAuthorizedException {
+            FiscalCodeNotAuthorizedException, InvalidCartException, CartNotFoundException {
 
         // replace new line and tab from user input to avoid log injection
         thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);

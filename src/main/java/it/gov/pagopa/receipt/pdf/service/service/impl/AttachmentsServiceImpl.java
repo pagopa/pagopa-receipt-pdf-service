@@ -54,7 +54,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     @Override
     public AttachmentsDetailsResponse getAttachmentsDetails(
             String thirdPartyId, String requestFiscalCode)
-            throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
+            throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException, CartNotFoundException {
 
         if (thirdPartyId.contains(CART)) {
             return  handleCartAttachmentDetails(thirdPartyId, requestFiscalCode );
@@ -87,7 +87,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     }
 
 
-    private AttachmentsDetailsResponse handleCartAttachmentDetails(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
+    private AttachmentsDetailsResponse handleCartAttachmentDetails(String thirdPartyId, String requestFiscalCode) throws CartNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {
         var partial = thirdPartyId.split(CART);
 
         String cartId = partial[0];
