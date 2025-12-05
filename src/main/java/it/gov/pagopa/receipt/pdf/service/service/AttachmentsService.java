@@ -36,5 +36,5 @@ public interface AttachmentsService {
      * @throws AttachmentNotFoundException thrown if the requested attachment was not found
      */
     File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
-            throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, BlobStorageClientException, AttachmentNotFoundException;
+            throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, BlobStorageClientException, AttachmentNotFoundException, InvalidCartException, CartNotFoundException;
 }
