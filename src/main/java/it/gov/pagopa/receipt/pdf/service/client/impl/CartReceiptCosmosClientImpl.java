@@ -13,6 +13,8 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
+
 /**
  * Client for the CosmosDB database
  */
@@ -39,7 +41,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
                 .queryItems(query, new CosmosQueryRequestOptions(), CartForReceipt.class);
 
         if (!queryResponse.iterator().hasNext()) {
-            String errMsg = String.format("Cart with id %s not found in the defined container: %s", cartId, containerCartReceipts.getId());
+            String errMsg = String.format("Cart with id %s not found in the defined container: %s", sanitize(cartId), containerCartReceipts.getId());
             logger.error(errMsg);
             throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
         }
