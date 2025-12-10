@@ -91,15 +91,15 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         var partial = thirdPartyId.split(CART);
 
         String cartId = partial[0];
-        String eventId = PAYER;
+        String bizEventId = PAYER;
         if (partial.length > 1) {
-            eventId = partial[1];
+            bizEventId = partial[1];
         }
 
         CartForReceipt cartForReceipt = getCartReceipt(cartId);
         SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
         String token = searchTokenResponse.getToken();
-        if (isFiscalCodeNotAuthorized(token, eventId, cartForReceipt)) { //TODO check per il fiscal code
+        if (isFiscalCodeNotAuthorized(token, bizEventId, cartForReceipt)) {
             String errMsg =
                     String.format(
                             "Fiscal code is not authorized to access the receipts for cart with id %s",thirdPartyId);
@@ -107,15 +107,15 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
         }
         //TODO
-        if (eventId.equals(PAYER)) {
+        if (bizEventId.equals(PAYER)) {
             return buildCartAttachmentDetails(cartForReceipt, cartForReceipt.getPayload().getMdAttachPayer());
         }
-        //TODO devono corrispondere solo a quelli col cf richiesto
-        ReceiptMetadata receiptmetadata = findDebtorMdAttach(cartForReceipt, eventId);
+        //TODO devono corrispondere solo a quelli col cf richiesto e biz event id
+        ReceiptMetadata receiptmetadata = findDebtorMdAttach(cartForReceipt, bizEventId);
 
         if (receiptmetadata == null) {
             String errMsg =
-                    String.format("The retrieved receipt metadata for cart %s for the debtor with bizEventId: %s, has null debtors attachment info", cartId, eventId);
+                    String.format("The retrieved receipt metadata for cart %s for the debtor with bizEventId: %s, has null debtors attachment info", cartId, bizEventId);
             logger.error(errMsg);
             throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_710, errMsg);
         }
@@ -321,7 +321,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                 .build();
     }
 
-    //TODO check
+    //TODO remote content
     private AttachmentsDetailsResponse buildCartAttachmentDetails(
             CartForReceipt cartReceiptDocument, ReceiptMetadata receiptMetadata) {
         return AttachmentsDetailsResponse.builder()
