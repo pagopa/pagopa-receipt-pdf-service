@@ -18,7 +18,6 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.NonNull;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,19 +133,18 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     /**
      * This method checks if the fiscal code is not authorized to access the attachment
      *
-     * @param attachmentUrl the attachment url from the request
-     * @param partial the splitted thirdPartyId
+     * @param attachmentUrl       the attachment url from the request
+     * @param partial             the splitted thirdPartyId
      * @param searchTokenResponse the tokenized fiscal code from the PDV Tokenizer
-     * @param cartForReceipt the cart for receipt object to check from the DB
+     * @param cartForReceipt      the cart for receipt object to check from the DB
      * @return true if the fiscal code is not authorized, false otherwise
      */
     private static boolean isFiscalCodeNotAuthorized(String attachmentUrl, String[] partial, SearchTokenResponse searchTokenResponse, CartForReceipt cartForReceipt) {
         boolean isFiscalCodeNotAuthorized;
         if (partial.length > 1) {
             isFiscalCodeNotAuthorized = isDebtorFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, partial[1], cartForReceipt);
-        }
-        else {
-            isFiscalCodeNotAuthorized =isPayerFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, cartForReceipt);
+        } else {
+            isFiscalCodeNotAuthorized = isPayerFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, cartForReceipt);
         }
         return isFiscalCodeNotAuthorized;
     }
@@ -308,10 +306,10 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     /**
      * This method checks if the debtor fiscal code is not authorized to access the attachment
      *
-     * @param requestFiscalCode  the fiscal code from the request
-     * @param attachmentUrl the attachment url from the request
-     * @param eventId the event id to match in the cart from the request
-     * @param cartForReceipt the cart for receipt object to check from the DB
+     * @param requestFiscalCode the fiscal code from the request
+     * @param attachmentUrl     the attachment url from the request
+     * @param eventId           the event id to match in the cart from the request
+     * @param cartForReceipt    the cart for receipt object to check from the DB
      * @return true if the debtor fiscal code is not authorized, false otherwise
      */
     private static boolean isDebtorFiscalCodeNotAuthorized(String requestFiscalCode, String attachmentUrl, String eventId, CartForReceipt cartForReceipt) {
@@ -339,8 +337,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * This method checks if the payer fiscal code is not authorized to access the attachment
      *
      * @param requestFiscalCode the fiscal code from the request
-     * @param attachmentUrl the attachment url from the request
-     * @param cartForReceipt the cart for receipt object to check from the DB
+     * @param attachmentUrl     the attachment url from the request
+     * @param cartForReceipt    the cart for receipt object to check from the DB
      * @return true if the payer fiscal code is not authorized, false otherwise
      */
     private static boolean isPayerFiscalCodeNotAuthorized(String requestFiscalCode, String attachmentUrl, CartForReceipt cartForReceipt) {
