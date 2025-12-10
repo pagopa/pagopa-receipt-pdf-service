@@ -17,8 +17,12 @@ public class BlobContainerClientProducer {
     @ConfigProperty(name = "blob.storage.container.name")
     private String containerName;
 
+    private final BlobServiceClient blobServiceClient;
+
     @Inject
-    private BlobServiceClient blobServiceClient;
+    public BlobContainerClientProducer(BlobServiceClient blobServiceClient) {
+        this.blobServiceClient = blobServiceClient;
+    }
 
     @Produces
     @ApplicationScoped

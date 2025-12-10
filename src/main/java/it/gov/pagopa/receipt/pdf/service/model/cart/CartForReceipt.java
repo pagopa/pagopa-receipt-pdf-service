@@ -20,7 +20,11 @@ public class CartForReceipt {
     private int numRetry;
     private int notificationNumRetry;
     private ReasonError reasonErr;
+
+    @SuppressWarnings("java:S116")
     private long inserted_at;
+    @SuppressWarnings("java:S116")
     private long generated_at;
+    @SuppressWarnings("java:S116")
     private long notified_at;
 }

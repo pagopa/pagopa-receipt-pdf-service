@@ -44,8 +44,12 @@ public class AttachmentResource {
     private static final String REPLACEMENT = "_";
     private static final int FISCAL_CODE_LENGTH = 16;
 
-    @Inject
     private AttachmentsService attachmentsService;
+
+    @Inject
+    public AttachmentResource(AttachmentsService attachmentsService) {
+        this.attachmentsService = attachmentsService;
+    }
 
     @Operation(
             summary = "Get attachment details",
