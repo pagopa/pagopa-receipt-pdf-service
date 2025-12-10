@@ -640,14 +640,13 @@ class AttachmentsServiceImplTest {
 
     @Test
     @SneakyThrows
-    void getAttachmentCartDebtorAttachNull() {
+    void getAttachmentCartAttachmentsNull() {
         String fileNamePayer = "file2.pdf";
         String payerFiscalCode = "12345";
         CartForReceipt cart = CartForReceipt.builder()
                 .payload(Payload.builder()
                         .payerFiscalCode(TOKEN_A)
                         .mdAttachPayer(ReceiptMetadata.builder()
-                                .name(fileNamePayer)
                                 .build())
                         .cart(List.of(CartPayment.builder()
                                 .debtorFiscalCode(TOKEN_B)

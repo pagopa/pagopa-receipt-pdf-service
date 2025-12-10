@@ -247,17 +247,17 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                 .map(ReceiptMetadata::getName)
                 .noneMatch(Objects::nonNull);
 
-        if (allDebtorsAttachAreNull) {
+        if (allDebtorsAttachAreNull && cartForReceipt.getPayload().getMdAttachPayer().getName() == null) {
             String errMsg =
                     String.format(
-                            "The retrieved cart with id: %s, has null attachment info for debtors",
+                            "The retrieved cart with id: %s, has null attachment info",
                             sanitize(cartId));
             logger.error(errMsg);
             throw new InvalidCartException(AppErrorCodeEnum.PDFS_710, errMsg);
         }
 
 
-        if (cartForReceipt.getPayload().getMdAttachPayer() == null) {
+        if (cartForReceipt.getPayload().getPayerFiscalCode() != null && cartForReceipt.getPayload().getMdAttachPayer() == null) {
             String errMsg =
                     String.format(
                             "The retrieved cart with id: %s, has null attachment info for payer",
