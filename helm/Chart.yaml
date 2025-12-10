@@ -2,8 +2,8 @@ apiVersion: v2
 name: pagopareceiptpdfservice
 description: Microservice pagopa-receipt-pdf-service
 type: application
-version: 0.61.0
-appVersion: 0.11.1-2-PAGOPA-3417-ipg-147-wp-06-sviluppo-receipt-service-per-cart-get-attachment
+version: 0.62.0
+appVersion: 0.11.1-3-PAGOPA-3417-ipg-147-wp-06-sviluppo-receipt-service-per-cart-get-attachment
 dependencies:
   - name: microservice-chart
     version: 8.0.2
