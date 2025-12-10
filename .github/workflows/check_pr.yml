@@ -75,7 +75,7 @@ jobs:
       - name: Formatting
         id: format
         continue-on-error: true
-        uses: axel-op/googlejavaformat-action@v4.0.0
+        uses: axel-op/googlejavaformat-action@c1134ebd196c4cbffb077f9476585b0be8b6afcd
         with:
           args: "--set-exit-if-changed"
 
