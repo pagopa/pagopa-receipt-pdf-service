@@ -646,12 +646,10 @@ class AttachmentsServiceImplTest {
         CartForReceipt cart = CartForReceipt.builder()
                 .payload(Payload.builder()
                         .payerFiscalCode(TOKEN_A)
-                        .mdAttachPayer(ReceiptMetadata.builder()
-                                .build())
+                        .mdAttachPayer(null)
                         .cart(List.of(CartPayment.builder()
                                 .debtorFiscalCode(TOKEN_B)
-                                .mdAttach(ReceiptMetadata.builder()
-                                        .build())
+                                .mdAttach(null)
                                 .build()))
                         .build())
                 .build();
@@ -706,7 +704,7 @@ class AttachmentsServiceImplTest {
                 () -> sut.getAttachment("test_CART_biz1", payerFiscalCode, fileNamePayer));
 
         assertNotNull(e);
-        assertEquals(AppErrorCodeEnum.PDFS_711, e.getErrorCode());
+        assertEquals(AppErrorCodeEnum.PDFS_712, e.getErrorCode());
 
     }
 

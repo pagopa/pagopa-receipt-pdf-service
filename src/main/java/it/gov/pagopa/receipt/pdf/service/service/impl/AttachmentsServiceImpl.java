@@ -247,13 +247,27 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                 .map(ReceiptMetadata::getName)
                 .noneMatch(Objects::nonNull);
 
-        if (allDebtorsAttachAreNull && cartForReceipt.getPayload().getMdAttachPayer().getName() == null) {
+        if (allDebtorsAttachAreNull && cartForReceipt.getPayload().getMdAttachPayer() == null) {
             String errMsg =
                     String.format(
                             "The retrieved cart with id: %s, has null attachment info",
                             sanitize(cartId));
             logger.error(errMsg);
             throw new InvalidCartException(AppErrorCodeEnum.PDFS_710, errMsg);
+        }
+
+        for (CartPayment elem : cartForReceipt.getPayload().getCart()) {
+            if ((elem.getDebtorFiscalCode() != null
+                    && !elem.getDebtorFiscalCode().equals(ANONIMO)
+                    && !elem.getDebtorFiscalCode().equals(cartForReceipt.getPayload().getPayerFiscalCode()))
+                    && elem.getMdAttach() == null) {
+                String errMsg =
+                        String.format(
+                                "The retrieved cart with id: %s, has null attachment info for debtor",
+                                sanitize(cartId));
+                logger.error(errMsg);
+                throw new InvalidCartException(AppErrorCodeEnum.PDFS_711, errMsg);
+            }
         }
 
 
@@ -263,7 +277,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                             "The retrieved cart with id: %s, has null attachment info for payer",
                             sanitize(cartId));
             logger.error(errMsg);
-            throw new InvalidCartException(AppErrorCodeEnum.PDFS_711, errMsg);
+            throw new InvalidCartException(AppErrorCodeEnum.PDFS_712, errMsg);
         }
         return cartForReceipt;
     }
