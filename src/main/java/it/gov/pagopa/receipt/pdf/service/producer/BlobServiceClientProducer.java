@@ -20,8 +20,12 @@ public class BlobServiceClientProducer {
     @ConfigProperty(name = "blob.storage.connString")
     String connectionString;
 
-    @Inject
     BlobServiceClientBuilder blobServiceClientBuilder;
+
+    @Inject
+    public BlobServiceClientProducer(BlobServiceClientBuilder blobServiceClientBuilder) {
+        this.blobServiceClientBuilder = blobServiceClientBuilder;
+    }
 
     @Produces
     @ApplicationScoped

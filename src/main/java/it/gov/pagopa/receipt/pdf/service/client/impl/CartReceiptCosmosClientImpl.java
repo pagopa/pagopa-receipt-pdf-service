@@ -21,9 +21,13 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
 
     private final Logger logger = LoggerFactory.getLogger(CartReceiptCosmosClientImpl.class);
 
-    @Inject
     @CartContainer
-    private CosmosContainer containerCartReceipts;
+    private final CosmosContainer containerCartReceipts;
+
+    @Inject
+    public CartReceiptCosmosClientImpl(@CartContainer CosmosContainer containerCartReceipts) {
+        this.containerCartReceipts = containerCartReceipts;
+    }
 
 
     public CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException {

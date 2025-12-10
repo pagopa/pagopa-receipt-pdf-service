@@ -41,8 +41,12 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
     @ConfigProperty(name = "blob.storage.client.timeout")
     private int timeout;
 
+    private final BlobContainerClient blobContainerClient;
+
     @Inject
-    private BlobContainerClient blobContainerClient;
+    public ReceiptBlobClientImpl(BlobContainerClient blobContainerClient) {
+        this.blobContainerClient = blobContainerClient;
+    }
 
     /**
      * Retrieve a PDF receipt from the blob storage

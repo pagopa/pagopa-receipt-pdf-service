@@ -10,6 +10,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Qualifier
 @Retention(RUNTIME)
-@Target({FIELD, METHOD, TYPE})
+@Target({PARAMETER, FIELD, METHOD, TYPE})
 public @interface ReceiptsContainer {
 }

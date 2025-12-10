@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 @ApplicationScoped
@@ -286,9 +287,9 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * This method checks if the fiscal code is authorized to access the attachment
      *
      * @param requestFiscalCode the fiscal code to check
-     * @param attachmentUrl the attachment url to get
-     * @param eventId the event id
-     * @param cartForReceipt the cart for receipt
+     * @param attachmentUrl     the attachment url to get
+     * @param eventId           the event id
+     * @param cartForReceipt    the cart for receipt
      * @return true if the fiscal code is not authorized, false otherwise
      */
     private boolean isFiscalCodeNotAuthorized(
@@ -312,16 +313,22 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         } else {
             // else check debtor attachment
 
-            boolean isDebtorAuthorized = cartForReceipt.getPayload().getCart() != null
-                    && cartForReceipt.getPayload().getCart().stream()
-                    .filter(elem ->
-                            elem != null
-                                    && elem.getMdAttach() != null
-                                    && attachmentUrl.equals(elem.getMdAttach().getName()))
-                    .allMatch(elem ->
-                            requestFiscalCode.equals(elem.getDebtorFiscalCode())
-                                    && eventId.equals(elem.getBizEventId())
-                    );
+            List<CartPayment> cart = cartForReceipt.getPayload().getCart();
+
+            List<CartPayment> matches = cart == null ? List.of() :
+                    cart.stream()
+                            .filter(Objects::nonNull)
+                            .filter(elem -> eventId.equals(elem.getBizEventId()))
+                            .toList();
+
+            boolean isDebtorAuthorized = false;
+            if (matches.size() == 1) {
+                CartPayment match = matches.get(0);
+                ReceiptMetadata mdAttach = match.getMdAttach();
+                isDebtorAuthorized = Objects.equals(requestFiscalCode, match.getDebtorFiscalCode())
+                        && mdAttach != null
+                        && Objects.equals(attachmentUrl, mdAttach.getName());
+            }
 
             return !isDebtorAuthorized;
 

@@ -24,8 +24,12 @@ public class CosmosContainerProducer {
     @ConfigProperty(name = "cosmos.container.cart.name")
     private String containerCart;
 
+    private final CosmosClient cosmosClient;
+
     @Inject
-    private CosmosClient cosmosClient;
+    public CosmosContainerProducer(CosmosClient cosmosClient) {
+        this.cosmosClient = cosmosClient;
+    }
 
     public CosmosDatabase cosmosDatabase() {
         return this.cosmosClient

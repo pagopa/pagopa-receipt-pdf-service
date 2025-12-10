@@ -26,8 +26,11 @@ public class Receipt {
     private int numRetry;
     private ReasonError reasonErr;
     private ReasonError reasonErrPayer;
+    @SuppressWarnings("java:S116")
     private long inserted_at;
+    @SuppressWarnings("java:S116")
     private long generated_at;
+    @SuppressWarnings("java:S116")
     private long notified_at;
     private Boolean isCart;
 }
