@@ -33,7 +33,6 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 public class AttachmentsServiceImpl implements AttachmentsService {
 
     public static final String CART = "_CART_";
-    public static final String PAYER = "PAYER";
     public static final String ANONIMO = "ANONIMO";
     private final Logger logger = LoggerFactory.getLogger(AttachmentsServiceImpl.class);
 

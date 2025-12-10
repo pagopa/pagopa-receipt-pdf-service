@@ -32,5 +32,4 @@ public class Receipt {
     private long generated_at;
     @SuppressWarnings("java:S116")
     private long notified_at;
-    private Boolean isCart;
 }
