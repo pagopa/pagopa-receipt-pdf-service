@@ -1,5 +1,9 @@
 package it.gov.pagopa.receipt.pdf.service.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUtils {
 
 
@@ -22,7 +26,9 @@ public class CommonUtils {
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&#x27;")
-                .replace("/", "&#x2F;");
+                .replace("/", "&#x2F;")
+                .replaceAll("[\\r\\n\\t]", "")
+                .replaceAll("[\n\r]", "");
 
         sanitizedInput = sanitizedInput.replace("\0", "");
 

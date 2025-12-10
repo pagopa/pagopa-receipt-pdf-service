@@ -115,14 +115,13 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         var partial = thirdPartyId.split(CART);
 
         String cartId = partial[0];
-        String eventId = PAYER;
-        if (partial.length > 1) {
-            eventId = partial[1];
-        }
 
         CartForReceipt cartForReceipt = getCartReceipt(cartId);
         SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
-        if (isFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, eventId, cartForReceipt)) {
+
+        boolean isFiscalCodeNotAuthorized = isFiscalCodeNotAuthorized(attachmentUrl, partial, searchTokenResponse, cartForReceipt);
+
+        if (isFiscalCodeNotAuthorized) {
             String errMsg =
                     String.format(
                             "Fiscal code is not authorized to access the receipts with name: %s, for cart with id %s",
@@ -130,6 +129,26 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             logger.error(errMsg);
             throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_706, errMsg);
         }
+    }
+
+    /**
+     * This method checks if the fiscal code is not authorized to access the attachment
+     *
+     * @param attachmentUrl the attachment url from the request
+     * @param partial the splitted thirdPartyId
+     * @param searchTokenResponse the tokenized fiscal code from the PDV Tokenizer
+     * @param cartForReceipt the cart for receipt object to check from the DB
+     * @return true if the fiscal code is not authorized, false otherwise
+     */
+    private static boolean isFiscalCodeNotAuthorized(String attachmentUrl, String[] partial, SearchTokenResponse searchTokenResponse, CartForReceipt cartForReceipt) {
+        boolean isFiscalCodeNotAuthorized;
+        if (partial.length > 1) {
+            isFiscalCodeNotAuthorized = isDebtorFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, partial[1], cartForReceipt);
+        }
+        else {
+            isFiscalCodeNotAuthorized =isPayerFiscalCodeNotAuthorized(searchTokenResponse.getToken(), attachmentUrl, cartForReceipt);
+        }
+        return isFiscalCodeNotAuthorized;
     }
 
     private SearchTokenResponse getSearchTokenResponse(String thirdPartyId, String requestFiscalCode)
@@ -287,51 +306,49 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     }
 
     /**
-     * This method checks if the fiscal code is authorized to access the attachment
+     * This method checks if the debtor fiscal code is not authorized to access the attachment
      *
-     * @param requestFiscalCode the fiscal code to check
-     * @param attachmentUrl     the attachment url to get
-     * @param eventId           the event id
-     * @param cartForReceipt    the cart for receipt
-     * @return true if the fiscal code is not authorized, false otherwise
+     * @param requestFiscalCode  the fiscal code from the request
+     * @param attachmentUrl the attachment url from the request
+     * @param eventId the event id to match in the cart from the request
+     * @param cartForReceipt the cart for receipt object to check from the DB
+     * @return true if the debtor fiscal code is not authorized, false otherwise
      */
-    private boolean isFiscalCodeNotAuthorized(
-            String requestFiscalCode, String attachmentUrl, String eventId, @NonNull CartForReceipt cartForReceipt) {
+    private static boolean isDebtorFiscalCodeNotAuthorized(String requestFiscalCode, String attachmentUrl, String eventId, CartForReceipt cartForReceipt) {
+        List<CartPayment> cart = cartForReceipt.getPayload().getCart();
 
-        if (eventId.equals(PAYER)) {
-            // if third_party_id is a payer then check payer attachment
+        List<CartPayment> matches = cart == null ? List.of() :
+                cart.stream()
+                        .filter(Objects::nonNull)
+                        .filter(elem -> eventId.equals(elem.getBizEventId()))
+                        .toList();
 
-            boolean isPayerAuthorized = cartForReceipt.getPayload().getMdAttachPayer() != null
-                    && attachmentUrl.equals(cartForReceipt.getPayload().getMdAttachPayer().getName())
-                    && requestFiscalCode.equals(cartForReceipt.getPayload().getPayerFiscalCode());
-
-            return !isPayerAuthorized;
-
-        } else {
-            // else check debtor attachment
-
-            List<CartPayment> cart = cartForReceipt.getPayload().getCart();
-
-            List<CartPayment> matches = cart == null ? List.of() :
-                    cart.stream()
-                            .filter(Objects::nonNull)
-                            .filter(elem -> eventId.equals(elem.getBizEventId()))
-                            .toList();
-
-            boolean isDebtorAuthorized = false;
-            if (matches.size() == 1) {
-                CartPayment match = matches.get(0);
-                ReceiptMetadata mdAttach = match.getMdAttach();
-                isDebtorAuthorized = Objects.equals(requestFiscalCode, match.getDebtorFiscalCode())
-                        && mdAttach != null
-                        && Objects.equals(attachmentUrl, mdAttach.getName());
-            }
-
-            return !isDebtorAuthorized;
-
+        boolean isDebtorAuthorized = false;
+        if (matches.size() == 1) {
+            CartPayment match = matches.get(0);
+            ReceiptMetadata mdAttach = match.getMdAttach();
+            isDebtorAuthorized = Objects.equals(requestFiscalCode, match.getDebtorFiscalCode())
+                    && mdAttach != null
+                    && Objects.equals(attachmentUrl, mdAttach.getName());
         }
 
+        return !isDebtorAuthorized;
+    }
 
+    /**
+     * This method checks if the payer fiscal code is not authorized to access the attachment
+     *
+     * @param requestFiscalCode the fiscal code from the request
+     * @param attachmentUrl the attachment url from the request
+     * @param cartForReceipt the cart for receipt object to check from the DB
+     * @return true if the payer fiscal code is not authorized, false otherwise
+     */
+    private static boolean isPayerFiscalCodeNotAuthorized(String requestFiscalCode, String attachmentUrl, CartForReceipt cartForReceipt) {
+        boolean isPayerAuthorized = cartForReceipt.getPayload().getMdAttachPayer() != null
+                && attachmentUrl.equals(cartForReceipt.getPayload().getMdAttachPayer().getName())
+                && requestFiscalCode.equals(cartForReceipt.getPayload().getPayerFiscalCode());
+
+        return !isPayerAuthorized;
     }
 
     private boolean isReceiptUnique(Receipt receiptDocument) {
