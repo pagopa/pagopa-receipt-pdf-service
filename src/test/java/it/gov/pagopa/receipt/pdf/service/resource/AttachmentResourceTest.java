@@ -2,7 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
@@ -10,7 +10,6 @@ import it.gov.pagopa.receipt.pdf.service.model.Attachment;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
-import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
@@ -34,11 +33,8 @@ class AttachmentResourceTest {
     private static final String INVALID_FISCAL_CODE = "tooShort";
     private static final String ATTACHMENT_URL = "url";
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
     private AttachmentsService attachmentsServiceMock;
-
-    @Inject
-    private AttachmentResource sut;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
