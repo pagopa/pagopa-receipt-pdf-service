@@ -20,8 +20,6 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.EventData;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
-import it.gov.pagopa.receipt.pdf.service.producer.CartContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -52,7 +50,7 @@ class AttachmentsServiceImplTest {
 
     @InjectMock(convertScopes = true)
     private ReceiptCosmosClient cosmosClientReceiptsMock;
-    
+
     @InjectMock(convertScopes = true)
     private CartReceiptCosmosClient cosmosClientCartMock;
 

@@ -1,9 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.client;
 
 
-import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 
 /**

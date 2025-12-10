@@ -10,7 +10,6 @@ import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.producer.CartContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -41,7 +40,8 @@ class CartReceiptCosmosClientImplTest {
 
         CosmosContainer cosmosContainerMock = mock(CosmosContainer.class);
         doReturn(cosmosPagedIterableMock).when(cosmosContainerMock).queryItems(anyString(), any(), any());
-        Annotation qualifier = new AnnotationLiteral<CartContainer>() {};
+        Annotation qualifier = new AnnotationLiteral<CartContainer>() {
+        };
         QuarkusMock.installMockForType(cosmosContainerMock, CosmosContainer.class, qualifier);
 
 
