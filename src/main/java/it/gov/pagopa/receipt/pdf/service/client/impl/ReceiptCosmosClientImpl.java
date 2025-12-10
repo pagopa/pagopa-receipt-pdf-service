@@ -5,10 +5,9 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
-import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
+import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -25,7 +24,8 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
     private final Logger logger = LoggerFactory.getLogger(ReceiptCosmosClientImpl.class);
 
     @Inject
-    private CosmosContainer cosmosContainer;
+    @ReceiptsContainer
+    private CosmosContainer containerReceipts;
 
     /**
      * Retrieve receipt document from CosmosDB database
@@ -38,30 +38,15 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         String query = String.format(FIND_RECEIPT_QUERY, thirdPartyId);
 
         //Query the container
-        CosmosPagedIterable<Receipt> queryResponse = cosmosContainer
+        CosmosPagedIterable<Receipt> queryResponse = containerReceipts
                 .queryItems(query, new CosmosQueryRequestOptions(), Receipt.class);
 
         if (!queryResponse.iterator().hasNext()) {
-            String errMsg = String.format("Receipt with id %s not found in the defined container: %s", thirdPartyId, cosmosContainer.getId());
+            String errMsg = String.format("Receipt with id %s not found in the defined container: %s", thirdPartyId, containerReceipts.getId());
             logger.error(errMsg);
             throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
         }
         return queryResponse.iterator().next();
     }
 
-    public CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException {
-        //Build query
-        String query = String.format("SELECT * FROM c WHERE c.eventId = '%s'", cartId);
-
-        //Query the container
-        CosmosPagedIterable<CartForReceipt> queryResponse = cosmosContainer
-                .queryItems(query, new CosmosQueryRequestOptions(), CartForReceipt.class);
-
-        if (!queryResponse.iterator().hasNext()) {
-            String errMsg = String.format("Cart with id %s not found in the defined container: %s", cartId, cosmosContainer.getId());
-            logger.error(errMsg);
-            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
-        }
-        return queryResponse.iterator().next();
-    }
 }

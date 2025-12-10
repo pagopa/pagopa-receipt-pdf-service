@@ -2,6 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
@@ -19,6 +20,8 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.EventData;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
+import it.gov.pagopa.receipt.pdf.service.producer.CartContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -48,7 +51,10 @@ class AttachmentsServiceImplTest {
     private static final String MISSING_FISCAL_CODE = "MISSING_FISCAL_CODE";
 
     @InjectMock(convertScopes = true)
-    private ReceiptCosmosClient cosmosClientMock;
+    private ReceiptCosmosClient cosmosClientReceiptsMock;
+    
+    @InjectMock(convertScopes = true)
+    private CartReceiptCosmosClient cosmosClientCartMock;
 
     @InjectMock(convertScopes = true)
     private ReceiptBlobClient receiptBlobClientMock;
@@ -62,7 +68,7 @@ class AttachmentsServiceImplTest {
 
     @BeforeEach
     public void init() {
-        Mockito.reset(cosmosClientMock, receiptBlobClientMock, restClientMock);
+        Mockito.reset(cosmosClientReceiptsMock, receiptBlobClientMock, restClientMock);
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(FISCAL_CODE_A))))
@@ -85,7 +91,7 @@ class AttachmentsServiceImplTest {
         String fileNamePayer = "file2.pdf";
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         AttachmentsDetailsResponse result = sut.getAttachmentsDetails(anyString(), FISCAL_CODE_B);
 
@@ -107,7 +113,7 @@ class AttachmentsServiceImplTest {
         String fileNameDebtor = "file1.pdf";
         Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         AttachmentsDetailsResponse result = sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A);
 
@@ -125,7 +131,7 @@ class AttachmentsServiceImplTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailReceiptNull() {
-        doReturn(null).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(null).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
@@ -136,7 +142,7 @@ class AttachmentsServiceImplTest {
     @Test
     @SneakyThrows
     void getAttachmentDetailsFailEventDataNull() {
-        doReturn(Receipt.builder().numRetry(0).build()).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(Receipt.builder().numRetry(0).build()).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
@@ -156,7 +162,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
@@ -177,7 +183,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
@@ -208,7 +214,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
@@ -230,7 +236,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
 
@@ -261,7 +267,7 @@ class AttachmentsServiceImplTest {
                 .numRetry(0)
                 .build();
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(FiscalCodeNotAuthorizedException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_B));
 
@@ -277,7 +283,7 @@ class AttachmentsServiceImplTest {
         String fileNamePayer = "file2.pdf";
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         File result = sut.getAttachment(anyString(), FISCAL_CODE_B, fileNamePayer);
@@ -292,7 +298,7 @@ class AttachmentsServiceImplTest {
         String fileNameDebtor = "file1.pdf";
         Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         File result = sut.getAttachment(anyString(), FISCAL_CODE_A, fileNameDebtor);
@@ -308,7 +314,7 @@ class AttachmentsServiceImplTest {
         String fileNamePayer = "file2.pdf";
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(
@@ -327,7 +333,7 @@ class AttachmentsServiceImplTest {
         String fileNamePayer = "file2.pdf";
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(
@@ -345,7 +351,7 @@ class AttachmentsServiceImplTest {
         String fileNameDebtor = "file1.pdf";
         Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(
@@ -364,7 +370,7 @@ class AttachmentsServiceImplTest {
         String fileNamePayer = "file2.pdf";
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(
@@ -383,7 +389,7 @@ class AttachmentsServiceImplTest {
         String fileNamePayer = "file2.pdf";
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
         assertThrows(
                 FiscalCodeNotAuthorizedException.class,
@@ -397,7 +403,7 @@ class AttachmentsServiceImplTest {
         String fileNameDebtor = "file1.pdf";
         Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
-        doReturn(receipt).when(cosmosClientMock).getReceiptDocument(anyString());
+        doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         assertThrows(
@@ -427,7 +433,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -461,7 +467,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -483,7 +489,7 @@ class AttachmentsServiceImplTest {
         String payerFiscalCode = "12345";
         CartForReceipt cart = null;
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -509,7 +515,7 @@ class AttachmentsServiceImplTest {
                 .payload(null)
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -537,7 +543,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -567,7 +573,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -605,7 +611,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -642,7 +648,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -677,7 +683,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))
@@ -714,7 +720,7 @@ class AttachmentsServiceImplTest {
                         .build())
                 .build();
 
-        doReturn(cart).when(cosmosClientMock).getCartForReceiptDocument(anyString());
+        doReturn(cart).when(cosmosClientCartMock).getCartForReceiptDocument(anyString());
 
         when(restClientMock.searchToken(
                 eq(new SearchTokenRequest(payerFiscalCode))))

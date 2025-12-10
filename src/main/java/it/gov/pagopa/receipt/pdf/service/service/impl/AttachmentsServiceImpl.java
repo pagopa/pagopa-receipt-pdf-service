@@ -1,6 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.cache.CacheResult;
+import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
@@ -34,6 +35,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     private final Logger logger = LoggerFactory.getLogger(AttachmentsServiceImpl.class);
 
     private final ReceiptCosmosClient cosmosClient;
+    private final CartReceiptCosmosClient cartReceiptCosmosClient;
 
     private final PDVTokenizerClient pdvTokenizerClient;
 
@@ -41,11 +43,12 @@ public class AttachmentsServiceImpl implements AttachmentsService {
 
     @Inject
     public AttachmentsServiceImpl(
-            ReceiptCosmosClient cosmosClient,
+            ReceiptCosmosClient cosmosClient, CartReceiptCosmosClient cartReceiptCosmosClient,
             @RestClient PDVTokenizerClient pdvTokenizerClient,
             ReceiptBlobClient receiptBlobClient
     ) {
         this.cosmosClient = cosmosClient;
+        this.cartReceiptCosmosClient = cartReceiptCosmosClient;
         this.pdvTokenizerClient = pdvTokenizerClient;
         this.receiptBlobClient = receiptBlobClient;
     }
@@ -188,7 +191,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     }
 
     private CartForReceipt getCartReceipt(String cartId) throws CartNotFoundException, InvalidCartException {
-        CartForReceipt cartForReceipt = cosmosClient.getCartForReceiptDocument(cartId);
+        CartForReceipt cartForReceipt = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
 
         if (cartForReceipt == null) {
             String errMsg = String.format("The retrieved cart with id: %s, is null", cartId);

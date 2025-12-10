@@ -4,10 +4,12 @@ import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
-import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
+import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
-import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
+import it.gov.pagopa.receipt.pdf.service.producer.CartContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Inject;
@@ -25,11 +27,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @QuarkusTest
-class ReceiptCosmosClientImplTest {
+class CartReceiptCosmosClientImplTest {
 
     @Inject
-    private ReceiptCosmosClient sut;
-
+    private CartReceiptCosmosClient sut;
 
     private static Iterator<Receipt> iteratorMock;
 
@@ -40,37 +41,37 @@ class ReceiptCosmosClientImplTest {
 
         CosmosContainer cosmosContainerMock = mock(CosmosContainer.class);
         doReturn(cosmosPagedIterableMock).when(cosmosContainerMock).queryItems(anyString(), any(), any());
-        Annotation qualifier = new AnnotationLiteral<ReceiptsContainer>() {
-        };
+        Annotation qualifier = new AnnotationLiteral<CartContainer>() {};
         QuarkusMock.installMockForType(cosmosContainerMock, CosmosContainer.class, qualifier);
 
 
         doReturn(iteratorMock).when(cosmosPagedIterableMock).iterator();
     }
 
-    @SneakyThrows
-    @Test
-    void getReceiptDocumentSuccess() {
-        Receipt receipt = new Receipt();
-
-        doReturn(true).when(iteratorMock).hasNext();
-        doReturn(receipt).when(iteratorMock).next();
-
-        Receipt result = sut.getReceiptDocument("id");
-
-        assertEquals(receipt, result);
-    }
 
     @SneakyThrows
     @Test
-    void getReceiptDocumentFailureReceiptNotFound() {
+    void getCartForReceiptDocumentNotFound() {
         doReturn(false).when(iteratorMock).hasNext();
 
-        ReceiptNotFoundException e = assertThrows(ReceiptNotFoundException.class, () -> sut.getReceiptDocument("id"));
+        CartNotFoundException e = assertThrows(CartNotFoundException.class, () -> sut.getCartForReceiptDocument("id"));
 
         assertNotNull(e);
-        assertEquals(AppErrorCodeEnum.PDFS_800, e.getErrorCode());
+        assertEquals(AppErrorCodeEnum.PDFS_801, e.getErrorCode());
 
     }
 
+    @SneakyThrows
+    @Test
+    void getCartForReceiptDocumentSuccess() {
+        CartForReceipt cart = new CartForReceipt();
+
+        doReturn(true).when(iteratorMock).hasNext();
+        doReturn(cart).when(iteratorMock).next();
+
+        CartForReceipt result = sut.getCartForReceiptDocument("id");
+
+        assertEquals(cart, result);
+
+    }
 }
