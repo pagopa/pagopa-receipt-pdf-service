@@ -17,4 +17,5 @@ public interface ReceiptCosmosClient {
      * @throws ReceiptNotFoundException thrown if the receipt was not found
      */
     Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException;
+
 }

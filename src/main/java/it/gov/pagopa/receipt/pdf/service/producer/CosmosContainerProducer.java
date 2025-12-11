@@ -2,6 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.producer;
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosDatabase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -17,17 +18,39 @@ public class CosmosContainerProducer {
     @ConfigProperty(name = "cosmos.db.name")
     private String databaseId;
 
-    @ConfigProperty(name = "cosmos.container.name")
-    private String containerId;
+    @ConfigProperty(name = "cosmos.container.receipts.name")
+    private String containerReceipts;
+
+    @ConfigProperty(name = "cosmos.container.cart.name")
+    private String containerCart;
+
+    private final CosmosClient cosmosClient;
 
     @Inject
-    private CosmosClient cosmosClient;
+    public CosmosContainerProducer(CosmosClient cosmosClient) {
+        this.cosmosClient = cosmosClient;
+    }
+
+    public CosmosDatabase cosmosDatabase() {
+        return this.cosmosClient
+                .getDatabase(databaseId);
+    }
 
     @Produces
     @ApplicationScoped
-    public CosmosContainer cosmosContainer() {
-        return this.cosmosClient
-                .getDatabase(databaseId)
-                .getContainer(containerId);
+    @ReceiptsContainer
+    public CosmosContainer containerReceipts() {
+        return cosmosDatabase()
+                .getContainer(containerReceipts);
     }
+
+    @Produces
+    @ApplicationScoped
+    @CartContainer
+    public CosmosContainer containerCartReceipts() {
+        return cosmosDatabase()
+                .getContainer(containerCart);
+    }
+
+
 }

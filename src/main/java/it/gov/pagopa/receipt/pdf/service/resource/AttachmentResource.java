@@ -44,8 +44,12 @@ public class AttachmentResource {
     private static final String REPLACEMENT = "_";
     private static final int FISCAL_CODE_LENGTH = 16;
 
-    @Inject
     private AttachmentsService attachmentsService;
+
+    @Inject
+    public AttachmentResource(AttachmentsService attachmentsService) {
+        this.attachmentsService = attachmentsService;
+    }
 
     @Operation(
             summary = "Get attachment details",
@@ -117,7 +121,7 @@ public class AttachmentResource {
             @PathParam("attachment_url") String attachmentUrl,
             @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
             throws InvalidFiscalCodeHeaderException, BlobStorageClientException, ReceiptNotFoundException,
-            InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException {
+            InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException, InvalidCartException, CartNotFoundException {
 
         // replace new line and tab from user input to avoid log injection
         thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
