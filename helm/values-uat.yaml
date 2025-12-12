@@ -99,7 +99,7 @@ microservice-chart:
     BLOB_STORAGE_ACCOUNT_ENDPOINT: 'https://pagopauweureceiptsfnsa.blob.core.windows.net'
     BLOB_STORAGE_CONTAINER_NAME: 'pagopa-u-weu-receipts-azure-blob-receipt-st-attach'
     ENABLE_ECS_CONSOLE: "true"
-    QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.otel.svc:4317"
+    QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
     QUARKUS_OTEL_TRACES_SAMPLER: "traceidratio"
     QUARKUS_OTEL_TRACES_SAMPLER_ARG: "0.5"
     QUARKUS_OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=uat"
