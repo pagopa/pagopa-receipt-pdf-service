@@ -38,7 +38,7 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
-    <!-- Stack REST Quarkus 3.x (come payment-options-service) -->
+    <!-- Stack REST Quarkus 3.x -->
 	<dependency>
 	  <groupId>io.quarkus</groupId>
 	  <artifactId>quarkus-rest</artifactId>
