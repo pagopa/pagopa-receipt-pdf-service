@@ -7,10 +7,13 @@ import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
+import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
 /**
  * Client for the CosmosDB database
@@ -22,8 +25,13 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
 
     private final Logger logger = LoggerFactory.getLogger(ReceiptCosmosClientImpl.class);
 
+    @ReceiptsContainer
+    private final CosmosContainer containerReceipts;
+
     @Inject
-    private CosmosContainer cosmosContainer;
+    public ReceiptCosmosClientImpl(@ReceiptsContainer CosmosContainer containerReceipts) {
+        this.containerReceipts = containerReceipts;
+    }
 
     /**
      * Retrieve receipt document from CosmosDB database
@@ -36,14 +44,15 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         String query = String.format(FIND_RECEIPT_QUERY, thirdPartyId);
 
         //Query the container
-        CosmosPagedIterable<Receipt> queryResponse = cosmosContainer
+        CosmosPagedIterable<Receipt> queryResponse = containerReceipts
                 .queryItems(query, new CosmosQueryRequestOptions(), Receipt.class);
 
         if (!queryResponse.iterator().hasNext()) {
-            String errMsg = String.format("Receipt with id %s not found in the defined container: %s", thirdPartyId, cosmosContainer.getId());
+            String errMsg = String.format("Receipt with id %s not found in the defined container: %s", sanitize(thirdPartyId), containerReceipts.getId());
             logger.error(errMsg);
             throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
         }
         return queryResponse.iterator().next();
     }
+
 }
