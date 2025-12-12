@@ -20,8 +20,12 @@ public class CosmosClientProducer {
     @ConfigProperty(name = "cosmos.endpoint")
     String serviceEndpoint;
 
-    @Inject
     CosmosClientBuilder cosmosClientBuilder;
+
+    @Inject
+    public CosmosClientProducer(CosmosClientBuilder cosmosClientBuilder) {
+        this.cosmosClientBuilder = cosmosClientBuilder;
+    }
 
     @Produces
     @ApplicationScoped

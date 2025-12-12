@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: "0.11.1"
+    tag: "0.11.1-4-PAGOPA-3417-ipg-147-wp-06-sviluppo-receipt-service-per-cart-get-attachment"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -94,7 +94,8 @@ microservice-chart:
     DEFAULT_LOGGING_LEVEL: 'INFO'
     COSMOS_RECEIPT_SERVICE_ENDPOINT: 'https://pagopa-p-weu-receipts-ds-cosmos-account.documents.azure.com:443/'
     COSMOS_RECEIPT_DB_NAME: 'db'
-    COSMOS_RECEIPT_CONTAINER_NAME: 'receipts'
+    COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: 'receipts'
+    COSMOS_RECEIPT_CONTAINER_CART_NAME: "cart-for-receipts"
     BLOB_STORAGE_ACCOUNT_ENDPOINT: 'https://pagopapweureceiptsfnsa.blob.core.windows.net'
     BLOB_STORAGE_CONTAINER_NAME: 'pagopa-p-weu-receipts-azure-blob-receipt-st-attach'
     ENABLE_ECS_CONSOLE: "true"
