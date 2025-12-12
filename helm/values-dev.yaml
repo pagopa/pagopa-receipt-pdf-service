@@ -101,7 +101,7 @@ microservice-chart:
     ENABLE_ECS_CONSOLE: "true"
     QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
     QUARKUS_OTEL_TRACES_SAMPLER: "traceidratio"
-    QUARKUS_OTEL_TRACES_SAMPLER_ARG: "0.5"
+    QUARKUS_OTEL_TRACES_SAMPLER_ARG: "1.0"
     QUARKUS_OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=dev"
     TOKENIZER_URL: "https://api.uat.tokenizer.pdv.pagopa.it"
     JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m"
