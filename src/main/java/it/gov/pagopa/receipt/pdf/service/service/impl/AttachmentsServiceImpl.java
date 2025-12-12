@@ -119,8 +119,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * @throws FiscalCodeNotAuthorizedException if the fiscal code is not authorized to access the cart's attachments
      * @throws InvalidCartException if the cart is invalid
      */
-    private AttachmentsDetailsResponse handleCartAttachmentDetails(String thirdPartyId, String requestFiscalCode)
-            throws CartNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {
+    private AttachmentsDetailsResponse handleCartAttachmentDetails(String thirdPartyId, String requestFiscalCode) throws CartNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {
         var thirdPartyIdParts = thirdPartyId.split(CART);
 
         String cartId = thirdPartyIdParts[0];
