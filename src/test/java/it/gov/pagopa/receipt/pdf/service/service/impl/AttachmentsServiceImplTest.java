@@ -1,7 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.mockito.InjectMock;
 import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
@@ -19,8 +19,11 @@ import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -44,13 +47,13 @@ class AttachmentsServiceImplTest {
 
     private static final String MISSING_FISCAL_CODE = "MISSING_FISCAL_CODE";
 
-    @InjectMock
+    @InjectMock(convertScopes = true)
     private ReceiptCosmosClient cosmosClientMock;
 
-    @InjectMock
+    @InjectMock(convertScopes = true)
     private ReceiptBlobClient receiptBlobClientMock;
 
-    @InjectMock
+    @InjectMock(convertScopes = true)
     @RestClient
     private PDVTokenizerClient restClientMock;
 
