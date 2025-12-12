@@ -29,11 +29,14 @@ import java.io.IOException;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
 
+import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
+
 /**
  * Resource class that expose the API to retrieve the attachments
  */
 @Tag(name = "Attachments", description = "Attachments operations")
 @Path("/messages")
+@LoggedAPI
 public class AttachmentResource {
 
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);

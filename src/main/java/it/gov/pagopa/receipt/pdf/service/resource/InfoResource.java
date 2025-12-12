@@ -1,5 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.resource;
 
+import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 import it.gov.pagopa.receipt.pdf.service.model.InfoResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 /** Resource class that expose the API to retrieve info about the service */
 @Path("/info")
 @Tag(name = "Info", description = "Info operations")
+@LoggedAPI
 public class InfoResource {
 
   private final Logger logger = LoggerFactory.getLogger(InfoResource.class);
