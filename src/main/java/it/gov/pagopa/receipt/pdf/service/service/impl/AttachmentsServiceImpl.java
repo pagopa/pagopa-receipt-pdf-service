@@ -532,7 +532,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                             elem != null
                                     && elem.getMdAttach() != null
                             )
-                    .allMatch(elem ->
+                    .anyMatch(elem ->
                             requestFiscalCode.equals(elem.getDebtorFiscalCode())
                                     && eventId.equals(elem.getBizEventId())
                     );
