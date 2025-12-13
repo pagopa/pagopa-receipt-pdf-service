@@ -10,9 +10,10 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Jacksonized
 public class Detail {
 
-  @Schema(example = "Questo è il titolo del messaggio")
-  private String subject;
+    @Schema(example = "Questo è il titolo del messaggio")
+    private String subject;
 
-  @Schema(example = "Questo è il corpo del messaggio in formato **markdown**")
-  private String markdown;
+    @Schema(example = "Questo è il corpo del messaggio in formato **markdown**")
+    private String markdown;
+
 }
