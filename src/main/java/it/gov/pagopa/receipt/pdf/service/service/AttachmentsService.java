@@ -20,7 +20,7 @@ public interface AttachmentsService {
      * @throws InvalidReceiptException thrown if the retrieved receipt is invalid
      * @throws FiscalCodeNotAuthorizedException thrown if the fiscal code is not authorized to access the requested receipt
      */
-    AttachmentsDetailsResponse getAttachmentsDetails(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException;
+    AttachmentsDetailsResponse getAttachmentsDetails(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException, CartNotFoundException;
 
     /**
      * Retrieve the attachment of the receipt with the provided id using the given attachment url, only if the fiscal code is authorized to access it

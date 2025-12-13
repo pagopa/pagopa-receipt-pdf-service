@@ -16,6 +16,7 @@ import it.gov.pagopa.receipt.pdf.service.model.SearchTokenRequest;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenResponse;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartPayment;
+import it.gov.pagopa.receipt.pdf.service.model.cart.MessageData;
 import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.EventData;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
@@ -752,4 +753,187 @@ class AttachmentsServiceImplTest {
                 .build();
     }
 
+    @Test
+    void getAttachmentsDetails_receipt_success_debtor() throws Exception {
+        String id = "id1";
+        String fiscalCode = "FCODE";
+        String fileName = "file.pdf";
+        Receipt receipt = Receipt.builder()
+                .id(id)
+                .eventData(EventData.builder()
+                        .debtorFiscalCode(fiscalCode)
+                        .payerFiscalCode(fiscalCode)
+                        .build())
+                .mdAttach(ReceiptMetadata.builder().name(fileName).build())
+                .numRetry(0)
+                .build();
+
+        when(cosmosClientReceiptsMock.getReceiptDocument(anyString())).thenReturn(receipt);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse(fiscalCode));
+
+        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails("id1", fiscalCode);
+
+        assertNotNull(resp);
+        assertEquals(1, resp.getAttachments().size());
+        assertEquals(fileName, resp.getAttachments().get(0).getName());
+    }
+
+    @Test
+    void getAttachmentsDetails_receipt_success_payer() throws Exception {
+        String id = "id2";
+        String debtor = "DEBTOR";
+        String payer = "PAYER";
+        String fileNamePayer = "payer.pdf";
+        Receipt receipt = Receipt.builder()
+                .id(id)
+                .eventData(EventData.builder()
+                        .debtorFiscalCode(debtor)
+                        .payerFiscalCode(payer)
+                        .build())
+                .mdAttach(ReceiptMetadata.builder().name("debtor.pdf").build())
+                .mdAttachPayer(ReceiptMetadata.builder().name(fileNamePayer).build())
+                .numRetry(0)
+                .build();
+
+        when(cosmosClientReceiptsMock.getReceiptDocument(anyString())).thenReturn(receipt);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse(payer));
+
+        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails("id2", payer);
+
+        assertNotNull(resp);
+        assertEquals(fileNamePayer, resp.getAttachments().get(0).getName());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentsDetails_receipt_not_authorized() {
+        String id = "id3";
+        String debtor = "DEBTOR";
+        String payer = "PAYER";
+        Receipt receipt = Receipt.builder()
+                .id(id)
+                .eventData(EventData.builder()
+                        .debtorFiscalCode(debtor)
+                        .payerFiscalCode(payer)
+                        .build())
+                .mdAttach(ReceiptMetadata.builder().name("debtor.pdf").build())
+                .mdAttachPayer(ReceiptMetadata.builder().name("payer.pdf").build())
+                .numRetry(0)
+                .build();
+
+        when(cosmosClientReceiptsMock.getReceiptDocument(anyString())).thenReturn(receipt);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse("OTHER"));
+
+        FiscalCodeNotAuthorizedException ex = assertThrows(FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachmentsDetails("id3", "OTHER"));
+        assertEquals(AppErrorCodeEnum.PDFS_700, ex.getErrorCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentsDetails_receipt_null() {
+        when(cosmosClientReceiptsMock.getReceiptDocument(anyString())).thenReturn(null);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse("FCODE"));
+
+        InvalidReceiptException ex = assertThrows(InvalidReceiptException.class,
+                () -> sut.getAttachmentsDetails("id4", "FCODE"));
+        assertEquals(AppErrorCodeEnum.PDFS_701, ex.getErrorCode());
+    }
+
+    @Test
+    void getAttachmentsDetails_cart_success_payer() throws Exception {
+        String cartId = "cart1";
+        String payer = "PAYER";
+        String fileName = "payer.pdf";
+        String debtor = "DEBTOR";
+        String bizId = "BIZ";
+
+        CartPayment payment = CartPayment.builder()
+                .bizEventId(bizId)
+                .debtorFiscalCode(debtor)
+                .mdAttach(ReceiptMetadata.builder().name(fileName).build())
+                .messageDebtor(MessageData.builder().subject("subj").markdown("md").build())
+                .build();
+
+        CartForReceipt cart = CartForReceipt.builder()
+                .id(cartId)
+                .payload(Payload.builder()
+                        .payerFiscalCode(payer)
+                        .mdAttachPayer(ReceiptMetadata.builder().name(fileName).build())
+                        .cart(List.of(payment))
+                        .messagePayer(MessageData.builder().subject("subj").markdown("md").build())
+                        .build())
+                .build();
+
+        when(cosmosClientCartMock.getCartForReceiptDocument(anyString())).thenReturn(cart);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse(payer));
+
+        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART, payer);
+
+        assertNotNull(resp);
+        assertEquals(fileName, resp.getAttachments().get(0).getName());
+        assertEquals("subj", resp.getDetails().getSubject());
+    }
+
+    @Test
+    void getAttachmentsDetails_cart_success_debtor() throws Exception {
+        String cartId = "cart2";
+        String debtor = "DEBTOR";
+        String bizId = "BIZ";
+        String fileName = "debtor.pdf";
+        CartPayment payment = CartPayment.builder()
+                .bizEventId(bizId)
+                .debtorFiscalCode(debtor)
+                .mdAttach(ReceiptMetadata.builder().name(fileName).build())
+                .messageDebtor(MessageData.builder().subject("subj").markdown("md").build())
+                .build();
+        CartForReceipt cart = CartForReceipt.builder()
+                .id(cartId)
+                .payload(Payload.builder()
+                        .payerFiscalCode("PAYER")
+                        .mdAttachPayer(ReceiptMetadata.builder().name("receipt.pdf").url("url").build())
+                        .cart(List.of(payment))
+                        .build())
+                .build();
+
+        when(cosmosClientCartMock.getCartForReceiptDocument(anyString())).thenReturn(cart);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse(debtor));
+
+        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART + bizId, debtor);
+
+        assertNotNull(resp);
+        assertEquals(fileName, resp.getAttachments().get(0).getName());
+        assertEquals("subj", resp.getDetails().getSubject());
+    }
+
+    @Test
+    @SneakyThrows
+    void getAttachmentsDetails_cart_not_authorized() {
+        String cartId = "cart3";
+        String bizId = "BIZ";
+        CartPayment payment = CartPayment.builder()
+                .bizEventId(bizId)
+                .debtorFiscalCode("DEBTOR")
+                .mdAttach(ReceiptMetadata.builder().name("debtor.pdf").build())
+                .messageDebtor(MessageData.builder().subject("subj").markdown("md").build())
+                .build();
+        CartForReceipt cart = CartForReceipt.builder()
+                .id(cartId)
+                .payload(Payload.builder()
+                        .payerFiscalCode("PAYER")
+                        .mdAttachPayer(ReceiptMetadata.builder().name("receipt.pdf").url("url").build())
+                        .cart(List.of(payment))
+                        .build())
+                .build();
+
+        when(cosmosClientCartMock.getCartForReceiptDocument(anyString())).thenReturn(cart);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse("OTHER"));
+
+        FiscalCodeNotAuthorizedException ex = assertThrows(FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART + bizId, "OTHER"));
+        assertEquals(AppErrorCodeEnum.PDFS_700, ex.getErrorCode());
+    }
+
 }
+
+
