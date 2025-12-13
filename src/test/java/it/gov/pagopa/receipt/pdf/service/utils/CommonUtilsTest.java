@@ -1,6 +1,11 @@
 package it.gov.pagopa.receipt.pdf.service.utils;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,32 +26,19 @@ class CommonUtilsTest {
         assertEquals("abc", CommonUtils.sanitize("  abc  "));
     }
 
-    @Test
-    void testSanitize_EscapeSpecialCharacters() {
-        String input = "<script>alert('XSS')</script>";
-        String expected = "&lt;script&gt;alert(&#x27;XSS&#x27;)&lt;&#x2F;script&gt;";
+    @ParameterizedTest
+    @MethodSource("sanitizeTestCases")
+    void testSanitize_VariousInputs(String input, String expected) {
         assertEquals(expected, CommonUtils.sanitize(input));
     }
 
-    @Test
-    void testSanitize_RemoveControlCharacters() {
-        String input = "a\nb\rc\td";
-        String expected = "abcd";
-        assertEquals(expected, CommonUtils.sanitize(input));
-    }
-
-    @Test
-    void testSanitize_EscapeAmpersandFirst() {
-        String input = "&<>";
-        String expected = "&amp;&lt;&gt;";
-        assertEquals(expected, CommonUtils.sanitize(input));
-    }
-
-    @Test
-    void testSanitize_RemoveNullChar() {
-        String input = "abc\0def";
-        String expected = "abcdef";
-        assertEquals(expected, CommonUtils.sanitize(input));
+    private static Stream<Arguments> sanitizeTestCases() {
+        return Stream.of(
+                org.junit.jupiter.params.provider.Arguments.of("<script>alert('XSS')</script>", "&lt;script&gt;alert(&#x27;XSS&#x27;)&lt;&#x2F;script&gt;"),
+                org.junit.jupiter.params.provider.Arguments.of("a\nb\rc\td", "abcd"),
+                org.junit.jupiter.params.provider.Arguments.of("&<>", "&amp;&lt;&gt;"),
+                org.junit.jupiter.params.provider.Arguments.of("abc\0def", "abcdef")
+        );
     }
 }
 
