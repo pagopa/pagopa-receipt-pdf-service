@@ -1,5 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
+
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
@@ -12,8 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
 /** Client for the CosmosDB database */
 @ApplicationScoped
