@@ -5,5 +5,4 @@ public class TooManyRequestsException extends RuntimeException {
   public TooManyRequestsException(String error) {
     super(error);
   }
-
 }

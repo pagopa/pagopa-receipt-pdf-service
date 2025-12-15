@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IOMessageData {
-    private String idMessageDebtor;
-    private String idMessagePayer;
+  private String idMessageDebtor;
+  private String idMessagePayer;
 }

@@ -5,15 +5,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.Produces;
 
-/**
- * Producer class for {@link CosmosClientBuilder} bean
- */
+/** Producer class for {@link CosmosClientBuilder} bean */
 @Singleton
 public class CosmosClientBuilderProducer {
 
-    @Produces
-    @ApplicationScoped
-    public CosmosClientBuilder cosmosClientBuilder() {
-        return new CosmosClientBuilder();
-    }
+  @Produces
+  @ApplicationScoped
+  public CosmosClientBuilder cosmosClientBuilder() {
+    return new CosmosClientBuilder();
+  }
 }

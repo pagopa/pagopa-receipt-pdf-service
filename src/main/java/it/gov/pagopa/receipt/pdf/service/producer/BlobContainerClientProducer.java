@@ -8,25 +8,23 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.Produces;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-/**
- * Producer class for {@link BlobContainerClient} bean
- */
+/** Producer class for {@link BlobContainerClient} bean */
 @Singleton
 public class BlobContainerClientProducer {
 
-    @ConfigProperty(name = "blob.storage.container.name")
-    private String containerName;
+  @ConfigProperty(name = "blob.storage.container.name")
+  private String containerName;
 
-    private final BlobServiceClient blobServiceClient;
+  private final BlobServiceClient blobServiceClient;
 
-    @Inject
-    public BlobContainerClientProducer(BlobServiceClient blobServiceClient) {
-        this.blobServiceClient = blobServiceClient;
-    }
+  @Inject
+  public BlobContainerClientProducer(BlobServiceClient blobServiceClient) {
+    this.blobServiceClient = blobServiceClient;
+  }
 
-    @Produces
-    @ApplicationScoped
-    public BlobContainerClient blobContainerClient() {
-        return this.blobServiceClient.getBlobContainerClient(containerName);
-    }
+  @Produces
+  @ApplicationScoped
+  public BlobContainerClient blobContainerClient() {
+    return this.blobServiceClient.getBlobContainerClient(containerName);
+  }
 }

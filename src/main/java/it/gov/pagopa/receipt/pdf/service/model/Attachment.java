@@ -11,17 +11,16 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Jacksonized
 public class Attachment {
 
-    @Schema(example = "id_allegato")
-    private String id;
+  @Schema(example = "id_allegato")
+  private String id;
 
-    @Schema(example = "application/pdf")
-    @JsonProperty("content_type")
-    private String contentType;
+  @Schema(example = "application/pdf")
+  @JsonProperty("content_type")
+  private String contentType;
 
-    @Schema(example = "Allegato 1.pdf")
-    private String name;
+  @Schema(example = "Allegato 1.pdf")
+  private String name;
 
-    @Schema(example = "<percorso relativo dell'allegato>")
-    private String url;
-
+  @Schema(example = "<percorso relativo dell'allegato>")
+  private String url;
 }

@@ -8,31 +8,26 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.Produces;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-/**
- * Producer class for {@link CosmosClient} bean
- */
+/** Producer class for {@link CosmosClient} bean */
 @Singleton
 public class CosmosClientProducer {
 
-    @ConfigProperty(name = "cosmos.receipt.key")
-    String azureKey;
+  @ConfigProperty(name = "cosmos.receipt.key")
+  String azureKey;
 
-    @ConfigProperty(name = "cosmos.endpoint")
-    String serviceEndpoint;
+  @ConfigProperty(name = "cosmos.endpoint")
+  String serviceEndpoint;
 
-    CosmosClientBuilder cosmosClientBuilder;
+  CosmosClientBuilder cosmosClientBuilder;
 
-    @Inject
-    public CosmosClientProducer(CosmosClientBuilder cosmosClientBuilder) {
-        this.cosmosClientBuilder = cosmosClientBuilder;
-    }
+  @Inject
+  public CosmosClientProducer(CosmosClientBuilder cosmosClientBuilder) {
+    this.cosmosClientBuilder = cosmosClientBuilder;
+  }
 
-    @Produces
-    @ApplicationScoped
-    public CosmosClient cosmosClient() {
-        return cosmosClientBuilder
-                .endpoint(serviceEndpoint)
-                .key(azureKey)
-                .buildClient();
-    }
+  @Produces
+  @ApplicationScoped
+  public CosmosClient cosmosClient() {
+    return cosmosClientBuilder.endpoint(serviceEndpoint).key(azureKey).buildClient();
+  }
 }

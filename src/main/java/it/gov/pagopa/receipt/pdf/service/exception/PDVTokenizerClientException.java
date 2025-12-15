@@ -5,5 +5,4 @@ public class PDVTokenizerClientException extends RuntimeException {
   public PDVTokenizerClientException(String error) {
     super(error);
   }
-
 }

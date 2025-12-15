@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReasonError {
-    private int code;
-    private String message;
-
+  private int code;
+  private String message;
 }

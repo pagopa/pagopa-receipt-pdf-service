@@ -14,5 +14,4 @@ import lombok.NoArgsConstructor;
 public class SearchTokenRequest {
 
   private String pii;
-
 }

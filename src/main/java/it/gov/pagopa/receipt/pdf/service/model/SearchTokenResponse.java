@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class SearchTokenResponse {
 
   String token;
-
 }
