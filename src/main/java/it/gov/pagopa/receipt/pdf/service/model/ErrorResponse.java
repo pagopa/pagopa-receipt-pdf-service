@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-/** Model class for the error response */
+/**
+ * Model class for the error response
+ */
 @Getter
 @Builder
 @Jacksonized

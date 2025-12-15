@@ -12,21 +12,19 @@ import lombok.NoArgsConstructor;
 @Data
 public class CartForReceipt {
 
-  private String eventId;
-  private String id;
-  private String version;
-  private Payload payload;
-  private CartStatusType status;
-  private int numRetry;
-  private int notificationNumRetry;
-  private ReasonError reasonErr;
+    private String eventId;
+    private String id;
+    private String version;
+    private Payload payload;
+    private CartStatusType status;
+    private int numRetry;
+    private int notificationNumRetry;
+    private ReasonError reasonErr;
 
-  @SuppressWarnings("java:S116")
-  private long inserted_at;
-
-  @SuppressWarnings("java:S116")
-  private long generated_at;
-
-  @SuppressWarnings("java:S116")
-  private long notified_at;
+    @SuppressWarnings("java:S116")
+    private long inserted_at;
+    @SuppressWarnings("java:S116")
+    private long generated_at;
+    @SuppressWarnings("java:S116")
+    private long notified_at;
 }

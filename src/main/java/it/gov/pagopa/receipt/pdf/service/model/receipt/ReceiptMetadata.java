@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReceiptMetadata {
 
-  private String name;
-  private String url;
+    private String name;
+    private String url;
 }

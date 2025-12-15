@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MessageData {
 
-  private String id;
-  private String subject;
-  private String markdown;
+    private String id;
+    private String subject;
+    private String markdown;
 }

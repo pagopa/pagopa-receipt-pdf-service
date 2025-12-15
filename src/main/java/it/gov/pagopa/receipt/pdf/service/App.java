@@ -26,14 +26,13 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                           schema = @Schema(implementation = ErrorResponse.class),
                           example =
                               """
-                              {
-                                 "type": "",
-                                 "title": "Internal Server Error",
-                                 "status": 500,
-                                 "detail": "An unexpected error has occurred. Please contact support.",
-                                 "instance": "PDFS_603"
-                               }\
-                              """)),
+                                  {
+                                     "type": "",
+                                     "title": "Internal Server Error",
+                                     "status": 500,
+                                     "detail": "An unexpected error has occurred. Please contact support.",
+                                     "instance": "PDFS_603"
+                                   }""")),
               @APIResponse(
                   name = "AppException400",
                   responseCode = "400",
@@ -43,18 +42,17 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                           mediaType = MediaType.APPLICATION_JSON,
                           schema = @Schema(implementation = ErrorResponse.class),
                           examples =
-                              @ExampleObject(
-                                  name = "Error",
-                                  value =
-                                      """
-                                      {
-                                         "type": "",
-                                         "title": "Bad Request",
-                                         "status": 400,
-                                         "detail": "The provided third party id [<td_id>] is invalid",
-                                         "instance": "PDFS_703"
-                                       }\
-                                      """))),
+                            @ExampleObject(
+                                name = "Error",
+                                value =
+                                    """
+                                  {
+                                     "type": "",
+                                     "title": "Bad Request",
+                                     "status": 400,
+                                     "detail": "The provided third party id [<td_id>] is invalid",
+                                     "instance": "PDFS_703"
+                                   }"""))),
               @APIResponse(
                   name = "AppException404",
                   responseCode = "404",
@@ -65,14 +63,13 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
                           schema = @Schema(implementation = ErrorResponse.class),
                           example =
                               """
-                              {
-                                 "type": "",
-                                 "title": "Not Found",
-                                 "status": 404,
-                                 "detail": "Third party id [<td_id>] not found",
-                                 "instance": "PDFS_900"
-                               }\
-                              """)),
+                                  {
+                                     "type": "",
+                                     "title": "Not Found",
+                                     "status": 404,
+                                     "detail": "Third party id [<td_id>] not found",
+                                     "instance": "PDFS_900"
+                                   }""")),
             }),
     info = @Info(title = "Receipt PDF service", version = "0.0.0-SNAPSHOT"))
 @Startup
