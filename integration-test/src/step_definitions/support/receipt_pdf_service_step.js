@@ -1,7 +1,7 @@
 const assert = require('assert');
 const { Given, When, Then, After } = require('@cucumber/cucumber');
 const {createReceipt, getAttachmentDetails, getAttachment, createToken} = require("./common.js");
-const { createDocumentInReceiptsDatastore, deleteDocumentFromReceiptsDatastore } = require("./receipts_datastore_client.js");
+const { createDocumentInReceiptsDatastore, deleteDocumentFromReceiptsDatastore, createDocumentInReceiptsCartDatastore, deleteDocumentFromReceiptsCartDatastore } = require("./receipts_datastore_client.js");
 const { createBlobPdf, deleteReceiptAttachment } = require("./receipts_blob_storage_client.js");
 
 const content = "Hello world!";
@@ -33,8 +33,26 @@ Given('a receipt with id {string} and debtorFiscalCode {string} stored on receip
   await createToken('INVALID_FISCCODE');
 
   let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, pdvResponse.token);
+
   assert.strictEqual(cosmosResponse.statusCode, 201);
 });
+
+
+Given('a cart receipt with id  {string} a payerFiscalCode {string} with bizEventId {string} and debtorFiscalCode {string} with bizEventId {string} stored on cart-for-receipts datastore', async function (id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId) {
+  this.receiptId = id;
+  // prior cancellation to avoid dirty cases
+  await deleteDocumentFromReceiptsCartDatastore(this.receiptId, this.receiptId);
+
+  let pdvPayerResponse = await createToken(payerFiscalCode);
+  let pdvDebtorFiscalCodeResponse = await createToken(debtorFiscalCode);
+  await createToken('INVALID_FISCCODE');
+
+  let cosmosResponse = await createDocumentInReceiptsCartDatastore(this.receiptId, pdvPayerResponse.token, payerBizEventId, pdvDebtorFiscalCodeResponse.token, debtorBizEventId);
+
+  assert.strictEqual(cosmosResponse.statusCode, 201);
+});
+
+
 
 When('an Http GET request is sent to the receipt-service getAttachmentDetails with path value {string} and fiscal_code param with value {string}', async function (receiptId, fiscalCode) {
   this.response = await getAttachmentDetails(receiptId, fiscalCode);
@@ -47,6 +65,14 @@ When('an Http GET request is sent to the receipt-service getAttachmentDetails wi
 
 Then('response body contains receipt id {string}', function (receiptId) {
   assert.strictEqual(this.response?.data?.attachments?.[0]?.id, receiptId);
+});
+
+Then('response body contains receipt details subject {string}', function (subject) {
+  assert.strictEqual(this.response?.data?.details?.subject, subject);
+});
+
+Then('response body contains receipt details markdown {string}', function (markdown) {
+  assert.strictEqual(this.response?.data?.details?.markdown, markdown);
 });
 
 

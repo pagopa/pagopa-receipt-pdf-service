@@ -57,6 +57,59 @@ function createReceipt(id, fiscalCode, pdfName) {
 	}
 	return receipt
 }
+
+function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName) {
+	let receipt =
+		{
+			"eventId": id,
+			"version": "1",
+			"payload": {
+				"payerFiscalCode": payerFiscalCode,
+				"mdAttachPayer": {
+					"name": pdfName,
+					"url": pdfName
+				},
+				"messagePayer": {
+					"subject": "Payer subject",
+					"markdown": "Payer **markdown**"
+				},
+				"cart": [
+					{
+						"bizEventId": debtorBizEventId,
+						"subject": "Pagamento 1",
+						"debtorFiscalCode": debtorFiscalCode,
+						"amount": "10,20",
+						"mdAttach": {
+							"name": pdfName,
+							"url": pdfName
+						},
+						"messageDebtor": {
+							"subject": "Cart Debtor subject",
+							"markdown": "Cart Debtor **markdown**"
+						}
+					},
+					{
+						"bizEventId": payerBizEventId,
+						"subject": "Pagamento 2",
+						"debtorFiscalCode": payerFiscalCode,
+						"amount": "22,15",
+						"mdAttach": {
+							"name": pdfName,
+							"url": pdfName
+						},
+						"messageDebtor": {
+							"subject": "Cart Payer subject",
+							"markdown": "Cart Payer **markdown**"
+						}
+					}
+				]
+			},
+			"status": "IO_NOTIFIED",
+			"id": id
+		}
+	return receipt
+}
+
 async function createToken(fiscalCode) {
     let token_api_key = process.env.TOKENIZER_API_KEY;
   	let headers = {
@@ -74,5 +127,5 @@ async function createToken(fiscalCode) {
 }
 
 module.exports = {
-	createReceipt, getAttachmentDetails, getAttachment, createToken
+	createReceipt, getAttachmentDetails, getAttachment, createToken, createCartReceipt
 }
