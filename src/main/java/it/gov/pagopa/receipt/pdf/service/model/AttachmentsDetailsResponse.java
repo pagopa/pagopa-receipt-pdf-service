@@ -15,4 +15,5 @@ import java.util.List;
 public class AttachmentsDetailsResponse {
 
     private List<Attachment> attachments;
+    private Detail details;
 }
