@@ -1,7 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.InjectMock;
 import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
@@ -48,16 +48,16 @@ class AttachmentsServiceImplTest {
 
     private static final String MISSING_FISCAL_CODE = "MISSING_FISCAL_CODE";
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
     private ReceiptCosmosClient cosmosClientReceiptsMock;
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
     private CartReceiptCosmosClient cosmosClientCartMock;
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
     private ReceiptBlobClient receiptBlobClientMock;
 
-    @InjectMock(convertScopes = true)
+    @InjectMock
     @RestClient
     private PDVTokenizerClient restClientMock;
 
