@@ -26,7 +26,7 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
     private final Logger logger = LoggerFactory.getLogger(ReceiptCosmosClientImpl.class);
 
     @ReceiptsContainer
-    private final CosmosContainer containerReceipts;
+    CosmosContainer containerReceipts;
 
     @Inject
     public ReceiptCosmosClientImpl(@ReceiptsContainer CosmosContainer containerReceipts) {
