@@ -1,24 +1,25 @@
 package it.gov.pagopa.receipt.pdf.service.resource.helpdesk;
 
 import it.gov.pagopa.receipt.pdf.service.client.BizCosmosClient;
-import it.gov.pagopa.receipt.pdf.service.exception.BizEventNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
-import it.gov.pagopa.receipt.pdf.service.model.ProblemJson;
 import it.gov.pagopa.receipt.pdf.service.model.biz.BizEvent;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
+import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import it.gov.pagopa.receipt.pdf.service.service.impl.ReceiptCosmosService;
-import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.createProblemJson;
@@ -28,10 +29,18 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.createProblemJ
 @Path("/helpdesk")
 @LoggedAPI
 public class HelpdeskResource {
+    private final Logger logger = LoggerFactory.getLogger(HelpdeskResource.class);
 
     private ReceiptCosmosService receiptCosmosService;
     private BizCosmosClient bizEventCosmosClient;
+    private AttachmentsService attachmentsService;
 
+    @Inject
+    public HelpdeskResource(ReceiptCosmosService receiptCosmosService, BizCosmosClient bizEventCosmosClient, AttachmentsService attachmentsService) {
+        this.receiptCosmosService = receiptCosmosService;
+        this.bizEventCosmosClient = bizEventCosmosClient;
+        this.attachmentsService = attachmentsService;
+    }
 
     @Path("/receipts/{event-id}")
     @GET
@@ -104,6 +113,28 @@ public class HelpdeskResource {
             return RestResponse.ok(receipt);
         } catch (IoMessageNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", messageId);
+            return RestResponse.status(Response.Status.NOT_FOUND,
+                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+        }
+    }
+
+    @Path("pdf-receipts/{file-name}")
+    @GET
+    public RestResponse<Object> getReceiptPdf(
+            @PathParam("file-name") String fileName) {
+        logger.info("[{}] API called at {}", "getReceiptPdf", LocalDateTime.now());
+
+        if (fileName == null || fileName.isBlank()) {
+            return RestResponse.status(Response.Status.BAD_REQUEST,
+                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid file name"));
+        }
+
+        try {
+            byte[] result = attachmentsService.getAttachmentBytesFromBlobStorage(fileName);
+            return RestResponse.ok(result);
+        } catch (BlobStorageClientException | AttachmentNotFoundException | IOException e) {
+            String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", fileName);
+            logger.error("[{}] {}", "getReceiptPdf", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
