@@ -1,7 +1,9 @@
 package it.gov.pagopa.receipt.pdf.service.client;
 
 
+import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 
@@ -18,6 +20,8 @@ public interface ReceiptCosmosClient {
      * @throws ReceiptNotFoundException thrown if the receipt was not found
      */
     Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException;
+
+    IOMessage getIoMessage(String messageId) throws IoMessageNotFoundException;
 
     ReceiptError getReceiptError(String bizEventId) throws  ReceiptNotFoundException;
 }

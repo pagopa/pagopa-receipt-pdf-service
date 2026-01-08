@@ -24,8 +24,11 @@ public class CosmosContainerProducer {
     @ConfigProperty(name = "cosmos.container.cart.name")
     private String containerCart;
 
-    @ConfigProperty(name = "cosmos.container.receipts.error.name")
+    @ConfigProperty(name = "cosmos.container.receipts-error.name")
     private String containerReceiptsError;
+
+    @ConfigProperty(name = "cosmos.container.receipts-io-messages-event.name")
+    private String containerReceiptsIOMessagesEvent;
 
     private final CosmosClient cosmosClient;
 
@@ -57,9 +60,17 @@ public class CosmosContainerProducer {
 
     @Produces
     @ApplicationScoped
-    @ReceiptsContainer
+    @ReceiptsErrorContainer
     public CosmosContainer containerReceiptsError() {
         return cosmosDatabase()
                 .getContainer(containerReceiptsError);
+    }
+
+    @Produces
+    @ApplicationScoped
+    @ReceiptsIOMessagesEventContainer
+    public CosmosContainer containerReceiptsIOMessagesEvent() {
+        return cosmosDatabase()
+                .getContainer(containerReceiptsIOMessagesEvent);
     }
 }

@@ -6,11 +6,14 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
+import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsErrorContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsIOMessagesEventContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -32,6 +35,9 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
 
     @ReceiptsContainer
     CosmosContainer containerReceipts;
+
+    @ReceiptsIOMessagesEventContainer
+    CosmosContainer containerReceiptsIOMessagesEvent;
 
     @ReceiptsErrorContainer
     CosmosContainer containerReceiptsError;
@@ -61,6 +67,31 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
             throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
         }
         return queryResponse.iterator().next();
+    }
+
+
+
+    /**
+     * Retrieve receipt document from CosmosDB database
+     *
+     * @param messageId IO Message id
+     * @return io message document
+     * @throws IoMessageNotFoundException in case no receipt has been found with the given messageId
+     */
+    @Override
+    public IOMessage getIoMessage(String messageId) throws IoMessageNotFoundException {
+
+        //Build query
+        String query = String.format("SELECT * FROM c WHERE c.messageId = '%s'", messageId);
+
+        //Query the container
+        CosmosPagedIterable<IOMessage> queryResponse = containerReceiptsIOMessagesEvent
+                .queryItems(query, new CosmosQueryRequestOptions(), IOMessage.class);
+
+        if (queryResponse.iterator().hasNext()) {
+            return queryResponse.iterator().next();
+        }
+        throw new IoMessageNotFoundException(DOCUMENT_NOT_FOUND_ERR_MSG);
     }
 
     /**

@@ -2,8 +2,10 @@ package it.gov.pagopa.receipt.pdf.service.resource.helpdesk;
 
 import it.gov.pagopa.receipt.pdf.service.client.BizCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.exception.BizEventNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
+import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.ProblemJson;
 import it.gov.pagopa.receipt.pdf.service.model.biz.BizEvent;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
@@ -16,6 +18,8 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.RestResponse;
+
+import java.time.LocalDateTime;
 
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.createProblemJson;
 
@@ -82,6 +86,26 @@ public class HelpdeskResource {
             String responseMsg = String.format("Unable to retrieve the receipt with eventId %s", bizEvent.getId());
             return RestResponse.status(Response.Status.NOT_FOUND);
 
+        }
+    }
+
+    @Path("/receipts/io-message/{message-id}")
+    @GET
+    public RestResponse<Object> getReceiptMessage(
+            @PathParam("message-id") String messageId) {
+
+        if (messageId == null || messageId.isBlank()) {
+            return RestResponse.status(Response.Status.BAD_REQUEST,
+                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid messageId"));
+        }
+
+        try {
+            IOMessage receipt = this.receiptCosmosService.getReceiptMessage(messageId);
+            return RestResponse.ok(receipt);
+        } catch (IoMessageNotFoundException e) {
+            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", messageId);
+            return RestResponse.status(Response.Status.NOT_FOUND,
+                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
     }
 

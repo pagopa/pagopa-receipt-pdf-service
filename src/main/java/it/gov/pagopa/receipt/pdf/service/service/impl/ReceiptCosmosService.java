@@ -1,8 +1,14 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
+import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.exception.Aes256Exception;
+import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
@@ -31,6 +37,23 @@ public class ReceiptCosmosService {
         }
         return receipt;
     }
+
+    public IOMessage getReceiptMessage(String messageId) throws IoMessageNotFoundException {
+        IOMessage message;
+        try {
+            message = this.receiptCosmosClient.getIoMessage(messageId);
+        } catch (IoMessageNotFoundException e) {
+            String errorMsg = String.format("Receipt Message to IO not found with the message id %s", messageId);
+            throw new IoMessageNotFoundException(errorMsg, e);
+        }
+
+        if (message == null) {
+            String errorMsg = String.format("Receipt retrieved with the message id %s is null", messageId);
+            throw new IoMessageNotFoundException(errorMsg);
+        }
+        return message;
+    }
+
 
     public ReceiptError getReceiptError(String eventId) throws ReceiptNotFoundException {
         if (eventId == null || eventId.isBlank()) {
