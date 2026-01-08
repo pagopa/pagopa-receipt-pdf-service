@@ -24,6 +24,9 @@ public class CosmosContainerProducer {
     @ConfigProperty(name = "cosmos.container.cart.name")
     private String containerCart;
 
+    @ConfigProperty(name = "cosmos.container.receipts.error.name")
+    private String containerReceiptsError;
+
     private final CosmosClient cosmosClient;
 
     @Inject
@@ -52,5 +55,11 @@ public class CosmosContainerProducer {
                 .getContainer(containerCart);
     }
 
-
+    @Produces
+    @ApplicationScoped
+    @ReceiptsContainer
+    public CosmosContainer containerReceiptsError() {
+        return cosmosDatabase()
+                .getContainer(containerReceiptsError);
+    }
 }
