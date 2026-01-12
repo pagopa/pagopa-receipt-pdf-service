@@ -160,7 +160,7 @@ public class HelpdeskResource {
             return RestResponse.ok(receiptError);
         } catch (ReceiptNotFoundException e) {
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, "No Receipt Error to process on bizEvent with id " + eventId));
+                    createProblemJson(Response.Status.NOT_FOUND, "No Receipt Error to process on bizEvent with id " + sanitize(eventId)));
         } catch (Exception e) {
             return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR,
                     createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage()));
