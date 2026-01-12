@@ -59,8 +59,8 @@ public class HelpdeskResource {
         }
 
         try {
-            var receipt = receiptCosmosService.getReceipt(eventId);
-            return RestResponse.status(Response.Status.OK, receipt);
+            Receipt receipt = receiptCosmosService.getReceipt(eventId);
+            return RestResponse.ok(receipt);
         } catch (ReceiptNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, eventId);
             return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
@@ -90,13 +90,11 @@ public class HelpdeskResource {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
                     organizationFiscalCode, iuv);
             return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
-
         }
 
         try {
             Receipt receipt = this.receiptCosmosService.getReceipt(bizEvent.getId());
-            return RestResponse.status(Response.Status.BAD_REQUEST, receipt);
-
+            return RestResponse.ok(receipt);
         } catch (ReceiptNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, bizEvent.getId());
             return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
@@ -179,7 +177,7 @@ public class HelpdeskResource {
 
         try {
             CartForReceipt receipt = cartReceiptCosmosService.getCartReceipt(cartId);
-            return RestResponse.status(Response.Status.OK, receipt);
+            return RestResponse.ok(receipt);
         } catch (CartNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the receipt with cartId %s", cartId);
             return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
@@ -213,8 +211,7 @@ public class HelpdeskResource {
 
         try {
             CartForReceipt receipt = this.cartReceiptCosmosService.getCartReceiptFromEventId(bizEvent.getId());
-            return RestResponse.status(Response.Status.BAD_REQUEST, receipt);
-
+            return RestResponse.ok(receipt);
         } catch (CartNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, bizEvent.getId());
             return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
