@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.createProblemJson;
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
 
 @Tag(name = "Helpdesk", description = "Helpdesk operations")
@@ -56,7 +57,7 @@ public class HelpdeskResource {
             var receipt = receiptCosmosService.getReceipt(eventId);
             return RestResponse.status(Response.Status.OK, receipt);
         } catch (ReceiptNotFoundException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt with eventId %s", eventId);
+            String responseMsg = String.format("Unable to retrieve the receipt with eventId %s", sanitize(eventId));
             logger.error("[{}] {}", "getReceipt", responseMsg);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
@@ -81,7 +82,7 @@ public class HelpdeskResource {
         BizEvent bizEvent;
         try {
             bizEvent = this.bizEventCosmosClient
-                    .getBizEventDocumentByOrganizationFiscalCodeAndIUV(organizationFiscalCode, iuv);
+                    .getBizEventDocumentByOrganizationFiscalCodeAndIUV(sanitize(organizationFiscalCode), sanitize(iuv));
         } catch (BizEventNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
                     organizationFiscalCode, iuv);
