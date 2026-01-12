@@ -44,11 +44,12 @@ public class HelpdeskResource {
 
     @Path("/receipts/{event-id}")
     @GET
-    public RestResponse<Receipt> getReceipt(
+    public RestResponse<Object> getReceipt(
             @PathParam("event-id") String eventId) {
 
         if (eventId == null || eventId.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST);
+            return RestResponse.status(Response.Status.BAD_REQUEST,
+                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid biz-event id"));
         }
 
         try {
@@ -56,15 +57,15 @@ public class HelpdeskResource {
             return RestResponse.status(Response.Status.OK, receipt);
         } catch (ReceiptNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the receipt with eventId %s", eventId);
-            return RestResponse.status(Response.Status.NOT_FOUND);
-
+            logger.error("[{}] {}", "getReceipt", responseMsg);
+            return RestResponse.status(Response.Status.NOT_FOUND,
+                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
     }
 
-
     @Path("/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}")
     @GET
-    public RestResponse<Receipt> GetReceiptByOrganizationFiscalCodeAndIUV(
+    public RestResponse<Object> getReceiptByOrganizationFiscalCodeAndIUV(
             @PathParam("organization-fiscal-code") String organizationFiscalCode,
             @PathParam("iuv") String iuv) {
 
@@ -73,7 +74,8 @@ public class HelpdeskResource {
                 || iuv == null
                 || iuv.isBlank()
         ) {
-            return RestResponse.status(Response.Status.BAD_REQUEST);
+            return RestResponse.status(Response.Status.BAD_REQUEST,
+                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organization fiscal code and iuv"));
         }
 
         BizEvent bizEvent;
@@ -83,18 +85,20 @@ public class HelpdeskResource {
         } catch (BizEventNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
                     organizationFiscalCode, iuv);
-            return RestResponse.status(Response.Status.NOT_FOUND);
-
+            logger.error("[{}] {}", "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
+            return RestResponse.status(Response.Status.NOT_FOUND,
+                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
 
         try {
             Receipt receipt = this.receiptCosmosService.getReceipt(bizEvent.getId());
-            return RestResponse.status(Response.Status.BAD_REQUEST, receipt);
+            return RestResponse.status(Response.Status.OK, receipt);
 
         } catch (ReceiptNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the receipt with eventId %s", bizEvent.getId());
-            return RestResponse.status(Response.Status.NOT_FOUND);
-
+            logger.error("[{}] {}", "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
+            return RestResponse.status(Response.Status.NOT_FOUND,
+                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
     }
 
