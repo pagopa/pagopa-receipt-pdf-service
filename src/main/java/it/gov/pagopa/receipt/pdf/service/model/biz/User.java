@@ -1,7 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.model.biz;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import it.gov.pagopa.receipt.pdf.helpdesk.entity.event.enumeration.UserType;
+import it.gov.pagopa.receipt.pdf.service.model.biz.enumeration.UserType;
 import lombok.*;
 
 @Getter
