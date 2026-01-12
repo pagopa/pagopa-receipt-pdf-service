@@ -85,7 +85,7 @@ public class HelpdeskResource {
                     .getBizEventDocumentByOrganizationFiscalCodeAndIUV(sanitize(organizationFiscalCode), sanitize(iuv));
         } catch (BizEventNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
-                    organizationFiscalCode, iuv);
+                    sanitize(organizationFiscalCode), sanitize(iuv));
             logger.error("[{}] {}", "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
@@ -117,7 +117,7 @@ public class HelpdeskResource {
             IOMessage receipt = this.receiptCosmosService.getReceiptMessage(messageId);
             return RestResponse.ok(receipt);
         } catch (IoMessageNotFoundException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", messageId);
+            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitize(messageId));
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -138,7 +138,7 @@ public class HelpdeskResource {
             byte[] result = attachmentsService.getAttachmentBytesFromBlobStorage(fileName);
             return RestResponse.ok(result);
         } catch (BlobStorageClientException | AttachmentNotFoundException | IOException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", fileName);
+            String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", sanitize(fileName));
             logger.error("[{}] {}", "getReceiptPdf", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
