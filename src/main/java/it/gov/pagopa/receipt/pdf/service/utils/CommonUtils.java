@@ -1,5 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.utils;
 
+import it.gov.pagopa.receipt.pdf.service.model.ProblemJson;
+import jakarta.ws.rs.core.Response;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -33,5 +35,13 @@ public class CommonUtils {
         sanitizedInput = sanitizedInput.replace("\0", "");
 
         return sanitizedInput;
+    }
+
+    public static ProblemJson createProblemJson(Response.Status status, String message) {
+        return ProblemJson.builder()
+                .title(status.name())
+                .detail(message)
+                .status(status.getStatusCode())
+                .build();
     }
 }

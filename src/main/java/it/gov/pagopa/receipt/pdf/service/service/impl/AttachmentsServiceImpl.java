@@ -16,11 +16,15 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -66,6 +70,16 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             return  handleSingleReceiptAttachmentDetails(thirdPartyId, requestFiscalCode);
         }
 
+    }
+
+    @Override
+    public byte[] getAttachmentBytesFromBlobStorage(String fileName) throws IOException, AttachmentNotFoundException, BlobStorageClientException {
+        File pdfFile = this.receiptBlobClient.getAttachmentFromBlobStorage(fileName);
+        FileInputStream inputStream = new FileInputStream(pdfFile);
+        byte[] result = IOUtils.toByteArray(inputStream);
+        Files.deleteIfExists(pdfFile.toPath());
+
+        return result;
     }
 
     /**
