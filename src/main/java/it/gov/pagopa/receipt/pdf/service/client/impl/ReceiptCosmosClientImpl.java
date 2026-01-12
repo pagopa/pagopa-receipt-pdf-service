@@ -1,7 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
@@ -11,9 +10,9 @@ import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
-import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsErrorContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsIOMessagesEventContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsErrorContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsIOMessagesEventContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -69,8 +68,6 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         return queryResponse.iterator().next();
     }
 
-
-
     /**
      * Retrieve receipt document from CosmosDB database
      *
@@ -102,7 +99,7 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      * @throws ReceiptNotFoundException If the document isn't found
      */
     @Override
-    public ReceiptError getReceiptError(String bizEventId) throws  ReceiptNotFoundException {
+    public ReceiptError getReceiptError(String bizEventId) throws ReceiptNotFoundException {
         //Build query
         String query = "SELECT * FROM c WHERE c.bizEventId = " + "'" + bizEventId + "'";
 
