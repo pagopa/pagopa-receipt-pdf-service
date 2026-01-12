@@ -3,6 +3,12 @@ package it.gov.pagopa.receipt.pdf.service.producer;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
+import it.gov.pagopa.receipt.pdf.service.producer.cart.CartContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.cart.CartReceiptsErrorContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.cart.CartReceiptsIOMessagesContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsErrorContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsIOMessagesEventContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -20,15 +26,17 @@ public class CosmosContainerProducer {
 
     @ConfigProperty(name = "cosmos.container.receipts.name")
     private String containerReceipts;
+    @ConfigProperty(name = "cosmos.container.receipts-error.name")
+    private String containerReceiptsError;
+    @ConfigProperty(name = "cosmos.container.receipts-io-messages-event.name")
+    private String containerReceiptsIOMessagesEvent;
 
     @ConfigProperty(name = "cosmos.container.cart.name")
     private String containerCart;
-
-    @ConfigProperty(name = "cosmos.container.receipts-error.name")
-    private String containerReceiptsError;
-
-    @ConfigProperty(name = "cosmos.container.receipts-io-messages-event.name")
-    private String containerReceiptsIOMessagesEvent;
+    @ConfigProperty(name = "cosmos.container.cart-receipts-error.name")
+    private String containerCartReceiptsError;
+    @ConfigProperty(name = "cosmos.container.cart-receipts-io-messages.name")
+    private String containerCartReceiptsIOMessages;
 
     private final CosmosClient cosmosClient;
 
@@ -52,14 +60,6 @@ public class CosmosContainerProducer {
 
     @Produces
     @ApplicationScoped
-    @CartContainer
-    public CosmosContainer containerCartReceipts() {
-        return cosmosDatabase()
-                .getContainer(containerCart);
-    }
-
-    @Produces
-    @ApplicationScoped
     @ReceiptsErrorContainer
     public CosmosContainer containerReceiptsError() {
         return cosmosDatabase()
@@ -72,5 +72,29 @@ public class CosmosContainerProducer {
     public CosmosContainer containerReceiptsIOMessagesEvent() {
         return cosmosDatabase()
                 .getContainer(containerReceiptsIOMessagesEvent);
+    }
+
+    @Produces
+    @ApplicationScoped
+    @CartContainer
+    public CosmosContainer containerCartReceipts() {
+        return cosmosDatabase()
+                .getContainer(containerCart);
+    }
+
+    @Produces
+    @ApplicationScoped
+    @CartReceiptsErrorContainer
+    public CosmosContainer containerCartReceiptsError() {
+        return cosmosDatabase()
+                .getContainer(containerCartReceiptsError);
+    }
+
+    @Produces
+    @ApplicationScoped
+    @CartReceiptsIOMessagesContainer
+    public CosmosContainer containerCartReceiptsIOMessages() {
+        return cosmosDatabase()
+                .getContainer(containerCartReceiptsIOMessages);
     }
 }

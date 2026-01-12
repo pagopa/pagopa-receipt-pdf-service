@@ -1,4 +1,4 @@
-package it.gov.pagopa.receipt.pdf.service.producer;
+package it.gov.pagopa.receipt.pdf.service.producer.cart;
 
 import jakarta.inject.Qualifier;
 
@@ -11,5 +11,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Retention(RUNTIME)
 @Target({PARAMETER, FIELD, METHOD, TYPE})
-public @interface ReceiptsIOMessagesEventContainer {
+public @interface CartReceiptsIOMessagesContainer {
 }
