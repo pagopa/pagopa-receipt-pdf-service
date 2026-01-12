@@ -7,7 +7,7 @@ import it.gov.pagopa.receipt.pdf.service.client.BizCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.BizEventNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.biz.BizEvent;
-import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.bizevent.containers.BizEventContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -18,11 +18,11 @@ import jakarta.inject.Inject;
 public class BizCosmosClientImpl implements BizCosmosClient {
 
 
-    @ReceiptsContainer
+    @BizEventContainer
     CosmosContainer cosmosContainer;
 
     @Inject
-    public BizCosmosClientImpl(@ReceiptsContainer CosmosContainer cosmosContainer) {
+    public BizCosmosClientImpl(@BizEventContainer CosmosContainer cosmosContainer) {
         this.cosmosContainer = cosmosContainer;
     }
 
@@ -31,7 +31,7 @@ public class BizCosmosClientImpl implements BizCosmosClient {
         String query = String.format("SELECT * FROM c WHERE c.creditor.idPA = '%s' AND c.debtorPosition.iuv = '%s'",
                 organizationFiscalCode, iuv);
 
-        CosmosPagedIterable<BizEvent> queryResponse = cosmosContainer
+        CosmosPagedIterable<BizEvent> queryResponse = this.cosmosContainer
                 .queryItems(query, new CosmosQueryRequestOptions(), BizEvent.class);
 
         if (queryResponse.iterator().hasNext()) {

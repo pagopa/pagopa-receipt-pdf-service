@@ -1,14 +1,9 @@
-package it.gov.pagopa.receipt.pdf.service.producer;
+package it.gov.pagopa.receipt.pdf.service.producer.receipt;
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
-import it.gov.pagopa.receipt.pdf.service.producer.cart.CartContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.cart.CartReceiptsErrorContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.cart.CartReceiptsIOMessagesContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsErrorContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsIOMessagesEventContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -19,9 +14,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * Producer class for {@link CosmosContainer} bean
  */
 @Singleton
-public class CosmosContainerProducer {
+public class ReceiptCosmosContainerProducer {
 
-    @ConfigProperty(name = "cosmos.db.name")
+    @ConfigProperty(name = "cosmos.receipt.db.name")
     private String databaseId;
 
     @ConfigProperty(name = "cosmos.container.receipts.name")
@@ -41,11 +36,11 @@ public class CosmosContainerProducer {
     private final CosmosClient cosmosClient;
 
     @Inject
-    public CosmosContainerProducer(CosmosClient cosmosClient) {
+    public ReceiptCosmosContainerProducer(@ReceiptCosmos CosmosClient cosmosClient) {
         this.cosmosClient = cosmosClient;
     }
 
-    public CosmosDatabase cosmosDatabase() {
+    private CosmosDatabase cosmosDatabase() {
         return this.cosmosClient
                 .getDatabase(databaseId);
     }

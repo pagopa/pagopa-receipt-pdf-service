@@ -9,6 +9,7 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_800;
 
@@ -16,7 +17,14 @@ import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDF
 @ApplicationScoped
 public class CartReceiptCosmosService {
 
-    private CartReceiptCosmosClient cartReceiptCosmosClient;
+    private final CartReceiptCosmosClient cartReceiptCosmosClient;
+
+    @Inject
+    public CartReceiptCosmosService(
+            CartReceiptCosmosClient cartReceiptCosmosClient
+    ) {
+        this.cartReceiptCosmosClient = cartReceiptCosmosClient;
+    }
 
     public CartForReceipt getCartReceipt(String cartId) throws CartNotFoundException {
         CartForReceipt receipt;

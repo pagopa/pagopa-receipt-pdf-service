@@ -9,7 +9,7 @@ import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
-import it.gov.pagopa.receipt.pdf.service.producer.cart.CartContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContainer;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;

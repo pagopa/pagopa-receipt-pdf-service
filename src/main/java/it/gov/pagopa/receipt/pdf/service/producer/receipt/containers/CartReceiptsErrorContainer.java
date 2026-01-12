@@ -1,4 +1,4 @@
-package it.gov.pagopa.receipt.pdf.service.producer.cart;
+package it.gov.pagopa.receipt.pdf.service.producer.receipt.containers;
 
 import jakarta.inject.Qualifier;
 

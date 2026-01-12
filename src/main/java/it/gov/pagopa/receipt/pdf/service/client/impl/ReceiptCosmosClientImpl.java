@@ -10,9 +10,9 @@ import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
-import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsErrorContainer;
-import it.gov.pagopa.receipt.pdf.service.producer.receipt.ReceiptsIOMessagesEventContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsErrorContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsIOMessagesEventContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         String query = String.format(FIND_RECEIPT_QUERY, thirdPartyId);
 
         //Query the container
-        CosmosPagedIterable<Receipt> queryResponse = containerReceipts
+        CosmosPagedIterable<Receipt> queryResponse = this.containerReceipts
                 .queryItems(query, new CosmosQueryRequestOptions(), Receipt.class);
 
         if (!queryResponse.iterator().hasNext()) {
