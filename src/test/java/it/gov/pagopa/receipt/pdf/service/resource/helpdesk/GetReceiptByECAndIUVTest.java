@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-public class GetReceiptByECAndIUVTest {
+class GetReceiptByECAndIUVTest {
 
     private static final String ORGANIZATION_FISCAL_CODE = "12345678901";
     private static final String IUV = "IUV_TEST_123";
@@ -32,9 +32,24 @@ public class GetReceiptByECAndIUVTest {
     private ReceiptCosmosService receiptCosmosService;
 
     @Test
-    void getReceiptByOrgAndIUV_BadRequest_MissingParams() {
+    void getReceiptByOrgAndIUV_BadRequest_MissingOrganizationFiscalCodeParam() {
         given()
                 .pathParam("organization-fiscal-code", " ")
+                .pathParam("iuv", "iuv")
+                .when()
+                .get("/helpdesk/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST)
+                .contentType(ContentType.JSON)
+                .body("status", equalTo(400))
+                .body("title", equalTo("BAD_REQUEST"))
+                .body("detail", equalTo("Please pass a valid organization fiscal code"));
+    }
+
+    @Test
+    void getReceiptByOrgAndIUV_BadRequest_MissingIuvParams() {
+        given()
+                .pathParam("organization-fiscal-code", "org")
                 .pathParam("iuv", " ")
                 .when()
                 .get("/helpdesk/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}")
@@ -43,7 +58,7 @@ public class GetReceiptByECAndIUVTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(400))
                 .body("title", equalTo("BAD_REQUEST"))
-                .body("detail", equalTo("Please pass a valid organization fiscal code and iuv"));
+                .body("detail", equalTo("Please pass a valid iuv"));
     }
 
     @Test

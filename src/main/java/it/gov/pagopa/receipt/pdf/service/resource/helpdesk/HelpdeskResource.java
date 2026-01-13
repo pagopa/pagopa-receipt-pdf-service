@@ -79,7 +79,7 @@ public class HelpdeskResource {
             @PathParam("iuv") String iuv) {
 
         if (organizationFiscalCode == null || organizationFiscalCode.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organizationFiscalCode"));
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organization fiscal code"));
         }
 
         if (iuv == null || iuv.isBlank()) {
@@ -205,7 +205,7 @@ public class HelpdeskResource {
             @PathParam("iuv") String iuv) {
 
         if (organizationFiscalCode == null || organizationFiscalCode.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organizationFiscalCode"));
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organization fiscal code"));
         }
 
         if (iuv == null || iuv.isBlank()) {
