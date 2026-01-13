@@ -65,8 +65,9 @@ public class HelpdeskResource {
             Receipt receipt = receiptCosmosService.getReceipt(eventId);
             return RestResponse.ok(receipt);
         } catch (ReceiptNotFoundException e) {
-            String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, sanitize(eventId));
-            logger.error(LOG_ERROR_MESSAGE, "getReceipt", responseMsg);
+            String sanitizedEventId = sanitize(eventId);
+            String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, sanitizedEventId);
+            logger.error(LOG_ERROR_MESSAGE, "getReceipt", sanitizedEventId);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
