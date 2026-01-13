@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
-import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitizeForLog;
 
 /**
