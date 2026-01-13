@@ -70,7 +70,6 @@ class ReceiptCosmosClientImplTest {
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_800, e.getErrorCode());
-
     }
 
 }

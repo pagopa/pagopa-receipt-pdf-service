@@ -58,7 +58,6 @@ class CartReceiptCosmosClientImplTest {
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_801, e.getErrorCode());
-
     }
 
     @SneakyThrows
@@ -72,6 +71,5 @@ class CartReceiptCosmosClientImplTest {
         CartForReceipt result = sut.getCartForReceiptDocument("id");
 
         assertEquals(cart, result);
-
     }
 }
