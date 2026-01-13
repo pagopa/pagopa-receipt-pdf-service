@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.createProblemJson;
-import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitizeForLog;
 
 
 @Tag(name = "Helpdesk", description = "Helpdesk operations")
@@ -57,7 +57,7 @@ public class HelpdeskResource {
             var receipt = receiptCosmosService.getReceipt(eventId);
             return RestResponse.status(Response.Status.OK, receipt);
         } catch (ReceiptNotFoundException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt with eventId %s", sanitize(eventId));
+            String responseMsg = String.format("Unable to retrieve the receipt with eventId %s", sanitizeForLog(eventId));
             logger.error("[{}] {}", "getReceipt", responseMsg);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
@@ -82,10 +82,10 @@ public class HelpdeskResource {
         BizEvent bizEvent;
         try {
             bizEvent = this.bizEventCosmosClient
-                    .getBizEventDocumentByOrganizationFiscalCodeAndIUV(sanitize(organizationFiscalCode), sanitize(iuv));
+                    .getBizEventDocumentByOrganizationFiscalCodeAndIUV(sanitizeForLog(organizationFiscalCode), sanitizeForLog(iuv));
         } catch (BizEventNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
-                    sanitize(organizationFiscalCode), sanitize(iuv));
+                    sanitizeForLog(organizationFiscalCode), sanitizeForLog(iuv));
             logger.error("[{}] {}", "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
@@ -117,7 +117,7 @@ public class HelpdeskResource {
             IOMessage receipt = this.receiptCosmosService.getReceiptMessage(messageId);
             return RestResponse.ok(receipt);
         } catch (IoMessageNotFoundException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitize(messageId));
+            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitizeForLog(messageId));
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -138,7 +138,7 @@ public class HelpdeskResource {
             byte[] result = attachmentsService.getAttachmentBytesFromBlobStorage(fileName);
             return RestResponse.ok(result);
         } catch (BlobStorageClientException | AttachmentNotFoundException | IOException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", sanitize(fileName));
+            String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", sanitizeForLog(fileName));
             logger.error("[{}] {}", "getReceiptPdf", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
@@ -160,7 +160,7 @@ public class HelpdeskResource {
             return RestResponse.ok(receiptError);
         } catch (ReceiptNotFoundException e) {
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, "No Receipt Error to process on bizEvent with id " + sanitize(eventId)));
+                    createProblemJson(Response.Status.NOT_FOUND, "No Receipt Error to process on bizEvent with id " + sanitizeForLog(eventId)));
         } catch (Exception e) {
             return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR,
                     createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage()));
