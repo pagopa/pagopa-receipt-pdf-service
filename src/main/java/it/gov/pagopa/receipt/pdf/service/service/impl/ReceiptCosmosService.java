@@ -1,9 +1,5 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
-import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosQueryRequestOptions;
-import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.exception.Aes256Exception;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
@@ -13,13 +9,21 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_800;
 
 @ApplicationScoped
 public class ReceiptCosmosService {
 
-    private ReceiptCosmosClient receiptCosmosClient;
+    private final ReceiptCosmosClient receiptCosmosClient;
+
+    @Inject
+    public ReceiptCosmosService(
+            ReceiptCosmosClient receiptCosmosClient
+    ) {
+        this.receiptCosmosClient = receiptCosmosClient;
+    }
 
     public Receipt getReceipt(String eventId) throws ReceiptNotFoundException {
         Receipt receipt;

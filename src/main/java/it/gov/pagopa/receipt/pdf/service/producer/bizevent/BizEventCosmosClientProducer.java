@@ -1,9 +1,8 @@
-package it.gov.pagopa.receipt.pdf.service.producer;
+package it.gov.pagopa.receipt.pdf.service.producer.bizevent;
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.Produces;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -12,25 +11,22 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * Producer class for {@link CosmosClient} bean
  */
 @Singleton
-public class CosmosClientProducer {
+public class BizEventCosmosClientProducer {
 
-    @ConfigProperty(name = "cosmos.receipt.key")
+    @ConfigProperty(name = "cosmos.bizevent.key")
     String azureKey;
 
-    @ConfigProperty(name = "cosmos.endpoint")
+    @ConfigProperty(name = "cosmos.bizevent.endpoint")
     String serviceEndpoint;
 
-    CosmosClientBuilder cosmosClientBuilder;
-
-    @Inject
-    public CosmosClientProducer(CosmosClientBuilder cosmosClientBuilder) {
-        this.cosmosClientBuilder = cosmosClientBuilder;
+    BizEventCosmosClientProducer() {
     }
 
     @Produces
     @ApplicationScoped
-    public CosmosClient cosmosClient() {
-        return cosmosClientBuilder
+    @BizEventCosmos
+    public CosmosClient cosmosBizEventClient() {
+        return new CosmosClientBuilder()
                 .endpoint(serviceEndpoint)
                 .key(azureKey)
                 .buildClient();

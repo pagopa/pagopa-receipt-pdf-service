@@ -9,7 +9,7 @@ import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
-import it.gov.pagopa.receipt.pdf.service.producer.CartContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContainer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;

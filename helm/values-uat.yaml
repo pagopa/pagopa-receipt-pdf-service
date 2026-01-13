@@ -92,12 +92,15 @@ microservice-chart:
     WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
-    COSMOS_RECEIPT_SERVICE_ENDPOINT: 'https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/'
-    COSMOS_RECEIPT_DB_NAME: 'db'
+    COSMOS_RECEIPT_ENDPOINT: "https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/"
+    COSMOS_RECEIPT_DB_NAME: "db"
     COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: 'receipts'
     COSMOS_RECEIPT_CONTAINER_CART_NAME: "cart-for-receipts"
     COSMOS_RECEIPT_CONTAINER_RECEIPTS_ERROR_NAME: "receipts-message-errors"
     COSMOS_RECEIPT_CONTAINER_RECEIPTS_IO_MESSAGES_EVENT_NAME: "receipts-io-messages-evt"
+    COSMOS_BIZEVENT_ENDPOINT: "https://pagopa-u-weu-bizevents-ds-cosmos-account.documents.azure.com:443/"
+    COSMOS_BIZEVENT_DB_NAME: "db"
+    COSMOS_BIZEVENT_CONTAINER_BIZEVENTS_NAME: "biz-events"
     BLOB_STORAGE_ACCOUNT_ENDPOINT: 'https://pagopauweureceiptsfnsa.blob.core.windows.net'
     BLOB_STORAGE_CONTAINER_NAME: 'pagopa-u-weu-receipts-azure-blob-receipt-st-attach'
     ENABLE_ECS_CONSOLE: "true"
@@ -120,6 +123,7 @@ microservice-chart:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-u-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
+    COSMOS_BIZEVENT_KEY: "cosmos-bizevent-pkey"
     TOKENIZER_API_KEY: "tokenizer-api-key"
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
     COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"

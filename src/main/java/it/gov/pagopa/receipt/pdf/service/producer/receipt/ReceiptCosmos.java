@@ -1,4 +1,4 @@
-package it.gov.pagopa.receipt.pdf.service.producer;
+package it.gov.pagopa.receipt.pdf.service.producer.receipt;
 
 import jakarta.inject.Qualifier;
 
@@ -10,6 +10,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Qualifier
 @Retention(RUNTIME)
-@Target({PARAMETER, FIELD, METHOD, TYPE})
-public @interface ReceiptsIOMessagesEventContainer {
+@Target({ FIELD, PARAMETER, METHOD })
+public @interface ReceiptCosmos {
 }
