@@ -15,8 +15,8 @@ import java.util.Base64;
 
 public class Aes256Utils {
 
-    private static final String AES_SECRET_KEY = System.getenv().getOrDefault("AES_SECRET_KEY", "");
-    private static final String AES_SALT = System.getenv().getOrDefault("AES_SALT", "");
+    private static String AES_SECRET_KEY = System.getenv().getOrDefault("AES_SECRET_KEY", "");
+    private static String AES_SALT = System.getenv().getOrDefault("AES_SALT", "");
     private static final int KEY_LENGTH = 256;
     private static final int ITERATION_COUNT = 65536;
     public static final String PBKDF_2_WITH_HMAC_SHA_256 = "PBKDF2WithHmacSHA256";
@@ -31,6 +31,12 @@ public class Aes256Utils {
      * Hide from public usage.
      */
     private Aes256Utils() {
+    }
+
+    /* Method used by test */
+    public static void setKeys(String key, String salt) {
+        AES_SECRET_KEY = key;
+        AES_SALT = salt;
     }
 
     public static String encrypt(String strToEncrypt) throws Aes256Exception {
