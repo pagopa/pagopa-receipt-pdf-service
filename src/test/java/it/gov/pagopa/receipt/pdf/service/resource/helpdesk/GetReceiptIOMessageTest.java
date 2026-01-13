@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-class GetReceiptMessageTest {
+class GetReceiptIOMessageTest {
 
     private static final String MESSAGE_ID = "message-12345";
 
@@ -22,7 +22,7 @@ class GetReceiptMessageTest {
     private ReceiptCosmosService receiptCosmosService;
 
     @Test
-    void getReceiptMessage_BadRequest_MessageIdIsBlank() {
+    void getReceiptIOMessage_BadRequest_MessageIdIsBlank() {
         given()
                 .pathParam("message-id", " ")
                 .when()
@@ -36,7 +36,7 @@ class GetReceiptMessageTest {
     }
 
     @Test
-    void getReceiptMessage_Success() throws IoMessageNotFoundException {
+    void getReceiptIOMessage_Success() throws IoMessageNotFoundException {
         IOMessage mockMessage = new IOMessage();
         mockMessage.setMessageId(MESSAGE_ID);
 
@@ -53,7 +53,7 @@ class GetReceiptMessageTest {
     }
 
     @Test
-    void getReceiptMessage_NotFound_ExceptionThrown() throws IoMessageNotFoundException {
+    void getReceiptIOMessage_NotFound_ExceptionThrown() throws IoMessageNotFoundException {
         String expectedMessage = String.format("Unable to retrieve the receipt message with messageId %s", MESSAGE_ID);
 
         when(receiptCosmosService.getReceiptMessage(MESSAGE_ID))
