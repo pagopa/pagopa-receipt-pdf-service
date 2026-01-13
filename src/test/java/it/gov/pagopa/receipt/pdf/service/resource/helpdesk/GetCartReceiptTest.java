@@ -4,15 +4,11 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
-import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
-import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartStatusType;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReasonError;
-import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.service.impl.CartReceiptCosmosService;
-import it.gov.pagopa.receipt.pdf.service.service.impl.ReceiptCosmosService;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
