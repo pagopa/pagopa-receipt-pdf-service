@@ -78,7 +78,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
                             "Cart with eventId %s not found in the defined container: %s",
                             sanitize(eventId), containerCartReceipts.getId());
             logger.error(errMsg);
-            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, eventId);
+            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_802, errMsg, eventId);
         }
         return queryResponse.iterator().next();
     }
@@ -112,6 +112,6 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
         if (queryResponse.iterator().hasNext()) {
             return queryResponse.iterator().next();
         }
-        throw new CartNotFoundException(AppErrorCodeEnum.PDFS_800, DOCUMENT_NOT_FOUND_ERR_MSG);
+        throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG);
     }
 }

@@ -34,6 +34,7 @@ public enum AppErrorCodeEnum {
 
     PDFS_800("PDFS_800", "Receipt not found with the provided third party id"),
     PDFS_801("PDFS_801", "Cart not found with the provided third party id"),
+    PDFS_802("PDFS_802", "Cart not found with the provided event id"),
 
     PDFS_901("PDFS_901", "Invalid fiscal code header, null or length not equal to 16");
 
