@@ -34,6 +34,7 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 @LoggedAPI
 public class HelpdeskResource {
     public static final String RECEIPT_NOT_FOUND_BY_EVENTID = "Unable to retrieve the receipt with eventId %s";
+    public static final String LOG_ERROR_MESSAGE = "[{}] {}";
     private final Logger logger = LoggerFactory.getLogger(HelpdeskResource.class);
 
     private final ReceiptCosmosService receiptCosmosService;
@@ -65,7 +66,7 @@ public class HelpdeskResource {
             return RestResponse.ok(receipt);
         } catch (ReceiptNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, sanitize(eventId));
-            logger.error("[{}] {}", "getReceipt", responseMsg);
+            logger.error(LOG_ERROR_MESSAGE, "getReceipt", responseMsg);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -77,13 +78,12 @@ public class HelpdeskResource {
             @PathParam("organization-fiscal-code") String organizationFiscalCode,
             @PathParam("iuv") String iuv) {
 
-        if (organizationFiscalCode == null
-                || organizationFiscalCode.isBlank()
-                || iuv == null
-                || iuv.isBlank()
-        ) {
-            return RestResponse.status(Response.Status.BAD_REQUEST,
-                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organization fiscal code and iuv"));
+        if (organizationFiscalCode == null || organizationFiscalCode.isBlank()) {
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organizationFiscalCode"));
+        }
+
+        if (iuv == null || iuv.isBlank()) {
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid iuv"));
         }
 
         BizEvent bizEvent;
@@ -93,7 +93,7 @@ public class HelpdeskResource {
         } catch (BizEventNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
                     sanitize(organizationFiscalCode), sanitize(iuv));
-            logger.error("[{}] {}", "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
+            logger.error(LOG_ERROR_MESSAGE, "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -103,7 +103,7 @@ public class HelpdeskResource {
             return RestResponse.ok(receipt);
         } catch (ReceiptNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, bizEvent.getId());
-            logger.error("[{}] {}", "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
+            logger.error(LOG_ERROR_MESSAGE, "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -124,6 +124,7 @@ public class HelpdeskResource {
             return RestResponse.ok(receipt);
         } catch (IoMessageNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitize(messageId));
+            logger.error(LOG_ERROR_MESSAGE, "getReceiptMessage", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -145,7 +146,7 @@ public class HelpdeskResource {
             return RestResponse.ok(result);
         } catch (BlobStorageClientException | AttachmentNotFoundException | IOException e) {
             String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", sanitize(fileName));
-            logger.error("[{}] {}", "getReceiptPdf", responseMsg, e);
+            logger.error(LOG_ERROR_MESSAGE, "getReceiptPdf", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -165,9 +166,12 @@ public class HelpdeskResource {
             ReceiptError receiptError = receiptCosmosService.getReceiptError(eventId);
             return RestResponse.ok(receiptError);
         } catch (ReceiptNotFoundException e) {
+            String responseMsg = "No Receipt Error to process on bizEvent with id " + sanitize(eventId);
+            logger.error(LOG_ERROR_MESSAGE, "getReceiptErrorByEventId", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, "No Receipt Error to process on bizEvent with id " + sanitize(eventId)));
+                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         } catch (Exception e) {
+            logger.error(LOG_ERROR_MESSAGE, "getReceiptErrorByEventId", e.getMessage(), e);
             return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR,
                     createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage()));
         }
@@ -180,15 +184,16 @@ public class HelpdeskResource {
             @PathParam("cart-id") String cartId) {
 
         if (cartId == null || cartId.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST);
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid cartId"));
         }
 
         try {
             CartForReceipt receipt = cartReceiptCosmosService.getCartReceipt(cartId);
             return RestResponse.ok(receipt);
         } catch (CartNotFoundException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt with cartId %s", cartId);
-            return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
+            String responseMsg = String.format("Unable to retrieve the receipt with cartId %s", sanitize(cartId));
+            logger.error(LOG_ERROR_MESSAGE, "getCartReceipt", responseMsg, e);
+            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
     }
 
@@ -199,12 +204,12 @@ public class HelpdeskResource {
             @PathParam("organization-fiscal-code") String organizationFiscalCode,
             @PathParam("iuv") String iuv) {
 
-        if (organizationFiscalCode == null
-                || organizationFiscalCode.isBlank()
-                || iuv == null
-                || iuv.isBlank()
-        ) {
-            return RestResponse.status(Response.Status.BAD_REQUEST);
+        if (organizationFiscalCode == null || organizationFiscalCode.isBlank()) {
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organizationFiscalCode"));
+        }
+
+        if (iuv == null || iuv.isBlank()) {
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid iuv"));
         }
 
         BizEvent bizEvent;
@@ -213,8 +218,9 @@ public class HelpdeskResource {
                     .getBizEventDocumentByOrganizationFiscalCodeAndIUV(organizationFiscalCode, iuv);
         } catch (BizEventNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
-                    organizationFiscalCode, iuv);
-            return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
+                    sanitize(organizationFiscalCode), sanitize(iuv));
+            logger.error(LOG_ERROR_MESSAGE, "getCartReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
+            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
 
         try {
@@ -222,7 +228,8 @@ public class HelpdeskResource {
             return RestResponse.ok(receipt);
         } catch (CartNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, bizEvent.getId());
-            return RestResponse.status(Response.Status.NOT_FOUND, responseMsg);
+            logger.error(LOG_ERROR_MESSAGE, "getCartReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
+            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
     }
 
@@ -240,7 +247,8 @@ public class HelpdeskResource {
             IOMessage ioMessage = this.cartReceiptCosmosService.getCartReceiptMessage(messageId);
             return RestResponse.ok(ioMessage);
         } catch (IoMessageNotFoundException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", messageId);
+            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitize(messageId));
+            logger.error(LOG_ERROR_MESSAGE, "getCartReceiptMessage", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         }
@@ -260,9 +268,12 @@ public class HelpdeskResource {
             CartReceiptError receiptError = this.cartReceiptCosmosService.getCartReceiptError(cartId);
             return RestResponse.ok(receiptError);
         } catch (CartNotFoundException e) {
+            String responseMsg = "No Receipt Error to process on cartId with id " + sanitize(cartId);
+            logger.error(LOG_ERROR_MESSAGE, "getCartReceiptErrorByCartId", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, "No Receipt Error to process on cartId with id " + cartId));
+                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
         } catch (Exception e) {
+            logger.error(LOG_ERROR_MESSAGE, "getCartReceiptErrorByCartId", e.getMessage(), e);
             return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR,
                     createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage()));
         }

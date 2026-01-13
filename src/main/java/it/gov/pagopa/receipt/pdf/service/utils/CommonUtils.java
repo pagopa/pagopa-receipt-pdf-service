@@ -37,27 +37,6 @@ public class CommonUtils {
         return sanitizedInput;
     }
 
-    /**
-     * This method sanitizes input intended to be written to logs by removing control characters
-     * (such as newlines, carriage returns, tabs, and null characters) that could be used to
-     * forge or obfuscate log entries.
-     *
-     * @param input the input string to be sanitized for logging
-     * @return the sanitized string safe for logging, or {@code null} if input is null
-     */
-    public static String sanitizeForLog(String input) {
-        if (input == null) {
-            return null;
-        }
-
-        String sanitizedInput = input.trim();
-
-        // Remove all ASCII control characters (0x00-0x1F), including \r, \n, \t and NUL
-        sanitizedInput = sanitizedInput.replaceAll("[\\x00-\\x1F]", "");
-
-        return sanitizedInput;
-    }
-
     public static ProblemJson createProblemJson(Response.Status status, String message) {
         return ProblemJson.builder()
                 .title(status.name())
