@@ -27,6 +27,7 @@ import java.util.HashSet;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitizeForLog;
 
 /**
  * Client for the Blob Storage
@@ -56,7 +57,7 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
      * @return the file where the PDF receipt was stored
      */
     public File getAttachmentFromBlobStorage(String fileName) throws BlobStorageClientException, AttachmentNotFoundException {
-        BlobClient blobClient = blobContainerClient.getBlobClient(fileName);
+        BlobClient blobClient = blobContainerClient.getBlobClient(sanitizeForLog(fileName));
         String filePath = createTempDirectory();
         downloadAttachment(fileName, blobClient, filePath);
         return new File(filePath);
@@ -85,12 +86,12 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
         } catch (BlobStorageException e) {
             String errMsg;
             if (e.getStatusCode() == 404) {
-                errMsg = String.format("PDF receipt with name: %s not found in Blob Storage: %s", sanitize(fileName), blobClient.getAccountName());
+                errMsg = String.format("PDF receipt with name: %s not found in Blob Storage: %s", sanitizeForLog(fileName), blobClient.getAccountName());
                 logger.error(errMsg);
                 throw new AttachmentNotFoundException(PDFS_602, errMsg, fileName, e);
             }
             errMsg = String.format("Unable to download the PDF receipt with name: %s from Blob Storage: %s. Error message from server: %s",
-                    sanitize(fileName),
+                    sanitizeForLog(fileName),
                     blobClient.getAccountName(),
                     e.getServiceMessage()
             );
