@@ -111,5 +111,5 @@ resource "github_actions_secret" "secret_slack_webhook_integration_test" {
 
 data "azurerm_key_vault_secret" "key_vault_integration_test_helpdesk_subkey" {
   name         = "apikey-helpdesk-receipt" # "integration-test-subkey"
-  key_vault_id = data.azurerm_key_vault.key_vault_domain.id
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
