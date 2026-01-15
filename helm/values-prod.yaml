@@ -174,6 +174,16 @@ microservice-chart: &microservice-chart
         pullPolicy: Always
       envConfig: {}
       envSecret: {}
+pagopa-receipt-pdf-service:
+  !!merge <<: *microservice-chart
+  ingress:
+    !!merge <<: *ingress
+  resources:
+    !!merge <<: *resources
+  envConfig:
+    !!merge <<: *envConfig
+  envSecret:
+    !!merge <<: *envSecret
 pagopa-receipt-pdf-service-helpdesk:
   !!merge <<: *microservice-chart
   fullnameOverride: "pagopa-receipt-pdf-service-helpdesk"
