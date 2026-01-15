@@ -1,6 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.model;
 
-import it.gov.pagopa.receipt.pdf.service.model.biz.enumeration.UserType;
+import it.gov.pagopa.receipt.pdf.service.model.enumeration.UserType;
 import lombok.*;
 
 @Getter
