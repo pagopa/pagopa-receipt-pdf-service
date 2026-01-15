@@ -1,4 +1,4 @@
-microservice-chart:
+microservice-chart: &microservice-chart
   namespace: "receipts"
   nameOverride: ""
   fullnameOverride: "pagopa-receipt-pdf-service"
@@ -42,14 +42,14 @@ microservice-chart:
     ports:
       - 8080 #http
       - 12345 #jmx-exporter
-  ingress:
+  ingress: &ingress
     create: true
     host: "weudev.receipts.internal.dev.platform.pagopa.it"
     path: /pagopa-receipt-pdf-service/(.*)
     servicePort: 8080
-  serviceAccount:
+  serviceAccount: &serviceAccount
     name: "receipts-workload-identity"
-  azure:
+  azure:  &azure
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
   podAnnotations: {}
   podSecurityContext:
@@ -61,7 +61,7 @@ microservice-chart:
     capabilities:
       drop:
         - all
-  resources:
+  resources: &resources
     requests:
       memory: "512Mi"
       cpu: "300m"
@@ -86,7 +86,7 @@ microservice-chart:
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "70"
   fileConfig: {}
-  envConfig:
+  envConfig: &envConfig
     APP_NAME: "pdf-receipt-service"
     APP_ENVIRONMENT: "dev"
     WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
@@ -121,7 +121,7 @@ microservice-chart:
     CACHE_ATTACHMENT_DETAILS_MAX_SIZE: "10000"
     CACHE_ATTACHMENT_DETAILS_EXPIRE_AFTER_WRITE: "15s"
   envFieldRef:
-  envSecret:
+  envSecret: &envSecret
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
@@ -165,3 +165,23 @@ microservice-chart:
         pullPolicy: Always
       envConfig: {}
       envSecret: {}
+pagopa-receipt-pdf-service-helpdesk:
+  !!merge <<: *microservice-chart
+  fullnameOverride: "pagopa-receipt-pdf-service-helpdesk"
+  ingress:
+    !!merge <<: *ingress
+    path: /pagopa-receipt-pdf-service-helpdesk/(.*)
+  resources:
+    !!merge <<: *resources
+    requests:
+      memory: "512Mi"
+      cpu: "300m"
+    limits:
+      memory: "512Mi"
+      cpu: "300m"
+  envConfig:
+    !!merge <<: *envConfig
+    APP_NAME: "pdf-receipt-service-helpdesk"
+    WEBSITE_SITE_NAME: 'pagopareceiptpdfservicehelpdesk'
+  envSecret:
+    !!merge <<: *envSecret
