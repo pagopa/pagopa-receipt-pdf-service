@@ -15,8 +15,8 @@ import java.util.Base64;
 
 public class Aes256Utils {
 
-    private static String AES_SECRET_KEY = System.getenv().getOrDefault("AES_SECRET_KEY", "");
-    private static String AES_SALT = System.getenv().getOrDefault("AES_SALT", "");
+    private static String aesSecretKey = System.getenv().getOrDefault("AES_SECRET_KEY", "");
+    private static String aesSalt = System.getenv().getOrDefault("AES_SALT", "");
     private static final int KEY_LENGTH = 256;
     private static final int ITERATION_COUNT = 65536;
     public static final String PBKDF_2_WITH_HMAC_SHA_256 = "PBKDF2WithHmacSHA256";
@@ -35,8 +35,8 @@ public class Aes256Utils {
 
     /* Method used by test */
     public static void setKeys(String key, String salt) {
-        AES_SECRET_KEY = key;
-        AES_SALT = salt;
+        aesSecretKey = key;
+        aesSalt = salt;
     }
 
     public static String encrypt(String strToEncrypt) throws Aes256Exception {
@@ -49,7 +49,7 @@ public class Aes256Utils {
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF_2_WITH_HMAC_SHA_256);
-            KeySpec spec = new PBEKeySpec(AES_SECRET_KEY.toCharArray(), AES_SALT.getBytes(), ITERATION_COUNT, KEY_LENGTH);
+            KeySpec spec = new PBEKeySpec(aesSecretKey.toCharArray(), aesSalt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
             SecretKey tmp = factory.generateSecret(spec);
             SecretKeySpec secretKeySpec = new SecretKeySpec(tmp.getEncoded(), ALGORITHM);
 
@@ -76,7 +76,7 @@ public class Aes256Utils {
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF_2_WITH_HMAC_SHA_256);
-            KeySpec spec = new PBEKeySpec(AES_SECRET_KEY.toCharArray(), AES_SALT.getBytes(), ITERATION_COUNT, KEY_LENGTH);
+            KeySpec spec = new PBEKeySpec(aesSecretKey.toCharArray(), aesSalt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
             SecretKey tmp = factory.generateSecret(spec);
             SecretKeySpec secretKeySpec = new SecretKeySpec(tmp.getEncoded(), ALGORITHM);
 

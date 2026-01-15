@@ -130,6 +130,8 @@ microservice-chart:
     BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
     COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
     QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
+    AES_SECRET_KEY: "aes-secret-key"
+    AES_SALT: "aes-salt"
   keyvault:
     name: "pagopa-p-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
