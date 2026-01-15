@@ -1,5 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.resource;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
@@ -37,6 +38,7 @@ import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 @Tag(name = "Attachments", description = "Attachments operations")
 @Path("/messages")
 @LoggedAPI
+@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "attachments"})
 public class AttachmentResource {
 
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);

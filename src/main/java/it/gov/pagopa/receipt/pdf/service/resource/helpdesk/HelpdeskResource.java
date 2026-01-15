@@ -1,5 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.resource.helpdesk;
 
+import io.quarkus.arc.profile.IfBuildProfile;
 import it.gov.pagopa.receipt.pdf.service.client.BizCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
@@ -32,6 +33,7 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 @Tag(name = "Helpdesk", description = "Helpdesk operations")
 @Path("/helpdesk")
 @LoggedAPI
+@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "helpdesk"})
 public class HelpdeskResource {
     public static final String RECEIPT_NOT_FOUND_BY_EVENTID = "Unable to retrieve the receipt with eventId %s";
     public static final String LOG_ERROR_MESSAGE = "[{}] {}";
