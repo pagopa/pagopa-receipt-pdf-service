@@ -47,15 +47,23 @@ jobs:
 
       - name: Run Integration Tests
         shell: bash
+        env:
+          SUBKEY: ${{ secrets.SUBKEY }}
+          HELPDESK_SUBKEY: ${{ secrets.HELPDESK_SUBKEY }}
+          CUCUMBER_PUBLISH_TOKEN: ${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
+          RECEIPTS_STORAGE_CONN_STRING: ${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}
+          RECEIPTS_COSMOS_CONN_STRING: ${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}
+          BIZEVENTS_COSMOS_CONN_STRING: ${{ secrets.BIZEVENTS_COSMOS_CONN_STRING }}
+          TOKENIZER_API_KEY: ${{ secrets.TOKENIZER_API_KEY }}
         run: |
-          export SUBKEY=${{ secrets.SUBKEY }}
-          export HELPDESK_SUBKEY=${{ secrets.HELPDESK_SUBKEY }}
+          export SUBKEY='$SUBKEY'
+          export HELPDESK_SUBKEY='$HELPDESK_SUBKEY'
           export CANARY=${{ inputs.canary }}
-          export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
-          export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
-          export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
-          export BIZEVENTS_COSMOS_CONN_STRING='${{ secrets.BIZEVENTS_COSMOS_CONN_STRING }}'
-          export TOKENIZER_API_KEY='${{ secrets.TOKENIZER_API_KEY }}'
+          export CUCUMBER_PUBLISH_TOKEN='$CUCUMBER_PUBLISH_TOKEN'
+          export RECEIPTS_STORAGE_CONN_STRING='$RECEIPTS_STORAGE_CONN_STRING'
+          export RECEIPTS_COSMOS_CONN_STRING='$RECEIPTS_COSMOS_CONN_STRING'
+          export BIZEVENTS_COSMOS_CONN_STRING='$BIZEVENTS_COSMOS_CONN_STRING'
+          export TOKENIZER_API_KEY='$TOKENIZER_API_KEY'
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
