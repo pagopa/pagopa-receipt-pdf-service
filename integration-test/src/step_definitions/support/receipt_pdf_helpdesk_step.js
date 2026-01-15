@@ -115,7 +115,7 @@ Given('a biz event with id {string} and status {string} and organizationFiscalCo
 Given('a receipt with eventId {string} stored into receipt datastore', async function (id) {
     eventId = id;
     // prior cancellation to avoid dirty cases
-    await deleteDocumentFromReceiptsDatastore(id, id);
+    await deleteDocumentFromReceiptsDatastore(id);
 
     const receiptsStoreResponse = await createDocumentInReceiptsDatastore(id, "FISCAL_CODE", "PDF_NAME");
     assert.strictEqual(receiptsStoreResponse.statusCode, 201);
@@ -152,7 +152,7 @@ Given('a receipt-io-message with bizEventId {string} and messageId {string} stor
 Given('a cart with id {string} stored into cart datastore', async function (id) {
     cartId = id;
     // prior cancellation to avoid dirty cases
-    await deleteDocumentFromReceiptsCartDatastore(id, id);
+    await deleteDocumentFromReceiptsCartDatastore(id);
 
     let cartStoreResponse = await createDocumentInReceiptsCartDatastore(id, "PAYER_FISCAL_CODE", id + "_PAYER", "DEBTOR_FISCAL_CODE", id + "_DEBTOR", "pdfName" /* TODO */);
     assert.strictEqual(cartStoreResponse.statusCode, 201);

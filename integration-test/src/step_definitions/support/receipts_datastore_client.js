@@ -1,5 +1,5 @@
 const { CosmosClient } = require("@azure/cosmos");
-const { createReceipt, createCartReceipt, createReceiptError, createReceiptMessage, createReceiptCartError } = require("./common");
+const { createReceipt, createCartReceipt, createReceiptError, createReceiptMessage, createReceiptCartError, createReceiptCartMessage } = require("./common");
 
 const cosmos_db_conn_string = process.env.RECEIPTS_COSMOS_CONN_STRING || "";
 const databaseId = process.env.RECEIPT_COSMOS_DB_NAME;
@@ -31,7 +31,7 @@ async function createDocumentInReceiptsDatastore(id, fiscalCode, pdfName) {
 
 async function deleteDocumentFromReceiptsDatastore(id, partitionKey) {
     try {
-        return await receiptContainer.item(id, partitionKey).delete();
+        return await receiptContainer.item(id, id || partitionKey).delete();
     } catch (error) {
         if (error.code !== 404) {
             console.log(error)
@@ -51,7 +51,7 @@ async function createDocumentInReceiptErrorDatastore(id, status) {
 
 async function deleteDocumentFromReceiptsErrorDatastore(id, partitionKey) {
     try {
-        return await receiptErrorContainer.item(id, partitionKey).delete();
+        return await receiptErrorContainer.item(id, id || partitionKey).delete();
     } catch (error) {
         if (error.code !== 404) {
             console.log(error)
@@ -69,9 +69,9 @@ async function createDocumentInReceiptIoMessageDatastore(eventId, messageId) {
     }
 }
 
-async function deleteDocumentInReceiptIoMessageDatastore(id) {
+async function deleteDocumentInReceiptIoMessageDatastore(id, partitionKey) {
     try {
-        return await receiptMessageContainer.item(id, id).delete();
+        return await receiptMessageContainer.item(id, id || partitionKey).delete();
     } catch (error) {
         if (error.code !== 404) {
             console.log(error)
@@ -91,7 +91,7 @@ async function createDocumentInReceiptsCartDatastore(id, payerFiscalCode, payerB
 
 async function deleteDocumentFromReceiptsCartDatastore(id, partitionKey) {
     try {
-        return await receiptCartContainer.item(id, partitionKey).delete();
+        return await receiptCartContainer.item(id, id || partitionKey).delete();
     } catch (error) {
         if (error.code !== 404) {
             console.log(error)
@@ -100,8 +100,8 @@ async function deleteDocumentFromReceiptsCartDatastore(id, partitionKey) {
 }
 
 // CART RECEIPT ERROR
-async function createDocumentInReceiptsCartErrorDatastore(id) {
-    let receipt = createReceiptCartError(id);
+async function createDocumentInReceiptsCartErrorDatastore(id, status) {
+    let receipt = createReceiptCartError(id, status);
     try {
         return await receiptCartErrorContainer.items.create(receipt);
     } catch (err) {
@@ -111,7 +111,7 @@ async function createDocumentInReceiptsCartErrorDatastore(id) {
 
 async function deleteDocumentFromReceiptsCartErrorDatastore(id, partitionKey) {
     try {
-        return await receiptCartErrorContainer.item(id, partitionKey).delete();
+        return await receiptCartErrorContainer.item(id, id || partitionKey).delete();
     } catch (error) {
         if (error.code !== 404) {
             console.log(error)
@@ -121,7 +121,7 @@ async function deleteDocumentFromReceiptsCartErrorDatastore(id, partitionKey) {
 
 //CART RECEIPT MESSAGE
 async function createDocumentInReceiptCartIoMessageDatastore(eventId, messageId) {
-    let message = createReceiptMessage(eventId, messageId);
+    let message = createReceiptCartMessage(eventId, messageId);
     try {
         return await receiptCartMessageContainer.items.create(message);
     } catch (err) {
@@ -129,9 +129,9 @@ async function createDocumentInReceiptCartIoMessageDatastore(eventId, messageId)
     }
 }
 
-async function deleteDocumentInReceiptCartIoMessageDatastore(id) {
+async function deleteDocumentInReceiptCartIoMessageDatastore(id, partitionKey) {
     try {
-        return await receiptCartMessageContainer.item(id, id).delete();
+        return await receiptCartMessageContainer.item(id, id || partitionKey).delete();
     } catch (error) {
         if (error.code !== 404) {
             console.log(error)

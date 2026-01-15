@@ -42,7 +42,7 @@ Feature: All about payment events to recover managed by Azure functions receipt-
   Scenario: getCartReceiptByOrganizationFiscalCodeAndIUV API return receipt stored on datastore
     Given a cart with id "receipt-cart-helpdesk-int-test-id-2" stored into cart datastore
     And a biz event with id "receipt-cart-helpdesk-int-test-id-2_PAYER" and status "DONE" and organizationFiscalCode "intTestOrgCode" and IUV "intTestIuv" stored on biz-events datastore
-    When getReceiptByOrganizationFiscalCodeAndIUV API is called with organizationFiscalCode "intTestOrgCode" and IUV "intTestIuv"
+    When getCartReceiptByOrganizationFiscalCodeAndIUV API is called with organizationFiscalCode "intTestOrgCode" and IUV "intTestIuv"
     Then the api response has a 200 Http status
     And the receipt has cartId "receipt-cart-helpdesk-int-test-id-2"
 

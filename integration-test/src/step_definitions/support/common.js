@@ -150,6 +150,15 @@ function createReceiptMessage(eventId, messageId) {
 	}
 }
 
+function createReceiptCartMessage(eventId, messageId) {
+	return {
+		"messageId": messageId,
+		"eventId": eventId,
+		"id": messageId,
+		"cartId": messageId
+	}
+}
+
 function createReceiptCartError(id, status) {
 	return {
 		"id": id,
@@ -193,5 +202,6 @@ module.exports = {
 	createReceiptMessage,
 	createReceiptCartError,
 	createEventWithIUVAndOrgCode,
-	createEvent
+	createEvent,
+	createReceiptCartMessage
 }
