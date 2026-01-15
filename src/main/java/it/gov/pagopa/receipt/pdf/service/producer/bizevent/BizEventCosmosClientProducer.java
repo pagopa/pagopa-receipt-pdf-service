@@ -7,6 +7,8 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.Produces;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.util.Collections;
+
 /**
  * Producer class for {@link CosmosClient} bean
  */
@@ -15,9 +17,10 @@ public class BizEventCosmosClientProducer {
 
     @ConfigProperty(name = "cosmos.bizevent.key")
     String azureKey;
-
     @ConfigProperty(name = "cosmos.bizevent.endpoint")
     String serviceEndpoint;
+    @ConfigProperty(name = "cosmos.preferred.region")
+    String preferredRegion;
 
     BizEventCosmosClientProducer() {
     }
@@ -28,6 +31,7 @@ public class BizEventCosmosClientProducer {
     public CosmosClient cosmosBizEventClient() {
         return new CosmosClientBuilder()
                 .endpoint(serviceEndpoint)
+                .preferredRegions(Collections.singletonList(preferredRegion))
                 .key(azureKey)
                 .buildClient();
     }
