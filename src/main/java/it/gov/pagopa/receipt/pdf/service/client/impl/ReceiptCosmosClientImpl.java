@@ -82,7 +82,7 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         String query = String.format("SELECT * FROM c WHERE c.messageId = '%s'", messageId);
 
         //Query the container
-        CosmosPagedIterable<IOMessage> queryResponse = containerReceiptsIOMessagesEvent
+        CosmosPagedIterable<IOMessage> queryResponse = this.containerReceiptsIOMessagesEvent
                 .queryItems(query, new CosmosQueryRequestOptions(), IOMessage.class);
 
         if (queryResponse.iterator().hasNext()) {

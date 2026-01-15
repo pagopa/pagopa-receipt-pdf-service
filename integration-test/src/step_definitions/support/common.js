@@ -145,7 +145,8 @@ function createReceiptError(id, status) {
 function createReceiptMessage(eventId, messageId) {
 	return {
 		"messageId": messageId,
-		"eventId": eventId
+		"eventId": eventId,
+		"id": messageId
 	}
 }
 
