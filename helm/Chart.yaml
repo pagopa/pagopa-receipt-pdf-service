@@ -5,6 +5,11 @@ type: application
 version: 0.70.0
 appVersion: 0.13.2-1-PAGOPA-3454-helpdesk-api-cart
 dependencies:
-  - name: microservice-chart
-    version: 8.0.2
-    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+    - name: microservice-chart
+      version: 8.0.2
+      repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+      alias: pagopa-receipt-pdf-service
+    - name: microservice-chart
+      version: 8.0.2
+      repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+      alias: pagopa-receipt-pdf-service-helpdesk
