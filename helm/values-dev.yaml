@@ -1,7 +1,7 @@
 microservice-chart: &microservice-chart
   namespace: "receipts"
   nameOverride: ""
-  fullnameOverride: "pagopa-receipt-pdf-service"
+  fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
     tag: "0.13.2-2-PAGOPA-3454-helpdesk-api-cart"
