@@ -38,7 +38,7 @@ import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 @Tag(name = "Attachments", description = "Attachments operations")
 @Path("/messages")
 @LoggedAPI
-@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "attachments"})
+@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "attachments"})
 public class AttachmentResource {
 
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);
@@ -49,7 +49,7 @@ public class AttachmentResource {
     private static final String REPLACEMENT = "_";
     private static final int FISCAL_CODE_LENGTH = 16;
 
-    private AttachmentsService attachmentsService;
+    private final AttachmentsService attachmentsService;
 
     @Inject
     public AttachmentResource(AttachmentsService attachmentsService) {

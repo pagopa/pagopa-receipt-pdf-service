@@ -33,7 +33,7 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 @Tag(name = "Helpdesk", description = "Helpdesk operations")
 @Path("/helpdesk")
 @LoggedAPI
-@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "helpdesk"})
+@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "helpdesk"})
 public class HelpdeskResource {
     public static final String RECEIPT_NOT_FOUND_BY_EVENTID = "Unable to retrieve the receipt with eventId %s";
     public static final String LOG_ERROR_MESSAGE = "[{}] {}";
@@ -180,7 +180,7 @@ public class HelpdeskResource {
     }
 
     // Cart Receipts
-    @Path("/receipts/cart/{cart-id}")
+    @Path("/cart-receipts/{cart-id}")
     @GET
     public RestResponse<Object> getCartReceipt(
             @PathParam("cart-id") String cartId) {
@@ -200,7 +200,7 @@ public class HelpdeskResource {
     }
 
 
-    @Path("/receipts/cart/organizations/{organization-fiscal-code}/iuvs/{iuv}")
+    @Path("/cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}")
     @GET
     public RestResponse<Object> getCartReceiptByOrganizationFiscalCodeAndIUV(
             @PathParam("organization-fiscal-code") String organizationFiscalCode,
@@ -235,7 +235,7 @@ public class HelpdeskResource {
         }
     }
 
-    @Path("/receipts/cart/io-message/{message-id}")
+    @Path("/cart-receipts/io-message/{message-id}")
     @GET
     public RestResponse<Object> getCartReceiptMessage(
             @PathParam("message-id") String messageId) {
@@ -256,7 +256,7 @@ public class HelpdeskResource {
         }
     }
 
-    @Path("/errors-toreview/cart/{cart-id}")
+    @Path("/cart-errors-toreview/{cart-id}")
     @GET
     public RestResponse<Object> getCartReceiptErrorByCartId(
             @PathParam("cart-id") String cartId) {

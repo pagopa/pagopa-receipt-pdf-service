@@ -74,7 +74,7 @@ async function getReceiptPdf(fileName) {
 }
 
 async function getCartReceipt(id) {
-	let endpoint = process.env.GET_CART_RECEIPT_ENDPOINT || "receipts/cart/{cart-id}";
+	let endpoint = process.env.GET_CART_RECEIPT_ENDPOINT || "cart-receipts/{cart-id}";
 	endpoint = endpoint.replace("{cart-id}", id);
 
 	return await axios.get(helpdesk_url + endpoint)
@@ -87,7 +87,7 @@ async function getCartReceipt(id) {
 }
 
 async function getCartReceiptByOrganizationFiscalCodeAndIUV(orgCode, iuv) {
-	let endpoint = process.env.GET_CART_RECEIPT_BY_ORGCODE_AND_IUV_ENDPOINT || "receipts/cart/organizations/{organization-fiscal-code}/iuvs/{iuv}";
+	let endpoint = process.env.GET_CART_RECEIPT_BY_ORGCODE_AND_IUV_ENDPOINT || "cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}";
 	endpoint = endpoint.replace("{organization-fiscal-code}", orgCode);
 	endpoint = endpoint.replace("{iuv}", iuv);
 
@@ -101,7 +101,7 @@ async function getCartReceiptByOrganizationFiscalCodeAndIUV(orgCode, iuv) {
 }
 
 async function getCartReceiptMessage(id) {
-	let endpoint = process.env.GET_CART_RECEIPT_ENDPOINT || "receipts/cart/io-message/{message-id}";
+	let endpoint = process.env.GET_CART_RECEIPT_ENDPOINT || "cart-receipts/io-message/{message-id}";
 	endpoint = endpoint.replace("{message-id}", id);
 
 	return await axios.get(helpdesk_url + endpoint)
@@ -114,7 +114,7 @@ async function getCartReceiptMessage(id) {
 }
 
 async function getCartReceiptError(id) {
-	let endpoint = process.env.GET_CART_RECEIPT_ERROR_ENDPOINT || "errors-toreview/cart/{cart-id}";
+	let endpoint = process.env.GET_CART_RECEIPT_ERROR_ENDPOINT || "cart-errors-toreview/{cart-id}";
 	endpoint = endpoint.replace("{cart-id}", id);
 
 	return await axios.get(helpdesk_url + endpoint)
