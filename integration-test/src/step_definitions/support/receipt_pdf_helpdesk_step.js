@@ -63,8 +63,8 @@ After(async function () {
         await deleteDocumentFromReceiptsCartDatastore(receipt.id);
     }
     if (receiptError != null) {
-        await deleteDocumentFromReceiptsErrorDatastore(receipt.id);
-        await deleteDocumentFromReceiptsCartErrorDatastore(receipt.id);
+        await deleteDocumentFromReceiptsErrorDatastore(receiptError.id);
+        await deleteDocumentFromReceiptsCartErrorDatastore(receiptError.id);
     }
     if (receiptPdfFileName != null) {
         await deleteBlob(receiptPdfFileName);
@@ -112,12 +112,12 @@ Given('a biz event with id {string} and status {string} and organizationFiscalCo
     assert.strictEqual(bizEventStoreResponse.statusCode, 201);
 });
 
-Given('a receipt with eventId {string} and status {string} stored into receipt datastore', async function (id, status) {
+Given('a receipt with eventId {string} stored into receipt datastore', async function (id) {
     eventId = id;
     // prior cancellation to avoid dirty cases
-    await deleteDocumentFromReceiptsDatastore(id);
+    await deleteDocumentFromReceiptsDatastore(id, id);
 
-    let receiptsStoreResponse = await createDocumentInReceiptsDatastore(id, status);
+    const receiptsStoreResponse = await createDocumentInReceiptsDatastore(id, "FISCAL_CODE", "PDF_NAME");
     assert.strictEqual(receiptsStoreResponse.statusCode, 201);
 });
 

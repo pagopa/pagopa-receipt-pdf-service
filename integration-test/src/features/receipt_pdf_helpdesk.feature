@@ -1,13 +1,13 @@
 Feature: All about payment events to recover managed by Azure functions receipt-pdf-helpdesk
 
   Scenario: getReceipt API return receipt stored on datastore
-    Given a receipt with eventId "receipt-helpdesk-int-test-id-1" and status "TO_REVIEW" stored into receipt datastore
+    Given a receipt with eventId "receipt-helpdesk-int-test-id-1" stored into receipt datastore
     When getReceipt API is called with eventId "receipt-helpdesk-int-test-id-1"
     Then the api response has a 200 Http status
     And the receipt has eventId "receipt-helpdesk-int-test-id-1"
 
   Scenario: getReceiptByOrganizationFiscalCodeAndIUV API return receipt stored on datastore
-    Given a receipt with eventId "receipt-helpdesk-int-test-id-2" and status "TO_REVIEW" stored into receipt datastore
+    Given a receipt with eventId "receipt-helpdesk-int-test-id-2" stored into receipt datastore
     And a biz event with id "receipt-helpdesk-int-test-id-2" and status "DONE" and organizationFiscalCode "intTestOrgCode" and IUV "intTestIuv" stored on biz-events datastore
     When getReceiptByOrganizationFiscalCodeAndIUV API is called with organizationFiscalCode "intTestOrgCode" and IUV "intTestIuv"
     Then the api response has a 200 Http status

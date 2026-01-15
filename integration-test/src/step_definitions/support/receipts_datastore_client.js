@@ -25,6 +25,7 @@ async function createDocumentInReceiptsDatastore(id, fiscalCode, pdfName) {
         return await receiptContainer.items.create(receipt);
     } catch (err) {
         console.log(err);
+        throw err;
     }
 }
 
@@ -151,7 +152,7 @@ async function deleteMultipleDocumentsFromReceiptsDatastoreByEventId(eventId) {
     let documents = await getDocumentFromReceiptsDatastoreByEventId(eventId);
 
     documents?.resources?.forEach(el => {
-        deleteDocumentFromReceiptsDatastore(el.id);
+        deleteDocumentFromReceiptsDatastore(el.id, el.id);
     })
 }
 
@@ -167,7 +168,7 @@ async function deleteMultipleDocumentFromReceiptErrorDatastoreByEventId(id) {
     let documents = await getDocumentFromReceiptsErrorDatastoreByBizEventId(id);
 
     documents?.resources?.forEach(el => {
-        deleteDocumentFromReceiptsErrorDatastore(el.id);
+        deleteDocumentFromReceiptsErrorDatastore(el.id, el.id);
     })
 }
 

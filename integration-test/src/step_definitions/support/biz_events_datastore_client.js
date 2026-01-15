@@ -9,7 +9,7 @@ const client = new CosmosClient(cosmos_db_conn_string);
 const container = client.database(databaseId).container(containerId);
 
 async function createDocumentInBizEventsDatastore(id, status) {
-    let event = createEvent(id, status);
+    let event = createEvent(id, status, "org", "iuv");
     try {
         return await container.items.create(event);
     } catch (err) {
