@@ -37,5 +37,5 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-          helm_upgrade_options: '--debug --set pagopa-receipt-pdf-service.azure.workloadIdentityClientId=${{vars.WORKLOAD_IDENTITY_ID}} --set pagopa-receipt-pdf-service-helpdesk.azure.workloadIdentityClientId=${{vars.WORKLOAD_IDENTITY_ID}}'
+          helm_upgrade_options: '--debug --set microservice-chart.azure.workloadIdentityClientId=${{vars.WORKLOAD_IDENTITY_ID}} --set pagopa-receipt-pdf-service-helpdesk.azure.workloadIdentityClientId=${{vars.WORKLOAD_IDENTITY_ID}}'
           timeout: '15m0s'

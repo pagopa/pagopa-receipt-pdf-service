@@ -1,7 +1,7 @@
 microservice-chart: &microservice-chart
   namespace: 'receipts'
   nameOverride: ''
-  fullnameOverride: ''
+  fullnameOverride: 'pagopa-receipt-pdf-service'
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
     tag: '0.13.2-2-PAGOPA-3454-helpdesk-api-cart'
@@ -120,7 +120,7 @@ microservice-chart: &microservice-chart
     CACHE_ATTACHMENT_DETAILS_INITIAL_CAPACITY: '10000'
     CACHE_ATTACHMENT_DETAILS_MAX_SIZE: '50000'
     CACHE_ATTACHMENT_DETAILS_EXPIRE_AFTER_WRITE: '1h'
-    QUARKUS_PROFILE: 'uat'
+    QUARKUS_PROFILE: 'attachments'
   envSecret: &envSecret
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-u-connection-string'
@@ -165,18 +165,6 @@ microservice-chart: &microservice-chart
         pullPolicy: Always
       envConfig: {}
       envSecret: {}
-pagopa-receipt-pdf-service:
-  !!merge <<: *microservice-chart
-  fullnameOverride: 'pagopa-receipt-pdf-service'
-  ingress:
-    !!merge <<: *ingress
-  resources:
-    !!merge <<: *resources
-  envConfig:
-    !!merge <<: *envConfig
-    QUARKUS_PROFILE: 'attachments'
-  envSecret:
-    !!merge <<: *envSecret
 pagopa-receipt-pdf-service-helpdesk:
   !!merge <<: *microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service-helpdesk'
