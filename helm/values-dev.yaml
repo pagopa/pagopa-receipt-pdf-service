@@ -120,6 +120,7 @@ microservice-chart: &microservice-chart
     CACHE_ATTACHMENT_DETAILS_INITIAL_CAPACITY: "10"
     CACHE_ATTACHMENT_DETAILS_MAX_SIZE: "10000"
     CACHE_ATTACHMENT_DETAILS_EXPIRE_AFTER_WRITE: "15s"
+    QUARKUS_PROFILE: "dev"
   envSecret: &envSecret
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"

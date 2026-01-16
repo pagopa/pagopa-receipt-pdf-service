@@ -131,6 +131,7 @@ microservice-chart: &microservice-chart
     QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
     AES_SECRET_KEY: "aes-secret-key"
     AES_SALT: "aes-salt"
+    QUARKUS_PROFILE: "prod"
   keyvault:
     name: "pagopa-p-receipts-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
