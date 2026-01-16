@@ -17,7 +17,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
@@ -53,6 +59,26 @@ public class HelpdeskResource {
     }
 
     // Receipts
+    @Operation(
+            summary = "Get Receipt",
+            description = "Retrieve the receipt document by event id"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = Receipt.class)
+                            )
+                    )
+            }
+    )
     @Path("/receipts/{event-id}")
     @GET
     public RestResponse<Object> getReceipt(
@@ -74,6 +100,26 @@ public class HelpdeskResource {
         }
     }
 
+    @Operation(
+            summary = "Get Receipt by organization fiscal code and iuv",
+            description = "Retrieve the receipt document by organization fiscal code and iuv"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = Receipt.class)
+                            )
+                    )
+            }
+    )
     @Path("/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}")
     @GET
     public RestResponse<Object> getReceiptByOrganizationFiscalCodeAndIUV(
@@ -111,6 +157,26 @@ public class HelpdeskResource {
         }
     }
 
+    @Operation(
+            summary = "Get Receipt Message",
+            description = "Retrieve the receipt-message document by message id"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = IOMessage.class)
+                            )
+                    )
+            }
+    )
     @Path("/receipts/io-message/{message-id}")
     @GET
     public RestResponse<Object> getReceiptMessage(
@@ -132,6 +198,25 @@ public class HelpdeskResource {
         }
     }
 
+    @Operation(
+            summary = "Get Receipt PDF",
+            description = "Retrieve the receipt pdf by file name"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_OCTET_STREAM
+                            )
+                    )
+            }
+    )
     @Path("pdf-receipts/{file-name}")
     @GET
     public RestResponse<Object> getReceiptPdf(
@@ -154,6 +239,26 @@ public class HelpdeskResource {
         }
     }
 
+    @Operation(
+            summary = "Get Receipt Error by event id",
+            description = "Retrieve the receipt-error document by event id"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = ReceiptError.class)
+                            )
+                    )
+            }
+    )
     @Path("/errors-toreview/{bizevent-id}")
     @GET
     public RestResponse<Object> getReceiptErrorByEventId(
@@ -180,6 +285,26 @@ public class HelpdeskResource {
     }
 
     // Cart Receipts
+    @Operation(
+            summary = "Get CartReceipt",
+            description = "Retrieve the cart-receipt document by cart id"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = CartForReceipt.class)
+                            )
+                    )
+            }
+    )
     @Path("/cart-receipts/{cart-id}")
     @GET
     public RestResponse<Object> getCartReceipt(
@@ -199,7 +324,26 @@ public class HelpdeskResource {
         }
     }
 
-
+    @Operation(
+            summary = "Get CartReceipt by organization fiscal code and iuv",
+            description = "Retrieve the cart-receipt document by organization fiscal code and iuv"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = CartForReceipt.class)
+                            )
+                    )
+            }
+    )
     @Path("/cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}")
     @GET
     public RestResponse<Object> getCartReceiptByOrganizationFiscalCodeAndIUV(
@@ -235,6 +379,26 @@ public class HelpdeskResource {
         }
     }
 
+    @Operation(
+            summary = "Get CartReceipt Message",
+            description = "Retrieve the cart-receipt-message document by message id"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = IOMessage.class)
+                            )
+                    )
+            }
+    )
     @Path("/cart-receipts/io-message/{message-id}")
     @GET
     public RestResponse<Object> getCartReceiptMessage(
@@ -256,6 +420,26 @@ public class HelpdeskResource {
         }
     }
 
+    @Operation(
+            summary = "Get CartReceipt Error",
+            description = "Retrieve the cart-receipt-error document by cart id"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = CartReceiptError.class)
+                            )
+                    )
+            }
+    )
     @Path("/cart-errors-toreview/{cart-id}")
     @GET
     public RestResponse<Object> getCartReceiptErrorByCartId(

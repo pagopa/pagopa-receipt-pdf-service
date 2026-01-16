@@ -2,6 +2,110 @@
   "openapi" : "3.0.3",
   "components" : {
     "schemas" : {
+      "CartForReceipt" : {
+        "type" : "object",
+        "properties" : {
+          "eventId" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          },
+          "payload" : {
+            "$ref" : "#/components/schemas/Payload"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/CartStatusType"
+          },
+          "numRetry" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "notificationNumRetry" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "reasonErr" : {
+            "$ref" : "#/components/schemas/ReasonError"
+          },
+          "inserted_at" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "generated_at" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "notified_at" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        }
+      },
+      "CartItem" : {
+        "type" : "object",
+        "properties" : {
+          "subject" : {
+            "type" : "string"
+          },
+          "payeeName" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CartPayment" : {
+        "type" : "object",
+        "properties" : {
+          "bizEventId" : {
+            "type" : "string"
+          },
+          "subject" : {
+            "type" : "string"
+          },
+          "payeeName" : {
+            "type" : "string"
+          },
+          "debtorFiscalCode" : {
+            "type" : "string"
+          },
+          "amount" : {
+            "type" : "string"
+          },
+          "mdAttach" : {
+            "$ref" : "#/components/schemas/ReceiptMetadata"
+          },
+          "messageDebtor" : {
+            "$ref" : "#/components/schemas/MessageData"
+          },
+          "reasonErrDebtor" : {
+            "$ref" : "#/components/schemas/ReasonError"
+          }
+        }
+      },
+      "CartReceiptError" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "messagePayload" : {
+            "type" : "string"
+          },
+          "messageError" : {
+            "type" : "string"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ReceiptErrorStatusType"
+          }
+        }
+      },
+      "CartStatusType" : {
+        "enum" : [ "WAITING_FOR_BIZ_EVENT", "NOT_QUEUE_SENT", "INSERTED", "RETRY", "GENERATED", "SIGNED", "FAILED", "IO_NOTIFIED", "IO_ERROR_TO_NOTIFY", "IO_NOTIFIER_RETRY", "UNABLE_TO_SEND", "NOT_TO_NOTIFY", "TO_REVIEW" ],
+        "type" : "string"
+      },
       "ErrorResponse" : {
         "type" : "object",
         "properties" : {
@@ -24,6 +128,57 @@
           "instance" : {
             "type" : "string",
             "example" : "PDFS-500"
+          }
+        }
+      },
+      "EventData" : {
+        "type" : "object",
+        "properties" : {
+          "payerFiscalCode" : {
+            "type" : "string"
+          },
+          "debtorFiscalCode" : {
+            "type" : "string"
+          },
+          "transactionCreationDate" : {
+            "type" : "string"
+          },
+          "amount" : {
+            "type" : "string"
+          },
+          "cart" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CartItem"
+            }
+          }
+        }
+      },
+      "IOMessage" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "messageId" : {
+            "type" : "string"
+          },
+          "eventId" : {
+            "type" : "string"
+          },
+          "userType" : {
+            "$ref" : "#/components/schemas/UserType"
+          }
+        }
+      },
+      "IOMessageData" : {
+        "type" : "object",
+        "properties" : {
+          "idMessageDebtor" : {
+            "type" : "string"
+          },
+          "idMessagePayer" : {
+            "type" : "string"
           }
         }
       },
@@ -54,6 +209,163 @@
             "example" : "dev"
           }
         }
+      },
+      "MessageData" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "subject" : {
+            "type" : "string"
+          },
+          "markdown" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Payload" : {
+        "type" : "object",
+        "properties" : {
+          "payerFiscalCode" : {
+            "type" : "string"
+          },
+          "transactionCreationDate" : {
+            "type" : "string"
+          },
+          "totalNotice" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalAmount" : {
+            "type" : "string"
+          },
+          "mdAttachPayer" : {
+            "$ref" : "#/components/schemas/ReceiptMetadata"
+          },
+          "messagePayer" : {
+            "$ref" : "#/components/schemas/MessageData"
+          },
+          "cart" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CartPayment"
+            }
+          },
+          "reasonErrPayer" : {
+            "$ref" : "#/components/schemas/ReasonError"
+          }
+        }
+      },
+      "ReasonError" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Receipt" : {
+        "type" : "object",
+        "properties" : {
+          "eventId" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          },
+          "eventData" : {
+            "$ref" : "#/components/schemas/EventData"
+          },
+          "ioMessageData" : {
+            "$ref" : "#/components/schemas/IOMessageData"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ReceiptStatusType"
+          },
+          "mdAttach" : {
+            "$ref" : "#/components/schemas/ReceiptMetadata"
+          },
+          "mdAttachPayer" : {
+            "$ref" : "#/components/schemas/ReceiptMetadata"
+          },
+          "numRetry" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "reasonErr" : {
+            "$ref" : "#/components/schemas/ReasonError"
+          },
+          "reasonErrPayer" : {
+            "$ref" : "#/components/schemas/ReasonError"
+          },
+          "notificationNumRetry" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "inserted_at" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "generated_at" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "notified_at" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        }
+      },
+      "ReceiptError" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "bizEventId" : {
+            "type" : "string"
+          },
+          "messagePayload" : {
+            "type" : "string"
+          },
+          "messageError" : {
+            "type" : "string"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ReceiptErrorStatusType"
+          }
+        }
+      },
+      "ReceiptErrorStatusType" : {
+        "enum" : [ "TO_REVIEW", "REVIEWED", "NOT_TO_RETRY", "REQUEUED" ],
+        "type" : "string"
+      },
+      "ReceiptMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ReceiptStatusType" : {
+        "enum" : [ "NOT_QUEUE_SENT", "INSERTED", "RETRY", "GENERATED", "SIGNED", "FAILED", "IO_NOTIFIED", "IO_ERROR_TO_NOTIFY", "IO_NOTIFIER_RETRY", "UNABLE_TO_SEND", "NOT_TO_NOTIFY" ],
+        "type" : "string"
+      },
+      "UserType" : {
+        "enum" : [ "DEBTOR", "PAYER" ],
+        "type" : "string"
       }
     },
     "responses" : {
@@ -114,11 +426,11 @@
       }
     }
   },
-  "info": {
-    "title": "PagoPa PDF Receipt Service (local)",
+  "info" : {
+    "title" : "PagoPa PDF Receipt Service (local)",
     "version": "0.13.2-4-PAGOPA-3454-helpdesk-api-cart",
-    "description": "Expose APIs used by IO backend to retrieved payment receipts",
-    "termsOfService": "https://www.pagopa.gov.it/"
+    "description" : "Expose APIs used by IO backend to retrieved payment receipts",
+    "termsOfService" : "https://www.pagopa.gov.it/"
   },
   "tags" : [ {
     "name" : "Helpdesk",
@@ -130,6 +442,8 @@
   "paths" : {
     "/helpdesk/cart-errors-toreview/{cart-id}" : {
       "get" : {
+        "summary" : "Get CartReceipt Error",
+        "description" : "Retrieve the cart-receipt-error document by cart id",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "cart-id",
@@ -140,20 +454,32 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/CartReceiptError"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Cart Receipt Error By Cart Id"
+        }
       }
     },
     "/helpdesk/cart-receipts/io-message/{message-id}" : {
       "get" : {
+        "summary" : "Get CartReceipt Message",
+        "description" : "Retrieve the cart-receipt-message document by message id",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "message-id",
@@ -164,20 +490,32 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/IOMessage"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Cart Receipt Message"
+        }
       }
     },
     "/helpdesk/cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}" : {
       "get" : {
+        "summary" : "Get CartReceipt by organization fiscal code and iuv",
+        "description" : "Retrieve the cart-receipt document by organization fiscal code and iuv",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "iuv",
@@ -195,20 +533,32 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/CartForReceipt"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Cart Receipt By Organization Fiscal Code And IUV"
+        }
       }
     },
     "/helpdesk/cart-receipts/{cart-id}" : {
       "get" : {
+        "summary" : "Get CartReceipt",
+        "description" : "Retrieve the cart-receipt document by cart id",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "cart-id",
@@ -219,20 +569,32 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/CartForReceipt"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Cart Receipt"
+        }
       }
     },
     "/helpdesk/errors-toreview/{bizevent-id}" : {
       "get" : {
+        "summary" : "Get Receipt Error by event id",
+        "description" : "Retrieve the receipt-error document by event id",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "bizevent-id",
@@ -243,20 +605,32 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReceiptError"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Receipt Error By Event Id"
+        }
       }
     },
     "/helpdesk/pdf-receipts/{file-name}" : {
       "get" : {
+        "summary" : "Get Receipt PDF",
+        "description" : "Retrieve the receipt pdf by file name",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "file-name",
@@ -267,20 +641,28 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
-              "application/json" : {
-                "schema" : { }
-              }
+              "application/octet-stream" : { }
             }
           }
-        },
-        "summary" : "Get Receipt Pdf"
+        }
       }
     },
     "/helpdesk/receipts/io-message/{message-id}" : {
       "get" : {
+        "summary" : "Get Receipt Message",
+        "description" : "Retrieve the receipt-message document by message id",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "message-id",
@@ -291,20 +673,32 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/IOMessage"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Receipt Message"
+        }
       }
     },
     "/helpdesk/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}" : {
       "get" : {
+        "summary" : "Get Receipt by organization fiscal code and iuv",
+        "description" : "Retrieve the receipt document by organization fiscal code and iuv",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "iuv",
@@ -322,20 +716,32 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/Receipt"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Receipt By Organization Fiscal Code And IUV"
+        }
       }
     },
     "/helpdesk/receipts/{event-id}" : {
       "get" : {
+        "summary" : "Get Receipt",
+        "description" : "Retrieve the receipt document by event id",
         "tags" : [ "Helpdesk" ],
         "parameters" : [ {
           "name" : "event-id",
@@ -346,16 +752,26 @@
           }
         } ],
         "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
+          },
           "200" : {
-            "description" : "OK",
+            "description" : "Success",
             "content" : {
               "application/json" : {
-                "schema" : { }
+                "schema" : {
+                  "$ref" : "#/components/schemas/Receipt"
+                }
               }
             }
           }
-        },
-        "summary" : "Get Receipt"
+        }
       }
     },
     "/info" : {
