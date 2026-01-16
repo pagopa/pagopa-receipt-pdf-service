@@ -100,30 +100,6 @@ class CartReceiptCosmosClientImplTest {
 
     @SneakyThrows
     @Test
-    void getCartReceiptFromEventIdSuccess() {
-        CartForReceipt cart = new CartForReceipt();
-
-        doReturn(true).when(iteratorCartReceiptMock).hasNext();
-        doReturn(cart).when(iteratorCartReceiptMock).next();
-
-        CartForReceipt result = sut.getCartReceiptFromEventId("eventId");
-
-        assertEquals(cart, result);
-    }
-
-    @SneakyThrows
-    @Test
-    void getCartReceiptFromEventIdNotFound() {
-        doReturn(false).when(iteratorCartReceiptMock).hasNext();
-
-        CartNotFoundException e = assertThrows(CartNotFoundException.class, () -> sut.getCartReceiptFromEventId("eventId"));
-
-        assertNotNull(e);
-        assertEquals(AppErrorCodeEnum.PDFS_802, e.getErrorCode());
-    }
-
-    @SneakyThrows
-    @Test
     void getCartIoMessageSuccess() {
         IOMessage ioMessage = new IOMessage();
 

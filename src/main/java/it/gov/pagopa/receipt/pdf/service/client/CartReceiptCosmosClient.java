@@ -18,15 +18,6 @@ public interface CartReceiptCosmosClient {
     CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException;
 
     /**
-     * This method retrieves the cart document from the CosmosDB database.
-     *
-     * @param eventId the id of the BizEvent contained in the cart to be retrieved
-     * @return the cart for receipt
-     * @throws CartNotFoundException in case cart receipt is not found
-     */
-    CartForReceipt getCartReceiptFromEventId(String eventId) throws CartNotFoundException;
-
-    /**
      * Retrieve cart document from CosmosDB database
      *
      * @param messageId IO Message id

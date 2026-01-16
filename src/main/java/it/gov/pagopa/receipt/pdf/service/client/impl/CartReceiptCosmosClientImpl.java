@@ -60,27 +60,6 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
         return queryResponse.iterator().next();
     }
 
-    public CartForReceipt getCartReceiptFromEventId(String eventId) throws CartNotFoundException {
-        // Build query
-        String query = String.format("SELECT * FROM c WHERE ARRAY_CONTAINS(c.payload.cart, { 'bizEventId' : '%s'}, true)", eventId);
-
-        // Query the container
-        CosmosPagedIterable<CartForReceipt> queryResponse =
-                this.containerCartReceipts.queryItems(
-                        query, new CosmosQueryRequestOptions(), CartForReceipt.class);
-
-        if (!queryResponse.iterator().hasNext()) {
-            String errMsg =
-                    String.format(
-                            "Cart with eventId %s not found in the defined container: %s",
-                            sanitize(eventId), containerCartReceipts.getId());
-            logger.error(errMsg);
-            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_802, errMsg, eventId);
-        }
-        return queryResponse.iterator().next();
-    }
-
-
     @Override
     public IOMessage getCartIoMessage(String messageId) throws IoMessageNotFoundException {
 

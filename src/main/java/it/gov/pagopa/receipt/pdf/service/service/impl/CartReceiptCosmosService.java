@@ -59,7 +59,6 @@ public class CartReceiptCosmosService {
         return message;
     }
 
-
     public CartReceiptError getCartReceiptError(String cartId) throws CartNotFoundException {
         if (cartId == null || cartId.isBlank()) {
             throw new IllegalArgumentException("Event ID cannot be null or empty");
