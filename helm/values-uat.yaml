@@ -1,10 +1,10 @@
 microservice-chart: &microservice-chart
-  namespace: "receipts"
-  nameOverride: ""
-  fullnameOverride: ""
+  namespace: 'receipts'
+  nameOverride: ''
+  fullnameOverride: ''
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: "0.13.2-2-PAGOPA-3454-helpdesk-api-cart"
+    tag: '0.13.2-2-PAGOPA-3454-helpdesk-api-cart'
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -44,11 +44,11 @@ microservice-chart: &microservice-chart
       - 12345 #jmx-exporter
   ingress: &ingress
     create: true
-    host: "weuuat.receipts.internal.uat.platform.pagopa.it"
+    host: 'weuuat.receipts.internal.uat.platform.pagopa.it'
     path: /pagopa-receipt-pdf-service/(.*)
     servicePort: 8080
   serviceAccount:
-    name: "receipts-workload-identity"
+    name: 'receipts-workload-identity'
   azure:
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
   podAnnotations: {}
@@ -63,11 +63,11 @@ microservice-chart: &microservice-chart
         - all
   resources: &resources
     requests:
-      memory: "512Mi"
-      cpu: "300m"
+      memory: '512Mi'
+      cpu: '300m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
   autoscaling:
     enable: true
     minReplica: 1
@@ -79,62 +79,62 @@ microservice-chart: &microservice-chart
         metadata:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-          value: "75"
+          value: '75'
       - type: memory
         metadata:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-          value: "70"
+          value: '70'
   fileConfig: {}
   envConfig: &envConfig
-    APP_NAME: "pdf-receipt-service"
-    APP_ENVIRONMENT: "uat"
+    APP_NAME: 'pdf-receipt-service'
+    APP_ENVIRONMENT: 'uat'
     WEBSITE_SITE_NAME: 'pagopareceiptpdfservice' # required to show cloud role name in application insights
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
-    COSMOS_RECEIPT_ENDPOINT: "https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/"
-    COSMOS_RECEIPT_DB_NAME: "db"
-    COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: "receipts"
-    COSMOS_RECEIPT_CONTAINER_RECEIPTS_ERROR_NAME: "receipts-message-errors"
-    COSMOS_RECEIPT_CONTAINER_RECEIPTS_IO_MESSAGES_EVENT_NAME: "receipts-io-messages-evt"
-    COSMOS_RECEIPT_CONTAINER_CART_NAME: "cart-for-receipts"
-    COSMOS_RECEIPT_CONTAINER_CART_RECEIPTS_ERROR_NAME: "cart-receipts-message-errors"
-    COSMOS_RECEIPT_CONTAINER_CART_RECEIPTS_IO_MESSAGES_NAME: "cart-receipts-io-messages"
-    COSMOS_BIZEVENT_ENDPOINT: "https://pagopa-u-weu-bizevents-ds-cosmos-account.documents.azure.com:443/"
-    COSMOS_BIZEVENT_DB_NAME: "db"
-    COSMOS_BIZEVENT_CONTAINER_BIZEVENTS_NAME: "biz-events"
+    COSMOS_RECEIPT_ENDPOINT: 'https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/'
+    COSMOS_RECEIPT_DB_NAME: 'db'
+    COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: 'receipts'
+    COSMOS_RECEIPT_CONTAINER_RECEIPTS_ERROR_NAME: 'receipts-message-errors'
+    COSMOS_RECEIPT_CONTAINER_RECEIPTS_IO_MESSAGES_EVENT_NAME: 'receipts-io-messages-evt'
+    COSMOS_RECEIPT_CONTAINER_CART_NAME: 'cart-for-receipts'
+    COSMOS_RECEIPT_CONTAINER_CART_RECEIPTS_ERROR_NAME: 'cart-receipts-message-errors'
+    COSMOS_RECEIPT_CONTAINER_CART_RECEIPTS_IO_MESSAGES_NAME: 'cart-receipts-io-messages'
+    COSMOS_BIZEVENT_ENDPOINT: 'https://pagopa-u-weu-bizevents-ds-cosmos-account.documents.azure.com:443/'
+    COSMOS_BIZEVENT_DB_NAME: 'db'
+    COSMOS_BIZEVENT_CONTAINER_BIZEVENTS_NAME: 'biz-events'
     BLOB_STORAGE_ACCOUNT_ENDPOINT: 'https://pagopauweureceiptsfnsa.blob.core.windows.net'
     BLOB_STORAGE_CONTAINER_NAME: 'pagopa-u-weu-receipts-azure-blob-receipt-st-attach'
-    ENABLE_ECS_CONSOLE: "true"
-    QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
-    QUARKUS_OTEL_TRACES_SAMPLER: "traceidratio"
-    QUARKUS_OTEL_TRACES_SAMPLER_ARG: "1.0"
-    QUARKUS_OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=uat"
-    TOKENIZER_URL: "https://api.uat.tokenizer.pdv.pagopa.it"
-    JAVA_TOOL_OPTIONS: "-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m"
-    TOKENIZER_MAX_RETRY: "3"
-    TOKENIZER_DELAY: "200"
-    TOKENIZER_EXPB_MAX_DELAY: "6000"
-    TOKENIZER_EXPB_FACTOR: "2"
-    QUARKUS_CACHE_ENABLED: "true"
-    CACHE_ATTACHMENT_DETAILS_INITIAL_CAPACITY: "10000"
-    CACHE_ATTACHMENT_DETAILS_MAX_SIZE: "50000"
-    CACHE_ATTACHMENT_DETAILS_EXPIRE_AFTER_WRITE: "1h"
-    QUARKUS_PROFILE: "uat"
+    ENABLE_ECS_CONSOLE: 'true'
+    QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector.elastic-system.svc:4317'
+    QUARKUS_OTEL_TRACES_SAMPLER: 'traceidratio'
+    QUARKUS_OTEL_TRACES_SAMPLER_ARG: '1.0'
+    QUARKUS_OTEL_RESOURCE_ATTRIBUTES: 'deployment.environment=uat'
+    TOKENIZER_URL: 'https://api.uat.tokenizer.pdv.pagopa.it'
+    JAVA_TOOL_OPTIONS: '-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m'
+    TOKENIZER_MAX_RETRY: '3'
+    TOKENIZER_DELAY: '200'
+    TOKENIZER_EXPB_MAX_DELAY: '6000'
+    TOKENIZER_EXPB_FACTOR: '2'
+    QUARKUS_CACHE_ENABLED: 'true'
+    CACHE_ATTACHMENT_DETAILS_INITIAL_CAPACITY: '10000'
+    CACHE_ATTACHMENT_DETAILS_MAX_SIZE: '50000'
+    CACHE_ATTACHMENT_DETAILS_EXPIRE_AFTER_WRITE: '1h'
+    QUARKUS_PROFILE: 'uat'
   envSecret: &envSecret
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-u-connection-string'
-    COSMOS_RECEIPT_KEY: "cosmos-receipt-pkey"
-    COSMOS_BIZEVENT_KEY: "cosmos-bizevent-pkey"
-    TOKENIZER_API_KEY: "tokenizer-api-key"
-    BLOB_STORAGE_CONN_STRING: "receipts-storage-account-connection-string"
-    COSMOS_RECEIPTS_CONN_STRING: "cosmos-receipt-connection-string"
+    COSMOS_RECEIPT_KEY: 'cosmos-receipt-pkey'
+    COSMOS_BIZEVENT_KEY: 'cosmos-bizevent-pkey'
+    TOKENIZER_API_KEY: 'tokenizer-api-key'
+    BLOB_STORAGE_CONN_STRING: 'receipts-storage-account-connection-string'
+    COSMOS_RECEIPTS_CONN_STRING: 'cosmos-receipt-connection-string'
     QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'
-    AES_SECRET_KEY: "aes-secret-key"
-    AES_SALT: "aes-salt"
+    AES_SECRET_KEY: 'aes-secret-key'
+    AES_SALT: 'aes-salt'
   keyvault:
-    name: "pagopa-u-receipts-kv"
-    tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+    name: 'pagopa-u-receipts-kv'
+    tenantId: '7788edaf-0346-4068-9d79-c868aed15b3d'
   nodeSelector: {}
   tolerations: []
   affinity:
@@ -161,40 +161,40 @@ microservice-chart: &microservice-chart
       create: true
       image:
         repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-        tag: "0.7.0"
+        tag: '0.7.0'
         pullPolicy: Always
       envConfig: {}
       envSecret: {}
 pagopa-receipt-pdf-service:
   !!merge <<: *microservice-chart
-  fullnameOverride: "pagopa-receipt-pdf-service"
+  fullnameOverride: 'pagopa-receipt-pdf-service'
   ingress:
     !!merge <<: *ingress
   resources:
     !!merge <<: *resources
   envConfig:
     !!merge <<: *envConfig
-    QUARKUS_PROFILE: "attachments"
+    QUARKUS_PROFILE: 'attachments'
   envSecret:
     !!merge <<: *envSecret
 pagopa-receipt-pdf-service-helpdesk:
   !!merge <<: *microservice-chart
-  fullnameOverride: "pagopa-receipt-pdf-service-helpdesk"
+  fullnameOverride: 'pagopa-receipt-pdf-service-helpdesk'
   ingress:
     !!merge <<: *ingress
     path: /pagopa-receipt-pdf-service-helpdesk/(.*)
   resources:
     !!merge <<: *resources
     requests:
-      memory: "512Mi"
-      cpu: "300m"
+      memory: '512Mi'
+      cpu: '300m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
   envConfig:
     !!merge <<: *envConfig
-    APP_NAME: "pdf-receipt-service-helpdesk"
+    APP_NAME: 'pdf-receipt-service-helpdesk'
     WEBSITE_SITE_NAME: 'pagopa-receipt-pdf-service-helpdesk'
-    QUARKUS_PROFILE: "helpdesk"
+    QUARKUS_PROFILE: 'helpdesk'
   envSecret:
     !!merge <<: *envSecret
