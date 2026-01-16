@@ -1,413 +1,377 @@
 {
-  "openapi": "3.0.3",
-  "components": {
-    "schemas": {
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
           },
-          "title": {
-            "type": "string",
-            "example": "Internal Server Error"
+          "title" : {
+            "type" : "string",
+            "example" : "Internal Server Error"
           },
-          "status": {
-            "format": "int32",
-            "type": "integer",
-            "example": 500
+          "status" : {
+            "format" : "int32",
+            "type" : "integer",
+            "example" : 500
           },
-          "detail": {
-            "type": "string",
-            "example": "An unexpected error has occurred. Please contact support."
+          "detail" : {
+            "type" : "string",
+            "example" : "An unexpected error has occurred. Please contact support."
           },
-          "instance": {
-            "type": "string",
-            "example": "PDFS-500"
+          "instance" : {
+            "type" : "string",
+            "example" : "PDFS-500"
           }
         }
       },
-      "InfoResponse": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "pagopa-receipt-pdf-service"
+      "InfoResponse" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "example" : "pagopa-receipt-pdf-service"
           },
-          "version": {
-            "type": "string",
-            "example": "1.2.3"
+          "version" : {
+            "type" : "string",
+            "example" : "1.2.3"
           },
-          "environment": {
-            "type": "string",
-            "example": "dev"
+          "environment" : {
+            "type" : "string",
+            "example" : "dev"
           },
-          "description": {
-            "type": "string",
-            "example": "Receipt PDF Service"
+          "description" : {
+            "type" : "string",
+            "example" : "Receipt PDF Service"
+          },
+          "profiles" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "example" : "dev"
           }
         }
       }
     },
-    "responses": {
-      "AppException400": {
-        "description": "Default app exception for status 400",
-        "content": {
-          "application/json": {
-            "examples": {
-              "Error": {
-                "value": {
-                  "type": "",
-                  "title": "Bad Request",
-                  "status": 400,
-                  "detail": "The provided third party id [<td_id>] is invalid",
-                  "instance": "PDFS_703"
+    "responses" : {
+      "AppException400" : {
+        "description" : "Default app exception for status 400",
+        "content" : {
+          "application/json" : {
+            "examples" : {
+              "Error" : {
+                "value" : {
+                  "type" : "",
+                  "title" : "Bad Request",
+                  "status" : 400,
+                  "detail" : "The provided third party id [<td_id>] is invalid",
+                  "instance" : "PDFS_703"
                 }
               }
             },
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
             }
           }
         }
       },
-      "AppException404": {
-        "description": "Default app exception for status 404",
-        "content": {
-          "application/json": {
-            "example": {
-              "type": "",
-              "title": "Not Found",
-              "status": 404,
-              "detail": "Third party id [<td_id>] not found",
-              "instance": "PDFS_900"
+      "AppException404" : {
+        "description" : "Default app exception for status 404",
+        "content" : {
+          "application/json" : {
+            "example" : {
+              "type" : "",
+              "title" : "Not Found",
+              "status" : 404,
+              "detail" : "Third party id [<td_id>] not found",
+              "instance" : "PDFS_900"
             },
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
             }
           }
         }
       },
-      "InternalServerError": {
-        "description": "Internal Server Error",
-        "content": {
-          "application/json": {
-            "example": {
-              "type": "",
-              "title": "Internal Server Error",
-              "status": 500,
-              "detail": "An unexpected error has occurred. Please contact support.",
-              "instance": "PDFS_603"
+      "InternalServerError" : {
+        "description" : "Internal Server Error",
+        "content" : {
+          "application/json" : {
+            "example" : {
+              "type" : "",
+              "title" : "Internal Server Error",
+              "status" : 500,
+              "detail" : "An unexpected error has occurred. Please contact support.",
+              "instance" : "PDFS_603"
             },
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
             }
           }
         }
       }
     }
   },
-  "info": {
-    "title": "PagoPa PDF Receipt Service (local)",
-    "version": "0.13.2-3-PAGOPA-3454-helpdesk-api-cart",
-    "description": "Expose APIs used by IO backend to retrieved payment receipts",
-    "termsOfService": "https://www.pagopa.gov.it/"
+  "info" : {
+    "title" : "PagoPa PDF Receipt Service (local)",
+    "version" : "0.0.0-SNAPSHOT",
+    "description" : "Expose APIs used by IO backend to retrieved payment receipts",
+    "termsOfService" : "https://www.pagopa.gov.it/"
   },
-  "tags": [
-    {
-      "name": "Helpdesk",
-      "description": "Helpdesk operations"
-    },
-    {
-      "name": "Info",
-      "description": "Info operations"
-    }
-  ],
-  "paths": {
-    "/helpdesk/cart-errors-toreview/{cart-id}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "cart-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+  "tags" : [ {
+    "name" : "Helpdesk",
+    "description" : "Helpdesk operations"
+  }, {
+    "name" : "Info",
+    "description" : "Info operations"
+  } ],
+  "paths" : {
+    "/helpdesk/cart-errors-toreview/{cart-id}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "cart-id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
               }
             }
           }
         },
-        "summary": "Get Cart Receipt Error By Cart Id"
+        "summary" : "Get Cart Receipt Error By Cart Id"
       }
     },
-    "/helpdesk/cart-receipts/io-message/{message-id}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "message-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+    "/helpdesk/cart-receipts/io-message/{message-id}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "message-id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
               }
             }
           }
         },
-        "summary": "Get Cart Receipt Message"
+        "summary" : "Get Cart Receipt Message"
       }
     },
-    "/helpdesk/cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "iuv",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+    "/helpdesk/cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "iuv",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "organization-fiscal-code",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
             }
+          }
+        },
+        "summary" : "Get Cart Receipt By Organization Fiscal Code And IUV"
+      }
+    },
+    "/helpdesk/cart-receipts/{cart-id}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "cart-id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
+            }
+          }
+        },
+        "summary" : "Get Cart Receipt"
+      }
+    },
+    "/helpdesk/errors-toreview/{bizevent-id}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "bizevent-id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
+            }
+          }
+        },
+        "summary" : "Get Receipt Error By Event Id"
+      }
+    },
+    "/helpdesk/pdf-receipts/{file-name}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "file-name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
+            }
+          }
+        },
+        "summary" : "Get Receipt Pdf"
+      }
+    },
+    "/helpdesk/receipts/io-message/{message-id}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "message-id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
+            }
+          }
+        },
+        "summary" : "Get Receipt Message"
+      }
+    },
+    "/helpdesk/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "iuv",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "organization-fiscal-code",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
+            }
+          }
+        },
+        "summary" : "Get Receipt By Organization Fiscal Code And IUV"
+      }
+    },
+    "/helpdesk/receipts/{event-id}" : {
+      "get" : {
+        "tags" : [ "Helpdesk" ],
+        "parameters" : [ {
+          "name" : "event-id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
+            }
+          }
+        },
+        "summary" : "Get Receipt"
+      }
+    },
+    "/info" : {
+      "get" : {
+        "summary" : "Get info of Receipt PDF Service",
+        "tags" : [ "Info" ],
+        "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
           },
-          {
-            "name": "organization-fiscal-code",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "summary": "Get Cart Receipt By Organization Fiscal Code And IUV"
-      }
-    },
-    "/helpdesk/cart-receipts/{cart-id}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "cart-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "summary": "Get Cart Receipt"
-      }
-    },
-    "/helpdesk/errors-toreview/{bizevent-id}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "bizevent-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "summary": "Get Receipt Error By Event Id"
-      }
-    },
-    "/helpdesk/pdf-receipts/{file-name}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "file-name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "summary": "Get Receipt Pdf"
-      }
-    },
-    "/helpdesk/receipts/io-message/{message-id}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "message-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "summary": "Get Receipt Message"
-      }
-    },
-    "/helpdesk/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "iuv",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organization-fiscal-code",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "summary": "Get Receipt By Organization Fiscal Code And IUV"
-      }
-    },
-    "/helpdesk/receipts/{event-id}": {
-      "get": {
-        "tags": [
-          "Helpdesk"
-        ],
-        "parameters": [
-          {
-            "name": "event-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "summary": "Get Receipt"
-      }
-    },
-    "/info": {
-      "get": {
-        "summary": "Get info of Receipt PDF Service",
-        "tags": [
-          "Info"
-        ],
-        "responses": {
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InfoResponse"
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InfoResponse"
                 }
               }
             }
