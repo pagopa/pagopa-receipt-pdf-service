@@ -2,14 +2,14 @@ apiVersion: v2
 name: pagopareceiptpdfservice
 description: Microservice pagopa-receipt-pdf-service
 type: application
-version: 0.71.0
-appVersion: 0.13.2-2-PAGOPA-3454-helpdesk-api-cart
+version: 0.72.0
+appVersion: 0.13.2-3-PAGOPA-3454-helpdesk-api-cart
 dependencies:
-    - name: microservice-chart
-      version: 8.0.2
-      repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
-      alias: pagopa-receipt-pdf-service
-    - name: microservice-chart
-      version: 8.0.2
-      repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
-      alias: pagopa-receipt-pdf-service-helpdesk
+  - name: microservice-chart
+    version: 8.0.2
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+    alias: pagopa-receipt-pdf-service
+  - name: microservice-chart
+    version: 8.0.2
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+    alias: pagopa-receipt-pdf-service-helpdesk
