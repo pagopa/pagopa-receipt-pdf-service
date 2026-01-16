@@ -73,14 +73,18 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     }
 
     @Override
-    public byte[] getAttachmentBytesFromBlobStorage(String fileName) throws IOException, AttachmentNotFoundException, BlobStorageClientException {
+    public byte[] getAttachmentBytesFromBlobStorage(String fileName)
+            throws IOException, AttachmentNotFoundException, BlobStorageClientException {
         File pdfFile = this.receiptBlobClient.getAttachmentFromBlobStorage(fileName);
-        FileInputStream inputStream = new FileInputStream(pdfFile);
-        byte[] result = IOUtils.toByteArray(inputStream);
-        Files.deleteIfExists(pdfFile.toPath());
-
-        return result;
+        try (FileInputStream inputStream = new FileInputStream(pdfFile)) {
+            return IOUtils.toByteArray(inputStream);
+        } finally {
+            if (pdfFile != null) {
+                Files.deleteIfExists(pdfFile.toPath());
+            }
+        }
     }
+
 
     /**
      * Retrieves the attachment details for a single receipt, validating the authorization
@@ -258,7 +262,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * This method checks if the fiscal code is not authorized to access the attachment
      *
      * @param attachmentUrl       the attachment url from the request
-     * @param partial             the splitted thirdPartyId
+     * @param partial             the split thirdPartyId
      * @param searchTokenResponse the tokenized fiscal code from the PDV Tokenizer
      * @param cartForReceipt      the cart for receipt object to check from the DB
      * @return true if the fiscal code is not authorized, false otherwise
