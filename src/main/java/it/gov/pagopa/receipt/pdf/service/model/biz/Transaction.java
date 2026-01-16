@@ -1,15 +1,12 @@
 package it.gov.pagopa.receipt.pdf.service.model.biz;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BizEvent {
-    private String id;
-    private TransactionDetails transactionDetails;
+@Builder
+public class Transaction {
+    private String transactionId;
 }

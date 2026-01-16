@@ -7,6 +7,8 @@ import it.gov.pagopa.receipt.pdf.service.client.BizCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.exception.BizEventNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.biz.BizEvent;
+import it.gov.pagopa.receipt.pdf.service.model.biz.Transaction;
+import it.gov.pagopa.receipt.pdf.service.model.biz.TransactionDetails;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.service.impl.CartReceiptCosmosService;
 import org.apache.http.HttpStatus;
@@ -23,6 +25,7 @@ class GetCartReceiptByOrgAndIUVTest {
     private static final String ORGANIZATION_FISCAL_CODE = "12345678901";
     private static final String IUV = "IUV_TEST_123";
     private static final String EVENT_ID = "EVENT_ID_XYZ";
+    private static final String CART_ID = "CART_ID";
 
     @InjectMock
     private BizCosmosClient bizEventCosmosClient;
@@ -85,12 +88,13 @@ class GetCartReceiptByOrgAndIUVTest {
     void getCartReceiptByOrgAndIUV_NotFound_ReceiptNotFound() throws BizEventNotFoundException, CartNotFoundException {
         BizEvent mockBizEvent = new BizEvent();
         mockBizEvent.setId(EVENT_ID);
+        mockBizEvent.setTransactionDetails(TransactionDetails.builder().transaction(Transaction.builder().transactionId(CART_ID).build()).build());
 
         String expectedMessage = String.format("Unable to retrieve the receipt with eventId %s", EVENT_ID);
 
         when(bizEventCosmosClient.getBizEventDocumentByOrganizationFiscalCodeAndIUV(ORGANIZATION_FISCAL_CODE, IUV))
                 .thenReturn(mockBizEvent);
-        when(cartReceiptCosmosService.getCartReceiptFromEventId(EVENT_ID))
+        when(cartReceiptCosmosService.getCartReceipt(CART_ID))
                 .thenThrow(new CartNotFoundException(PDFS_800, expectedMessage));
 
         given()
@@ -110,13 +114,15 @@ class GetCartReceiptByOrgAndIUVTest {
     void getCartReceiptByOrgAndIUV_Success() throws BizEventNotFoundException, CartNotFoundException {
         BizEvent mockBizEvent = new BizEvent();
         mockBizEvent.setId(EVENT_ID);
+        mockBizEvent.setTransactionDetails(TransactionDetails.builder().transaction(Transaction.builder().transactionId(CART_ID).build()).build());
 
         CartForReceipt mockReceipt = new CartForReceipt();
         mockReceipt.setEventId(EVENT_ID);
+        mockReceipt.setId(CART_ID);
 
         when(bizEventCosmosClient.getBizEventDocumentByOrganizationFiscalCodeAndIUV(ORGANIZATION_FISCAL_CODE, IUV))
                 .thenReturn(mockBizEvent);
-        when(cartReceiptCosmosService.getCartReceiptFromEventId(EVENT_ID))
+        when(cartReceiptCosmosService.getCartReceipt(CART_ID))
                 .thenReturn(mockReceipt);
 
         given()

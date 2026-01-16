@@ -43,23 +43,6 @@ public class CartReceiptCosmosService {
         return receipt;
     }
 
-    public CartForReceipt getCartReceiptFromEventId(String eventId) throws CartNotFoundException {
-        CartForReceipt receipt;
-        try {
-            receipt = this.cartReceiptCosmosClient.getCartReceiptFromEventId(eventId);
-        } catch (CartNotFoundException e) {
-            String errorMsg = String.format("Receipt not found with the event id %s", eventId);
-            throw new CartNotFoundException(PDFS_800, errorMsg, e);
-
-        }
-
-        if (receipt == null) {
-            String errorMsg = String.format("Receipt retrieved with the event id %s is null", eventId);
-            throw new CartNotFoundException(PDFS_800, errorMsg);
-        }
-        return receipt;
-    }
-
     public IOMessage getCartReceiptMessage(String messageId) throws IoMessageNotFoundException {
         IOMessage message;
         try {
@@ -94,6 +77,7 @@ public class CartReceiptCosmosService {
             try {
                 receiptError.setMessagePayload(Aes256Utils.decrypt(payload));
             } catch (IllegalArgumentException | Aes256Exception ignored) {
+                // Return encrypted payload
             }
         }
     }

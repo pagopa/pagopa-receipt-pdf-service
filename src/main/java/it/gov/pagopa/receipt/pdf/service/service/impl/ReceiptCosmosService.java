@@ -76,6 +76,7 @@ public class ReceiptCosmosService {
             try {
                 receiptError.setMessagePayload(Aes256Utils.decrypt(payload));
             } catch (IllegalArgumentException | Aes256Exception ignored) {
+                // Return encrypted payload
             }
         }
     }

@@ -226,7 +226,7 @@ public class HelpdeskResource {
         }
 
         try {
-            CartForReceipt receipt = this.cartReceiptCosmosService.getCartReceiptFromEventId(bizEvent.getId());
+            CartForReceipt receipt = this.cartReceiptCosmosService.getCartReceipt(bizEvent.getTransactionDetails().getTransaction().getTransactionId());
             return RestResponse.ok(receipt);
         } catch (CartNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, bizEvent.getId());
