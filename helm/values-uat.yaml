@@ -173,6 +173,7 @@ pagopa-receipt-pdf-service:
     !!merge <<: *resources
   envConfig:
     !!merge <<: *envConfig
+    QUARKUS_PROFILE: "attachments"
   envSecret:
     !!merge <<: *envSecret
 pagopa-receipt-pdf-service-helpdesk:
@@ -193,5 +194,6 @@ pagopa-receipt-pdf-service-helpdesk:
     !!merge <<: *envConfig
     APP_NAME: "pdf-receipt-service-helpdesk"
     WEBSITE_SITE_NAME: 'pagopa-receipt-pdf-service-helpdesk'
+    QUARKUS_PROFILE: "helpdesk"
   envSecret:
     !!merge <<: *envSecret
