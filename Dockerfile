@@ -8,8 +8,6 @@ WORKDIR /code
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 COPY src /code/src
 COPY agent /code/agent
-ARG QUARKUS_PROFILE
-ARG APP_NAME
 
 USER root
 RUN echo $(ls -1 /code/src)
@@ -22,7 +20,7 @@ RUN cd /code && \
     wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.19.0/jmx_prometheus_javaagent-0.19.0.jar
 
 # build the application
-RUN ./mvnw package -DskipTests=true -Dquarkus.application.name=$APP_NAME -Dquarkus.profile=$QUARKUS_PROFILE
+RUN ./mvnw package -DskipTests=true
 
 RUN mkdir -p /code/target/jmx && \
     cp /code/agent/config.yaml /code/target/jmx/config.yaml
@@ -48,5 +46,5 @@ USER 185
 ARG QUARKUS_PROFILE
 ARG APP_NAME
 
-ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Dquarkus.application.name=$APP_NAME -Dquarkus.profile=$QUARKUS_PROFILE -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
