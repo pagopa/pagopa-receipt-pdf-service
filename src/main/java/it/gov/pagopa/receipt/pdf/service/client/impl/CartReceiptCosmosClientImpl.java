@@ -14,7 +14,6 @@ import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContain
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsErrorContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsIOMessagesContainer;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
     private final Logger logger = LoggerFactory.getLogger(CartReceiptCosmosClientImpl.class);
 
     @CartContainer
-    private final CosmosContainer containerCartReceipts;
+    CosmosContainer containerCartReceipts;
 
     @CartReceiptsIOMessagesContainer
     CosmosContainer containerCartReceiptsIOMessagesEvent;
@@ -38,9 +37,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
     @CartReceiptsErrorContainer
     CosmosContainer containerCartReceiptsError;
 
-    @Inject
-    public CartReceiptCosmosClientImpl(@CartContainer CosmosContainer containerCartReceipts) {
-        this.containerCartReceipts = containerCartReceipts;
+    CartReceiptCosmosClientImpl() {
     }
 
     public CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException {

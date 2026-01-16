@@ -14,7 +14,6 @@ import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsCon
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsErrorContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsIOMessagesEventContainer;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +40,7 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
     @ReceiptsErrorContainer
     CosmosContainer containerReceiptsError;
 
-    @Inject
-    public ReceiptCosmosClientImpl(@ReceiptsContainer CosmosContainer containerReceipts) {
-        this.containerReceipts = containerReceipts;
+    ReceiptCosmosClientImpl() {
     }
 
     /**

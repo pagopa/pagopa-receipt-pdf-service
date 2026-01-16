@@ -9,7 +9,6 @@ import it.gov.pagopa.receipt.pdf.service.exception.BizEventNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.biz.BizEvent;
 import it.gov.pagopa.receipt.pdf.service.producer.bizevent.containers.BizEventContainer;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 /**
  * Client for the CosmosDB database
@@ -21,9 +20,7 @@ public class BizCosmosClientImpl implements BizCosmosClient {
     @BizEventContainer
     CosmosContainer cosmosContainer;
 
-    @Inject
-    public BizCosmosClientImpl(@BizEventContainer CosmosContainer cosmosContainer) {
-        this.cosmosContainer = cosmosContainer;
+    BizCosmosClientImpl() {
     }
 
     @Override
