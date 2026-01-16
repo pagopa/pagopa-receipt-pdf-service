@@ -184,6 +184,11 @@ function createEvent(id, status, orgCode, iuv) {
 		"payer": {
 			"entityUniqueIdentifierValue": FISCAL_CODE,
 		},
+		"transactionDetails": {
+			"transaction": {
+				"transactionId": id
+			}
+		},
 		"eventStatus": status || "DONE",
 	}
 	return json_event
