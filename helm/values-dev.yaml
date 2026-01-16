@@ -47,9 +47,9 @@ microservice-chart: &microservice-chart
     host: 'weudev.receipts.internal.dev.platform.pagopa.it'
     path: /pagopa-receipt-pdf-service/(.*)
     servicePort: 8080
-  serviceAccount: &serviceAccount
+  serviceAccount:
     name: 'receipts-workload-identity'
-  azure: &azure
+  azure:
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
   podAnnotations: {}
   podSecurityContext:
