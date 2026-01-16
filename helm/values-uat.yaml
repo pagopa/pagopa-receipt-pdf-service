@@ -173,12 +173,6 @@ pagopa-receipt-pdf-service-helpdesk:
     path: /pagopa-receipt-pdf-service-helpdesk/(.*)
   resources:
     !!merge <<: *resources
-    requests:
-      memory: '512Mi'
-      cpu: '300m'
-    limits:
-      memory: '512Mi'
-      cpu: '500m'
   envConfig:
     !!merge <<: *envConfig
     APP_NAME: 'pdf-receipt-service-helpdesk'
