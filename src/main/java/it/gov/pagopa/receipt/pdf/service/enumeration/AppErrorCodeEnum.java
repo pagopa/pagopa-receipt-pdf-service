@@ -7,6 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public enum AppErrorCodeEnum {
+    PDFS_100("PDFS_100", "Biz Event not found with the provided organization and NAV"),
 
     PDFS_400("PDFS_400", "An unexpected error has occurred, see logs for more info"),
 
@@ -34,7 +35,6 @@ public enum AppErrorCodeEnum {
 
     PDFS_800("PDFS_800", "Receipt not found with the provided third party id"),
     PDFS_801("PDFS_801", "Cart not found with the provided third party id"),
-    PDFS_802("PDFS_802", "Cart not found with the provided event id"),
 
     PDFS_901("PDFS_901", "Invalid fiscal code header, null or length not equal to 16");
 

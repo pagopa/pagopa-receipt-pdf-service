@@ -34,7 +34,7 @@ public class BizCosmosClientImpl implements BizCosmosClient {
         if (queryResponse.iterator().hasNext()) {
             return queryResponse.iterator().next();
         }
-        throw new BizEventNotFoundException(AppErrorCodeEnum.PDFS_800, "Document not found in the defined container");
+        throw new BizEventNotFoundException(AppErrorCodeEnum.PDFS_100, AppErrorCodeEnum.PDFS_100.getErrorMessage());
     }
 
 }

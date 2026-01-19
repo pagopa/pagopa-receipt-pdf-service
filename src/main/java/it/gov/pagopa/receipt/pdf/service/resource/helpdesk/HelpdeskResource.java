@@ -43,8 +43,9 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 public class HelpdeskResource {
     public static final String RECEIPT_NOT_FOUND_BY_EVENTID = "Unable to retrieve the receipt with eventId %s";
     public static final String LOG_ERROR_MESSAGE = "[{}] {}";
-    private final Logger logger = LoggerFactory.getLogger(HelpdeskResource.class);
+    private static final String HELPDESK_SUFFIX = "[HELPDESK] ";
 
+    private final Logger logger = LoggerFactory.getLogger(HelpdeskResource.class);
     private final ReceiptCosmosService receiptCosmosService;
     private final CartReceiptCosmosService cartReceiptCosmosService;
     private final BizCosmosClient bizEventCosmosClient;
@@ -86,7 +87,7 @@ public class HelpdeskResource {
 
         if (eventId == null || eventId.isBlank()) {
             return RestResponse.status(Response.Status.BAD_REQUEST,
-                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid biz-event id"));
+                    createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid biz-event id"));
         }
 
         try {
@@ -96,7 +97,7 @@ public class HelpdeskResource {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, sanitize(eventId));
             logger.error(LOG_ERROR_MESSAGE, "getReceipt", responseMsg);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
     }
 
@@ -127,11 +128,11 @@ public class HelpdeskResource {
             @PathParam("iuv") String iuv) {
 
         if (organizationFiscalCode == null || organizationFiscalCode.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organization fiscal code"));
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid organization fiscal code"));
         }
 
         if (iuv == null || iuv.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid iuv"));
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid iuv"));
         }
 
         BizEvent bizEvent;
@@ -143,7 +144,7 @@ public class HelpdeskResource {
                     sanitize(organizationFiscalCode), sanitize(iuv));
             logger.error(LOG_ERROR_MESSAGE, "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
 
         try {
@@ -153,7 +154,7 @@ public class HelpdeskResource {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, bizEvent.getId());
             logger.error(LOG_ERROR_MESSAGE, "getReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
     }
 
@@ -184,7 +185,7 @@ public class HelpdeskResource {
 
         if (messageId == null || messageId.isBlank()) {
             return RestResponse.status(Response.Status.BAD_REQUEST,
-                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid messageId"));
+                    createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid messageId"));
         }
 
         try {
@@ -194,7 +195,7 @@ public class HelpdeskResource {
             String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitize(messageId));
             logger.error(LOG_ERROR_MESSAGE, "getReceiptMessage", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
     }
 
@@ -225,7 +226,7 @@ public class HelpdeskResource {
 
         if (fileName == null || fileName.isBlank()) {
             return RestResponse.status(Response.Status.BAD_REQUEST,
-                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid file name"));
+                    createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid file name"));
         }
 
         try {
@@ -235,7 +236,7 @@ public class HelpdeskResource {
             String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", sanitize(fileName));
             logger.error(LOG_ERROR_MESSAGE, "getReceiptPdf", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
     }
 
@@ -266,7 +267,7 @@ public class HelpdeskResource {
 
         if (eventId == null || eventId.isBlank()) {
             return RestResponse.status(Response.Status.BAD_REQUEST,
-                    createProblemJson(Response.Status.BAD_REQUEST, "Missing valid search parameter"));
+                    createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Missing valid search parameter"));
         }
 
         try {
@@ -276,11 +277,11 @@ public class HelpdeskResource {
             String responseMsg = "No Receipt Error to process on bizEvent with id " + sanitize(eventId);
             logger.error(LOG_ERROR_MESSAGE, "getReceiptErrorByEventId", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         } catch (Exception e) {
             logger.error(LOG_ERROR_MESSAGE, "getReceiptErrorByEventId", e.getMessage(), e);
             return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR,
-                    createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage()));
+                    createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, HELPDESK_SUFFIX, e.getMessage()));
         }
     }
 
@@ -311,7 +312,7 @@ public class HelpdeskResource {
             @PathParam("cart-id") String cartId) {
 
         if (cartId == null || cartId.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid cartId"));
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid cartId"));
         }
 
         try {
@@ -320,7 +321,7 @@ public class HelpdeskResource {
         } catch (CartNotFoundException e) {
             String responseMsg = String.format("Unable to retrieve the receipt with cartId %s", sanitize(cartId));
             logger.error(LOG_ERROR_MESSAGE, "getCartReceipt", responseMsg, e);
-            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
     }
 
@@ -351,11 +352,11 @@ public class HelpdeskResource {
             @PathParam("iuv") String iuv) {
 
         if (organizationFiscalCode == null || organizationFiscalCode.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid organization fiscal code"));
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid organization fiscal code"));
         }
 
         if (iuv == null || iuv.isBlank()) {
-            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid iuv"));
+            return RestResponse.status(Response.Status.BAD_REQUEST, createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid iuv"));
         }
 
         BizEvent bizEvent;
@@ -366,7 +367,7 @@ public class HelpdeskResource {
             String responseMsg = String.format("Unable to retrieve the biz-event with organization fiscal code %s and iuv %s",
                     sanitize(organizationFiscalCode), sanitize(iuv));
             logger.error(LOG_ERROR_MESSAGE, "getCartReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
-            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
 
         try {
@@ -375,7 +376,7 @@ public class HelpdeskResource {
         } catch (CartNotFoundException e) {
             String responseMsg = String.format(RECEIPT_NOT_FOUND_BY_EVENTID, bizEvent.getId());
             logger.error(LOG_ERROR_MESSAGE, "getCartReceiptByOrganizationFiscalCodeAndIUV", responseMsg, e);
-            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+            return RestResponse.status(Response.Status.NOT_FOUND, createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
     }
 
@@ -406,7 +407,7 @@ public class HelpdeskResource {
 
         if (messageId == null || messageId.isBlank()) {
             return RestResponse.status(Response.Status.BAD_REQUEST,
-                    createProblemJson(Response.Status.BAD_REQUEST, "Please pass a valid messageId"));
+                    createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Please pass a valid messageId"));
         }
 
         try {
@@ -416,7 +417,7 @@ public class HelpdeskResource {
             String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitize(messageId));
             logger.error(LOG_ERROR_MESSAGE, "getCartReceiptMessage", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         }
     }
 
@@ -447,7 +448,7 @@ public class HelpdeskResource {
 
         if (cartId == null || cartId.isBlank()) {
             return RestResponse.status(Response.Status.BAD_REQUEST,
-                    createProblemJson(Response.Status.BAD_REQUEST, "Missing valid search parameter"));
+                    createProblemJson(Response.Status.BAD_REQUEST, HELPDESK_SUFFIX, "Missing valid search parameter"));
         }
 
         try {
@@ -457,11 +458,11 @@ public class HelpdeskResource {
             String responseMsg = "No Receipt Error to process on cartId with id " + sanitize(cartId);
             logger.error(LOG_ERROR_MESSAGE, "getCartReceiptErrorByCartId", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
-                    createProblemJson(Response.Status.NOT_FOUND, responseMsg));
+                    createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
         } catch (Exception e) {
             logger.error(LOG_ERROR_MESSAGE, "getCartReceiptErrorByCartId", e.getMessage(), e);
             return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR,
-                    createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage()));
+                    createProblemJson(Response.Status.INTERNAL_SERVER_ERROR, HELPDESK_SUFFIX, e.getMessage()));
         }
     }
 }

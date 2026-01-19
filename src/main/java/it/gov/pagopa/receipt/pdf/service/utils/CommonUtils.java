@@ -37,10 +37,10 @@ public class CommonUtils {
         return sanitizedInput;
     }
 
-    public static ProblemJson createProblemJson(Response.Status status, String message) {
+    public static ProblemJson createProblemJson(Response.Status status, String suffix, String message) {
         return ProblemJson.builder()
                 .title(status.name())
-                .detail(message)
+                .detail(suffix.concat(message))
                 .status(status.getStatusCode())
                 .build();
     }
