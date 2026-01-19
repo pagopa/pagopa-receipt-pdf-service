@@ -428,7 +428,7 @@
   },
   "info" : {
     "title" : "PagoPa PDF Receipt Service (local)",
-    "version": "0.13.2-4-PAGOPA-3454-helpdesk-api-cart",
+    "version" : "0.0.0-SNAPSHOT",
     "description" : "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService" : "https://www.pagopa.gov.it/"
   },

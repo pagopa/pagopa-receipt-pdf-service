@@ -35,7 +35,7 @@ class GetReceiptPDFTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(400))
                 .body("title", equalTo("BAD_REQUEST"))
-                .body("detail", equalTo("Please pass a valid file name"));
+                .body("detail", equalTo("[HELPDESK] Please pass a valid file name"));
     }
 
     @Test
@@ -73,7 +73,7 @@ class GetReceiptPDFTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(404))
                 .body("title", equalTo("NOT_FOUND"))
-                .body("detail", equalTo(expectedMessage));
+                .body("detail", equalTo("[HELPDESK] " + expectedMessage));
     }
 
     @Test
@@ -89,6 +89,6 @@ class GetReceiptPDFTest {
                 .get("/helpdesk/pdf-receipts/{file-name}")
                 .then()
                 .statusCode(HttpStatus.SC_NOT_FOUND)
-                .body("detail", equalTo(expectedMessage));
+                .body("detail", equalTo("[HELPDESK] " + expectedMessage));
     }
 }

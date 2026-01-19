@@ -32,7 +32,7 @@ class GetReceiptIOMessageTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(400))
                 .body("title", equalTo("BAD_REQUEST"))
-                .body("detail", equalTo("Please pass a valid messageId"));
+                .body("detail", equalTo("[HELPDESK] Please pass a valid messageId"));
     }
 
     @Test
@@ -68,6 +68,6 @@ class GetReceiptIOMessageTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(404))
                 .body("title", equalTo("NOT_FOUND"))
-                .body("detail", equalTo(expectedMessage));
+                .body("detail", equalTo("[HELPDESK] " + expectedMessage));
     }
 }

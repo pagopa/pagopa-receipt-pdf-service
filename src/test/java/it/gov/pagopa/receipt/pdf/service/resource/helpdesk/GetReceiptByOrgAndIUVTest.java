@@ -43,7 +43,7 @@ class GetReceiptByOrgAndIUVTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(400))
                 .body("title", equalTo("BAD_REQUEST"))
-                .body("detail", equalTo("Please pass a valid organization fiscal code"));
+                .body("detail", equalTo("[HELPDESK] Please pass a valid organization fiscal code"));
     }
 
     @Test
@@ -58,7 +58,7 @@ class GetReceiptByOrgAndIUVTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(400))
                 .body("title", equalTo("BAD_REQUEST"))
-                .body("detail", equalTo("Please pass a valid iuv"));
+                .body("detail", equalTo("[HELPDESK] Please pass a valid iuv"));
     }
 
     @Test
@@ -79,7 +79,7 @@ class GetReceiptByOrgAndIUVTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(404))
                 .body("title", equalTo("NOT_FOUND"))
-                .body("detail", equalTo(expectedMessage));
+                .body("detail", equalTo("[HELPDESK] " + expectedMessage));
     }
 
     @Test
@@ -104,7 +104,7 @@ class GetReceiptByOrgAndIUVTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(404))
                 .body("title", equalTo("NOT_FOUND"))
-                .body("detail", equalTo(expectedMessage));
+                .body("detail", equalTo("[HELPDESK] " + expectedMessage));
     }
 
     @Test

@@ -33,7 +33,7 @@ class GetCartReceiptErrorTest {
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(400))
-                .body("detail", equalTo("Missing valid search parameter"));
+                .body("detail", equalTo("[HELPDESK] Missing valid search parameter"));
     }
 
     @Test
@@ -72,7 +72,7 @@ class GetCartReceiptErrorTest {
                 .statusCode(HttpStatus.SC_NOT_FOUND)
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(404))
-                .body("detail", equalTo(expectedDetail));
+                .body("detail", equalTo("[HELPDESK] " + expectedDetail));
     }
 
     @Test
@@ -92,6 +92,6 @@ class GetCartReceiptErrorTest {
                 .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(500))
-                .body("detail", equalTo(errorMessage));
+                .body("detail", equalTo("[HELPDESK] " + errorMessage));
     }
 }

@@ -52,7 +52,7 @@ class GetReceiptTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(400))
                 .body("title", equalTo("BAD_REQUEST"))
-                .body("detail", equalTo("Please pass a valid biz-event id"));
+                .body("detail", equalTo("[HELPDESK] Please pass a valid biz-event id"));
     }
 
     @Test
@@ -69,7 +69,7 @@ class GetReceiptTest {
                 .contentType(ContentType.JSON)
                 .body("status", equalTo(404))
                 .body("title", equalTo("NOT_FOUND"))
-                .body("detail", equalTo(errorMessage));
+                .body("detail", equalTo("[HELPDESK] " + errorMessage));
     }
 
     // --- HELPER ---
