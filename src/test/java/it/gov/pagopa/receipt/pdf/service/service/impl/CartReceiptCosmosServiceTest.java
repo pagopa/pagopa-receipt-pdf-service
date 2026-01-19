@@ -1,5 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
+import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.Aes256Exception;
@@ -20,6 +21,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@QuarkusTest
 class CartReceiptCosmosServiceTest {
 
     private CartReceiptCosmosClient cartReceiptCosmosClientMock;
