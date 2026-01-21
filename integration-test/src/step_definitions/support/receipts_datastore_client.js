@@ -151,9 +151,9 @@ async function getDocumentFromReceiptsDatastoreByEventId(id) {
 async function deleteMultipleDocumentsFromReceiptsDatastoreByEventId(eventId) {
     let documents = await getDocumentFromReceiptsDatastoreByEventId(eventId);
 
-    documents?.resources?.forEach(el => {
-        deleteDocumentFromReceiptsDatastore(el.id, el.id);
-    })
+    for(let doc of documents?.resources) {
+        await deleteDocumentFromReceiptsDatastore(doc.id, doc.id);
+    }
 }
 
 async function getDocumentFromReceiptsErrorDatastoreByBizEventId(id) {
@@ -167,9 +167,9 @@ async function getDocumentFromReceiptsErrorDatastoreByBizEventId(id) {
 async function deleteMultipleDocumentFromReceiptErrorDatastoreByEventId(id) {
     let documents = await getDocumentFromReceiptsErrorDatastoreByBizEventId(id);
 
-    documents?.resources?.forEach(el => {
-        deleteDocumentFromReceiptsErrorDatastore(el.id, el.id);
-    })
+    for(let doc of documents?.resources) {
+        await deleteDocumentFromReceiptsErrorDatastore(doc.id, doc.id);
+    }
 }
 
 module.exports = {
