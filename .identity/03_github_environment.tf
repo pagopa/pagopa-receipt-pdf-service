@@ -27,7 +27,9 @@ locals {
     "ISSUER_RANGE_TABLE" : "${local.prefix}${var.env_short}${local.location_short}${local.domain}saissuerrangetable",
     "RECEIPTS_STORAGE_CONN_STRING" : data.azurerm_storage_account.receipts_sa.primary_connection_string,
     "RECEIPTS_COSMOS_CONN_STRING" : "AccountEndpoint=https://pagopa-${var.env_short}-${local.location_short}-${local.domain}-ds-cosmos-account.documents.azure.com:443/;AccountKey=${data.azurerm_cosmosdb_account.receipts_cosmos.primary_key};",
+    "BIZEVENTS_COSMOS_CONN_STRING" : "AccountEndpoint=https://pagopa-${var.env_short}-${local.location_short}-bizevents-ds-cosmos-account.documents.azure.com:443/;AccountKey=${data.azurerm_cosmosdb_account.bizevents_cosmos.primary_key};",
     "SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_subkey.value
+    "HELPDESK_SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_helpdesk_subkey.value
     "TOKENIZER_API_KEY" : data.azurerm_key_vault_secret.key_vault_tokenizer_api_key.value
   }
   env_variables = {
@@ -105,4 +107,9 @@ resource "github_actions_secret" "secret_slack_webhook_integration_test" {
   repository      = local.github.repository
   secret_name     = "SLACK_WEBHOOK_URL_INTEGRATION_TEST"
   plaintext_value = data.azurerm_key_vault_secret.key_vault_integration_test_webhook_slack.value
+}
+
+data "azurerm_key_vault_secret" "key_vault_integration_test_helpdesk_subkey" {
+  name         = "apikey-helpdesk-receipt" # "integration-test-subkey"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }

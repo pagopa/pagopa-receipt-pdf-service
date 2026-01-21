@@ -1,12 +1,17 @@
 package it.gov.pagopa.receipt.pdf.service.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CommonUtilsTest {
@@ -39,6 +44,27 @@ class CommonUtilsTest {
                 org.junit.jupiter.params.provider.Arguments.of("&<>", "&amp;&lt;&gt;"),
                 org.junit.jupiter.params.provider.Arguments.of("abc\0def", "abcdef")
         );
+    }
+
+    public static void generateOpenApi(String filename) throws Exception {
+        String responseString =
+                given()
+                        .when().get("/q/openapi?format=json")
+                        .then()
+                        .statusCode(200)
+                        .contentType("application/json")
+                        .extract()
+                        .asString();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object swagger = objectMapper.readValue(responseString, Object.class);
+        String formatted = objectMapper
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(swagger);
+
+        Path basePath = Paths.get("openapi/");
+        Files.createDirectories(basePath);
+        Files.write(basePath.resolve(filename), formatted.getBytes());
     }
 }
 

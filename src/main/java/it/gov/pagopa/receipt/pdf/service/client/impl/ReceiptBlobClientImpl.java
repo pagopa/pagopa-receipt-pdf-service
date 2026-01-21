@@ -56,7 +56,7 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
      * @return the file where the PDF receipt was stored
      */
     public File getAttachmentFromBlobStorage(String fileName) throws BlobStorageClientException, AttachmentNotFoundException {
-        BlobClient blobClient = blobContainerClient.getBlobClient(fileName);
+        BlobClient blobClient = blobContainerClient.getBlobClient(sanitize(fileName));
         String filePath = createTempDirectory();
         downloadAttachment(fileName, blobClient, filePath);
         return new File(filePath);

@@ -4,6 +4,7 @@ import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Interface of the service to be used to retrieve the attachments
@@ -37,4 +38,15 @@ public interface AttachmentsService {
      */
     File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, BlobStorageClientException, AttachmentNotFoundException, InvalidCartException, CartNotFoundException;
+
+    /**
+     * Retrieve a PDF receipt from the blob storage
+     *
+     * @param fileName file name of the PDF receipt
+     * @return the File with the reference to the attachment
+     * @throws IOException
+     * @throws BlobStorageClientException thrown for error when retrieving the attachment from the Blob Storage
+     * @throws AttachmentNotFoundException thrown if the requested attachment was not found
+     */
+    byte[] getAttachmentBytesFromBlobStorage(String fileName) throws IOException, AttachmentNotFoundException, BlobStorageClientException;
 }

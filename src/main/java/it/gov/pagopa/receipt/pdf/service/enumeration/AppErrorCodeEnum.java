@@ -7,6 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public enum AppErrorCodeEnum {
+    PDFS_100("PDFS_100", "Biz Event not found with the provided organization and NAV"),
 
     PDFS_400("PDFS_400", "An unexpected error has occurred, see logs for more info"),
 
