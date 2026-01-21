@@ -58,11 +58,11 @@ After(async function () {
         await deleteMultipleDocumentsFromReceiptsDatastoreByEventId(eventId);
         await deleteMultipleDocumentFromReceiptErrorDatastoreByEventId(eventId);
     }
-    if (receipt != null) {
+    if (receipt != null && receipt.id != null) {
         await deleteDocumentFromReceiptsDatastore(receipt.id);
         await deleteDocumentFromReceiptsCartDatastore(receipt.id);
     }
-    if (receiptError != null) {
+    if (receiptError != null && receiptError.id != null) {
         await deleteDocumentFromReceiptsErrorDatastore(receiptError.id);
         await deleteDocumentFromReceiptsCartErrorDatastore(receiptError.id);
     }
@@ -154,7 +154,7 @@ Given('a cart with id {string} stored into cart datastore', async function (id) 
     // prior cancellation to avoid dirty cases
     await deleteDocumentFromReceiptsCartDatastore(id);
 
-    let cartStoreResponse = await createDocumentInReceiptsCartDatastore(id, "PAYER_FISCAL_CODE", id + "_PAYER", "DEBTOR_FISCAL_CODE", id + "_DEBTOR", "pdfName" /* TODO */);
+    let cartStoreResponse = await createDocumentInReceiptsCartDatastore(id, "PAYER_FISCAL_CODE", id + "_PAYER", "DEBTOR_FISCAL_CODE", id + "_DEBTOR", "pdfName");
     assert.strictEqual(cartStoreResponse.statusCode, 201);
 });
 
