@@ -25,7 +25,7 @@ Feature: All about payment events to recover managed by Azure functions receipt-
     When getReceiptPdf API is called with filename "int-test-helpdesk-receipt.pdf"
     Then the api response has a 200 Http status
 
-  Scenario: getReceiptMessage API return receipt-error stored on datastore
+  Scenario: getReceiptMessage API return receipt-message stored on datastore
     Given a receipt-io-message with bizEventId "receipt-helpdesk-int-test-id-3" and messageId "receipt-helpdesk-int-test-message-id-3" stored into receipt-io-message datastore
     When getReceiptMessage API is called with messageId "receipt-helpdesk-int-test-message-id-3"
     Then the api response has a 200 Http status
@@ -53,7 +53,7 @@ Feature: All about payment events to recover managed by Azure functions receipt-
     And the cart-receipt-error has cartId "receipt-cart-helpdesk-int-test-id-3"
     And the cart-receipt-error payload has bizEvent decrypted with eventId "receipt-generator-int-test-id-4"
 
-  Scenario: getCartReceiptMessage API return receipt-error stored on datastore
+  Scenario: getCartReceiptMessage API return receipt-message stored on datastore
     Given a cart-receipt-io-message with bizEventId "receipt-cart-helpdesk-int-test-id-4" and messageId "receipt-cart-helpdesk-int-test-message-id-4" stored into cart-receipt-io-message datastore
     When getCartReceiptMessage API is called with messageId "receipt-cart-helpdesk-int-test-message-id-4"
     Then the api response has a 200 Http status
