@@ -42,7 +42,7 @@ jobs:
       - run: |
           python -m venv venv
           source venv/bin/activate
-          git clone --branch PAGOPA-2986-fdr-3-check-correttezza-dashboard https://github.com/pagopa/opex-dashboard
+          git clone --branch fix-availability-dashboard https://github.com/pagopa/opex-dashboard
           cd opex-dashboard
           pip install -e .
           cd ..
@@ -50,7 +50,7 @@ jobs:
           venv/bin/opex_dashboard generate \
             --template-name azure-dashboard \
             --package ./dashboard \
-            --config-file .opex/pdf-receipt-service/env/prod/config.yaml
+            --config-file .opex/${{ matrix.product }}/env/${{ matrix.environment }}/config.yaml
 
       # we need to set env variables in the folder /azure-dashboard
       - name: Copy Environments
@@ -79,22 +79,10 @@ jobs:
         shell: bash
         run: |
           cd ./dashboard/azure-dashboard
-          
+
           export ARM_CLIENT_ID="${{ secrets.CLIENT_ID }}"
           export ARM_TENANT_ID="${{ secrets.TENANT_ID }}"
           export ARM_SUBSCRIPTION_ID="${{ secrets.SUBSCRIPTION_ID }}"
           export ARM_USE_OIDC=true
 
           bash ./terraform.sh apply ${{ matrix.environment }} -auto-approve
-
-#      # from https://github.com/pagopa/opex-dashboard-azure-action/
-#      - uses: pagopa/opex-dashboard-azure-action@v1.2.2
-#        with:
-#          environment: ${{ matrix.environment }}
-#          api-name: ${{ matrix.product }}
-#          config: .opex/${{ matrix.product }}/env/${{ matrix.environment }}/config.yaml
-#          client-id: ${{ secrets.CLIENT_ID }}
-#          tenant-id: ${{ secrets.TENANT_ID }}
-#          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
-#          # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
-#          docker-version: sha256:b17f49fc762cc2049f887f0999642c95b5546d1eb44e5ae19bed080f9d1859d4
