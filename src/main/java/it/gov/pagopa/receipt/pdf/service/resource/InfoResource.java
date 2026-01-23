@@ -6,6 +6,9 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+
+import java.util.List;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -15,6 +18,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.quarkus.runtime.configuration.ConfigUtils;
 
 /** Resource class that expose the API to retrieve info about the service */
 @Path("/info")
@@ -48,12 +53,14 @@ public class InfoResource {
   @Produces(MediaType.APPLICATION_JSON)
   @GET
   public InfoResponse info() {
-    logger.info("Info environment: [{}] - name: [{}] - version: [{}]", environment, name, version);
+    List<String> profiles = ConfigUtils.getProfiles();
+    logger.info("Info environment: [{}] - name: [{}] - version: [{}] - profiles: [{}]", environment, name, version, profiles);
 
     return InfoResponse.builder()
         .name(name)
         .version(version)
         .environment(environment)
+        .profiles(profiles)
         .description("Receipt PDF Service")
         .build();
   }

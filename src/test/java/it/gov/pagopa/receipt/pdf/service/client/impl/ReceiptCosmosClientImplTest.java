@@ -8,7 +8,7 @@ import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
-import it.gov.pagopa.receipt.pdf.service.producer.ReceiptsContainer;
+import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsContainer;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
@@ -70,7 +70,6 @@ class ReceiptCosmosClientImplTest {
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_800, e.getErrorCode());
-
     }
 
 }

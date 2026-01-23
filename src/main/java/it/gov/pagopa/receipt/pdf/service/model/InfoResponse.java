@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
+
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
@@ -22,6 +25,9 @@ public class InfoResponse {
 
   @Schema(example = "dev")
   private String environment;
+
+  @Schema(example = "dev")
+  private List<String> profiles;
 
   @Schema(example = "Receipt PDF Service")
   private String description;

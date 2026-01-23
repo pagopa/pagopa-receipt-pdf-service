@@ -76,53 +76,23 @@ jobs:
       - name: Run Integration Tests
         shell: bash
         id: run_integration_test
+        env:
+          SUBKEY_ENV: ${{ secrets.SUBKEY }}
+          HELPDESK_SUBKEY_ENV: ${{ secrets.HELPDESK_SUBKEY }}
+          CUCUMBER_PUBLISH_TOKEN_ENV: ${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
+          RECEIPTS_STORAGE_CONN_STRING_ENV: ${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}
+          RECEIPTS_COSMOS_CONN_STRING_ENV: ${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}
+          BIZEVENTS_COSMOS_CONN_STRING_ENV: ${{ secrets.BIZEVENTS_COSMOS_CONN_STRING }}
+          TOKENIZER_API_KEY_ENV: ${{ secrets.TOKENIZER_API_KEY }}
         run: |
-          export SUBKEY=${{ secrets.SUBKEY }}
-          export CANARY=${{ inputs.canary }}
-          export CUCUMBER_PUBLISH_TOKEN=${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
-          export RECEIPTS_STORAGE_CONN_STRING='${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}'
-          export RECEIPTS_COSMOS_CONN_STRING='${{ secrets.RECEIPTS_COSMOS_CONN_STRING }}'
-          export TOKENIZER_API_KEY='${{ secrets.TOKENIZER_API_KEY }}'
+          export SUBKEY='$SUBKEY_ENV'
+          export HELPDESK_SUBKEY='$HELPDESK_SUBKEY_ENV'
+          export CUCUMBER_PUBLISH_TOKEN='$CUCUMBER_PUBLISH_TOKEN_ENV'
+          export RECEIPTS_STORAGE_CONN_STRING='$RECEIPTS_STORAGE_CONN_STRING_ENV'
+          export RECEIPTS_COSMOS_CONN_STRING='$RECEIPTS_COSMOS_CONN_STRING_ENV'
+          export BIZEVENTS_COSMOS_CONN_STRING='$BIZEVENTS_COSMOS_CONN_STRING_ENV'
+          export TOKENIZER_API_KEY='$TOKENIZER_API_KEY_ENV'
 
           cd ./integration-test
           chmod +x ./run_integration_test.sh
           ./run_integration_test.sh local
-
-  delete_github_deployments:
-    runs-on: ubuntu-latest
-    needs: smoke-test
-    if: ${{ always() }}
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
-      - name: Delete Previous deployments
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
-        env:
-          SHA_HEAD: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.sha}}
-        with:
-          script: |
-            const { SHA_HEAD } = process.env
-
-            const deployments = await github.rest.repos.listDeployments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: SHA_HEAD
-            });
-            await Promise.all(
-              deployments.data.map(async (deployment) => {
-                await github.rest.repos.createDeploymentStatus({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  deployment_id: deployment.id,
-                  state: 'inactive'
-                });
-                return github.rest.repos.deleteDeployment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  deployment_id: deployment.id
-                });
-              })
-            );
