@@ -37,7 +37,6 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
 
 @Tag(name = "Helpdesk", description = "Helpdesk operations")
-@Path("/helpdesk")
 @LoggedAPI
 @IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "helpdesk"})
 public class HelpdeskResource {
