@@ -5,7 +5,7 @@ locals {
   apim = {
     name       = "${local.product}-apim"
     rg         = "${local.product}-api-rg"
-    helpdesk_api_product_id = "helpdesk-api"
+    helpdesk_api_product_id = "technical_support_api"
   }
 
   receipt_pdf_service_hostname = var.env == "prod" ? "weu${var.env}.receipt-pdf-service.internal.platform.pagopa.it" : "weu${var.env}.receipt-pdf-service.internal.${var.env}.platform.pagopa.it"

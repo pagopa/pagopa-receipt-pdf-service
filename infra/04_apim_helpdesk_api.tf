@@ -16,7 +16,7 @@ resource "azurerm_api_management_api_version_set" "api_helpdesk_api" {
 module "apim_api_helpdesk_api_v1" {
   source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v8.62.1"
 
-  name                = format("%s-helpdesk-api-v1", var.env_short)
+  name                = format("%s-receipts-service-helpdesk-api", var.env_short)
   api_management_name = local.apim.name
   resource_group_name = local.apim.rg
   product_ids         = [local.apim.helpdesk_api_product_id]
