@@ -8,13 +8,13 @@ resource "azurerm_api_management_api_version_set" "api_helpdesk_api" {
   name                = format("%s-receipts-service-helpdesk-api", var.env_short)
   resource_group_name = local.apim.rg
   api_management_name = local.apim.name
-  display_name        = local.helpdesk_api.display_name
+  display_name        = local.receipt_service_helpdesk_api.display_name
   versioning_scheme   = "Segment"
 }
 
 # Helpdesk v1
 module "apim_api_helpdesk_api_v1" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v8.62.1"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v8.103.0"
 
   name                = format("%s-receipts-service-helpdesk-api", var.env_short)
   api_management_name = local.apim.name
@@ -25,9 +25,9 @@ module "apim_api_helpdesk_api_v1" {
   version_set_id        = azurerm_api_management_api_version_set.api_helpdesk_api.id
   api_version           = "v1"
 
-  description  = local.helpdesk_api.description
-  display_name = local.helpdesk_api.display_name
-  path         = local.helpdesk_api.path
+  description  = local.receipt_service_helpdesk_api.description
+  display_name = local.receipt_service_helpdesk_api.display_name
+  path         = local.receipt_service_helpdesk_api.path
   protocols    = ["https"]
   service_url  = local.receipt_pdf_service_url
 

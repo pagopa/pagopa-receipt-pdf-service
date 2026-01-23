@@ -5,13 +5,22 @@ locals {
   apim = {
     name       = "${local.product}-apim"
     rg         = "${local.product}-api-rg"
+    hostname     = "api.${var.apim_dns_zone_prefix}.${var.apim_dns_zone_prefix}"
     helpdesk_api_product_id = "technical_support_api"
   }
 
-  receipt_pdf_service_hostname = var.env == "prod" ? "weu${var.env}.receipt-pdf-service.internal.platform.pagopa.it" : "weu${var.env}.receipt-pdf-service.internal.${var.env}.platform.pagopa.it"
-  receipt_pdf_service_url      = "https://${local.receipt_pdf_service_hostname}/pagopa-receipt-pdf-service"
+  receipts_hostname = var.env == "prod" ? "weu${var.env}.receipts.internal.platform.pagopa.it" : "weu${var.env}.receipts.internal.${var.env}.platform.pagopa.it"
+  receipt_pdf_service_url      = "https://${local.receipts_hostname}/pagopa-receipt-pdf-service"
 
-  helpdesk_api = {
+  receipts_service_api = {
+    display_name          = "Receipts Service PDF"
+    description           = "API to handle receipts"
+    path                  = "receipts/service"
+    subscription_required = true
+    service_url           = null
+  }
+
+  receipt_service_helpdesk_api = {
     display_name          = "Receipt PDF Service - Helpdesk API"
     description           = "Receipt PDF Service API for helpdesk support"
     published             = true
