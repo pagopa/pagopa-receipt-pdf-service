@@ -934,6 +934,40 @@ class AttachmentsServiceImplTest {
         assertEquals(AppErrorCodeEnum.PDFS_700, ex.getErrorCode());
     }
 
+
+    @Test
+    void getAttachmentsDetails_cart_missing_payer() throws Exception {
+        String cartId = "cart1";
+        String payer = "PAYER";
+        String fileName = "payer.pdf";
+        String debtor = "DEBTOR";
+        String bizId = "BIZ";
+
+        CartPayment payment = CartPayment.builder()
+                .bizEventId(bizId)
+                .debtorFiscalCode(debtor)
+                .mdAttach(ReceiptMetadata.builder().name(fileName).build())
+                .messageDebtor(MessageData.builder().subject("subj").markdown("md").build())
+                .build();
+
+        CartForReceipt cart = CartForReceipt.builder()
+                .id(cartId)
+                .payload(Payload.builder()
+                        .payerFiscalCode(payer)
+                        .mdAttachPayer(ReceiptMetadata.builder().name(fileName).build())
+                        .cart(List.of(payment))
+                        .build())
+                .build();
+
+        when(cosmosClientCartMock.getCartForReceiptDocument(anyString())).thenReturn(cart);
+        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse(payer));
+
+
+        InvalidReceiptException ex = assertThrows(InvalidReceiptException.class,
+                () -> sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART, payer));
+        assertEquals(AppErrorCodeEnum.PDFS_713, ex.getErrorCode());
+    }
+
 }
 
 

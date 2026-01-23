@@ -64,10 +64,9 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException, CartNotFoundException {
 
         if (thirdPartyId.contains(CART)) {
-            return  handleCartAttachmentDetails(thirdPartyId, requestFiscalCode );
-        }
-        else {
-            return  handleSingleReceiptAttachmentDetails(thirdPartyId, requestFiscalCode);
+            return handleCartAttachmentDetails(thirdPartyId, requestFiscalCode);
+        } else {
+            return handleSingleReceiptAttachmentDetails(thirdPartyId, requestFiscalCode);
         }
 
     }
@@ -90,14 +89,14 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * Retrieves the attachment details for a single receipt, validating the authorization
      * of the provided fiscal code to access the receipt.
      *
-     * @param thirdPartyId the unique identifier of the receipt
+     * @param thirdPartyId      the unique identifier of the receipt
      * @param requestFiscalCode the fiscal code requesting access
      * @return the details of the attachment for the specified receipt
-     * @throws ReceiptNotFoundException if the receipt is not found
-     * @throws InvalidReceiptException if the receipt is invalid
+     * @throws ReceiptNotFoundException         if the receipt is not found
+     * @throws InvalidReceiptException          if the receipt is invalid
      * @throws FiscalCodeNotAuthorizedException if the fiscal code is not authorized to access the receipt
      */
-    private AttachmentsDetailsResponse handleSingleReceiptAttachmentDetails(String thirdPartyId, String requestFiscalCode )
+    private AttachmentsDetailsResponse handleSingleReceiptAttachmentDetails(String thirdPartyId, String requestFiscalCode)
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
         Receipt receiptDocument = getReceipt(thirdPartyId);
         SearchTokenResponse searchTokenResponse = getSearchTokenResponse(thirdPartyId, requestFiscalCode);
@@ -129,13 +128,13 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * The method validates the authorization of the provided fiscal code to access the cart's attachments.
      * </p>
      *
-     * @param thirdPartyId the unique identifier of the cart, possibly including a business event ID
+     * @param thirdPartyId      the unique identifier of the cart, possibly including a business event ID
      * @param requestFiscalCode the fiscal code requesting access
      * @return the details of the attachment for the specified cart
-     * @throws CartNotFoundException if the cart is not found
-     * @throws InvalidReceiptException if the cart or its attachments are invalid
+     * @throws CartNotFoundException            if the cart is not found
+     * @throws InvalidReceiptException          if the cart or its attachments are invalid
      * @throws FiscalCodeNotAuthorizedException if the fiscal code is not authorized to access the cart's attachments
-     * @throws InvalidCartException if the cart is invalid
+     * @throws InvalidCartException             if the cart is invalid
      */
     private AttachmentsDetailsResponse handleCartAttachmentDetails(String thirdPartyId, String requestFiscalCode) throws CartNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {
         var thirdPartyIdParts = thirdPartyId.split(CART);
@@ -152,7 +151,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         if (isFiscalCodeNotAuthorized(token, bizEventId, cartForReceipt)) {
             String errMsg =
                     String.format(
-                            "Fiscal code is not authorized to access the receipts for cart with id %s",sanitize(thirdPartyId));
+                            "Fiscal code is not authorized to access the receipts for cart with id %s", sanitize(thirdPartyId));
             logger.error(errMsg);
             throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
         }
@@ -165,6 +164,14 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                                 sanitize(cartId));
                 logger.error(errMsg);
                 throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_712, errMsg);
+            }
+
+            if(cartForReceipt.getPayload().getMessagePayer() == null){
+                String errMsg =
+                        String.format("The retrieved receipt metadata for cart %s has null payer message data",
+                                sanitize(cartId));
+                logger.error(errMsg);
+                throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_713, errMsg);
             }
 
             return buildCartAttachmentDetails(cartForReceipt,
@@ -182,7 +189,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_711, errMsg);
         }
 
-        return  buildCartAttachmentDetails(cartForReceipt, cartItem.getMdAttach(),cartItem.getMessageDebtor()) ;
+        return buildCartAttachmentDetails(cartForReceipt, cartItem.getMdAttach(), cartItem.getMessageDebtor());
 
     }
 
@@ -190,17 +197,17 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * Finds the debtor cart payment item in the given cart that matches the specified business event ID.
      *
      * @param cartForReceipt the cart containing the list of payments
-     * @param eventId the business event ID to match
+     * @param eventId        the business event ID to match
      * @return the first matching {@link CartPayment} with non-null attachment and message for the debtor, or null if not found
      */
-    private CartPayment findDebtorCartPaymentByBizEventId (CartForReceipt cartForReceipt,String eventId ){
+    private CartPayment findDebtorCartPaymentByBizEventId(CartForReceipt cartForReceipt, String eventId) {
         return cartForReceipt.getPayload().getCart() != null
                 ?
                 cartForReceipt.getPayload().getCart().stream()
                         .filter(elem ->
                                 elem != null
                                         && elem.getMdAttach() != null
-                                        && elem.getMessageDebtor()!=null
+                                        && elem.getMessageDebtor() != null
                                         && eventId.equals(elem.getBizEventId())
                         )
                         .findFirst()
@@ -521,8 +528,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
      * This method checks if the fiscal code is authorized to access the attachment details
      *
      * @param requestFiscalCode the fiscal code to check
-     * @param eventId the event id
-     * @param cartForReceipt the cart for receipt
+     * @param eventId           the event id
+     * @param cartForReceipt    the cart for receipt
      * @return true if the fiscal code is not authorized, false otherwise
      */
     private boolean isFiscalCodeNotAuthorized(
@@ -533,7 +540,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             return true;
         }
 
-        if (eventId == null ) {
+        if (eventId == null) {
             // if third_party_id is a payer then check payer attachment details
 
             boolean isPayerAuthorized = cartForReceipt.getPayload().getMdAttachPayer() != null
@@ -549,7 +556,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                     .filter(elem ->
                             elem != null
                                     && elem.getMdAttach() != null
-                            )
+                    )
                     .anyMatch(elem ->
                             requestFiscalCode.equals(elem.getDebtorFiscalCode())
                                     && eventId.equals(elem.getBizEventId())

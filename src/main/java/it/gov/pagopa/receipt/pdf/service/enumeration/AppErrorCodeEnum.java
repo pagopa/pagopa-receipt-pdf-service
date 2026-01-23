@@ -32,6 +32,7 @@ public enum AppErrorCodeEnum {
     PDFS_710("PDFS_710", "The retrieved cart has null attachment info"),
     PDFS_711("PDFS_711", "The retrieved cart has null debtor attachment info"),
     PDFS_712("PDFS_712", "The retrieved cart has null payer attachment info"),
+    PDFS_713("PDFS_713", "The retrieved cart has null payer message data"),
 
     PDFS_800("PDFS_800", "Receipt not found with the provided third party id"),
     PDFS_801("PDFS_801", "Cart not found with the provided third party id"),
