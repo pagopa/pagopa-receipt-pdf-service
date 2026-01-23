@@ -461,8 +461,8 @@
     }
   },
   "info": {
-    "title": "PagoPa PDF Receipt Service (local)",
-    "version": "0.14.2",
+    "title": "PagoPa PDF Receipt Service",
+    "version": "0.14.3",
     "description": "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService": "https://www.pagopa.gov.it/"
   },
@@ -477,7 +477,7 @@
     }
   ],
   "paths": {
-    "/helpdesk/cart-errors-toreview/{cart-id}": {
+    "/cart-errors-toreview/{cart-id}": {
       "get": {
         "summary": "Get CartReceipt Error",
         "description": "Retrieve the cart-receipt-error document by cart id",
@@ -517,7 +517,7 @@
         }
       }
     },
-    "/helpdesk/cart-receipts/io-message/{message-id}": {
+    "/cart-receipts/io-message/{message-id}": {
       "get": {
         "summary": "Get CartReceipt Message",
         "description": "Retrieve the cart-receipt-message document by message id",
@@ -557,7 +557,7 @@
         }
       }
     },
-    "/helpdesk/cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}": {
+    "/cart-receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}": {
       "get": {
         "summary": "Get CartReceipt by organization fiscal code and iuv",
         "description": "Retrieve the cart-receipt document by organization fiscal code and iuv",
@@ -605,7 +605,7 @@
         }
       }
     },
-    "/helpdesk/cart-receipts/{cart-id}": {
+    "/cart-receipts/{cart-id}": {
       "get": {
         "summary": "Get CartReceipt",
         "description": "Retrieve the cart-receipt document by cart id",
@@ -645,7 +645,7 @@
         }
       }
     },
-    "/helpdesk/errors-toreview/{bizevent-id}": {
+    "/errors-toreview/{bizevent-id}": {
       "get": {
         "summary": "Get Receipt Error by event id",
         "description": "Retrieve the receipt-error document by event id",
@@ -685,7 +685,30 @@
         }
       }
     },
-    "/helpdesk/pdf-receipts/{file-name}": {
+    "/info": {
+      "get": {
+        "summary": "Get info of Receipt PDF Service",
+        "tags": [
+          "Info"
+        ],
+        "responses": {
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pdf-receipts/{file-name}": {
       "get": {
         "summary": "Get Receipt PDF",
         "description": "Retrieve the receipt pdf by file name",
@@ -721,7 +744,7 @@
         }
       }
     },
-    "/helpdesk/receipts/io-message/{message-id}": {
+    "/receipts/io-message/{message-id}": {
       "get": {
         "summary": "Get Receipt Message",
         "description": "Retrieve the receipt-message document by message id",
@@ -761,7 +784,7 @@
         }
       }
     },
-    "/helpdesk/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}": {
+    "/receipts/organizations/{organization-fiscal-code}/iuvs/{iuv}": {
       "get": {
         "summary": "Get Receipt by organization fiscal code and iuv",
         "description": "Retrieve the receipt document by organization fiscal code and iuv",
@@ -809,7 +832,7 @@
         }
       }
     },
-    "/helpdesk/receipts/{event-id}": {
+    "/receipts/{event-id}": {
       "get": {
         "summary": "Get Receipt",
         "description": "Retrieve the receipt document by event id",
@@ -842,29 +865,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Receipt"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/info": {
-      "get": {
-        "summary": "Get info of Receipt PDF Service",
-        "tags": [
-          "Info"
-        ],
-        "responses": {
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InfoResponse"
                 }
               }
             }

@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service'
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: '0.14.2'
+    tag: '0.14.3'
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -120,7 +120,6 @@ microservice-chart: &microservice-chart
     CACHE_ATTACHMENT_DETAILS_INITIAL_CAPACITY: '10'
     CACHE_ATTACHMENT_DETAILS_MAX_SIZE: '10000'
     CACHE_ATTACHMENT_DETAILS_EXPIRE_AFTER_WRITE: '15s'
-    QUARKUS_PROFILE: 'attachments'
   envSecret: &envSecret
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_RECEIPT_KEY: 'cosmos-receipt-pkey'
@@ -176,6 +175,5 @@ pagopa-receipt-pdf-service-helpdesk:
     !!merge <<: *envConfig
     APP_NAME: 'pdf-receipt-service-helpdesk'
     WEBSITE_SITE_NAME: 'pagopareceiptpdfservicehelpdesk'
-    QUARKUS_PROFILE: 'helpdesk'
   envSecret:
     !!merge <<: *envSecret

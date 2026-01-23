@@ -37,8 +37,8 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
 
 @Tag(name = "Helpdesk", description = "Helpdesk operations")
-@Path("/helpdesk")
 @LoggedAPI
+@Path("")
 @IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "helpdesk"})
 public class HelpdeskResource {
     public static final String RECEIPT_NOT_FOUND_BY_EVENTID = "Unable to retrieve the receipt with eventId %s";

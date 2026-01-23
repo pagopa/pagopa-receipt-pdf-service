@@ -14,6 +14,6 @@ class OpenApiGenerationTest {
     @Test
     void generateOpenApi() throws Exception {
         CommonUtilsTest.generateOpenApi("openapi.json");
-        Assertions.assertTrue(new File("openapi/openapi-helpdesk.json").isFile());
+        Assertions.assertTrue(new File("openapi/openapi.json").isFile());
     }
 }
