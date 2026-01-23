@@ -120,7 +120,6 @@ microservice-chart: &microservice-chart
     CACHE_ATTACHMENT_DETAILS_INITIAL_CAPACITY: '10000'
     CACHE_ATTACHMENT_DETAILS_MAX_SIZE: '50000'
     CACHE_ATTACHMENT_DETAILS_EXPIRE_AFTER_WRITE: '1h'
-    QUARKUS_PROFILE: 'attachments'
   envSecret: &envSecret
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-p-connection-string'
@@ -187,6 +186,5 @@ pagopa-receipt-pdf-service-helpdesk:
     APP_NAME: 'pdf-receipt-service-helpdesk'
     WEBSITE_SITE_NAME: 'pagopareceiptpdfservicehelpdesk'
     COSMOS_PREFERRED_REGION: 'North Europe'
-    QUARKUS_PROFILE: 'helpdesk'
   envSecret:
     !!merge <<: *envSecret

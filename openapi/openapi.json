@@ -163,7 +163,7 @@
     }
   },
   "info": {
-    "title": "PagoPa PDF Receipt Service (local)",
+    "title": "PagoPa PDF Receipt Service",
     "version": "0.14.2",
     "description": "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService": "https://www.pagopa.gov.it/"
