@@ -32,7 +32,7 @@ hs_err_pid*
 # Project files
 /target/
 **/node_modules
-**/.env
+**/*.env
 .cache_ggshield
 yarn.lock
 package-lock.json
