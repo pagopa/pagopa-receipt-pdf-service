@@ -24,24 +24,6 @@ variable "env_short" {
   }
 }
 
-variable "location_short" {
-  type = string
-  validation {
-    condition = (
-    length(var.location_short) == 3
-    )
-    error_message = "Length must be 3 chars."
-  }
-  description = "One of weu, neu"
-}
-
-variable "tags" {
-  type    = map(any)
-  default = {
-    CreatedBy = "Terraform"
-  }
-}
-
 variable "domain" {
   type = string
   validation {
@@ -52,25 +34,19 @@ variable "domain" {
   }
 }
 
-variable "location" {
+variable "location_short" {
   type = string
+  validation {
+    condition = (
+    length(var.location_short) == 3
+    )
+    error_message = "Length must be 3 chars."
+  }
+  description = "One of wue, neu"
 }
 
-variable "instance" {
-  type        = string
-  description = "Identifies the instance"
-  default     = "dev"
-}
-
-#apim
 variable "apim_dns_zone_prefix" {
-  type = string
-}
-
-variable "external_domain" {
-  type = string
-}
-
-variable "hostname" {
-  type = string
+  type        = string
+  default     = null
+  description = "The dns subdomain for apim."
 }
