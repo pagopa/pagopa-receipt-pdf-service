@@ -50,3 +50,4 @@ variable "apim_dns_zone_prefix" {
   default     = null
   description = "The dns subdomain for apim."
 }
+
