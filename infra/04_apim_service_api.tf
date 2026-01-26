@@ -3,7 +3,7 @@
 ##############
 
 module "apim_receipts_product" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_product?ref=v8.103.0"
+  source = "./.terraform/modules/__v3__/api_management_product"
 
   product_id   = "receipts"
   display_name = "Receipts Service PDF"
@@ -35,7 +35,7 @@ resource "azurerm_api_management_api_version_set" "api_receipts_api" {
 
 
 module "apim_api_receipts_api_v1" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v8.103.0"
+  source = "./.terraform/modules/__v3__/api_management_api"
 
   name                  = format("%s-receipts-service-api", local.project)
   api_management_name = local.apim.name
