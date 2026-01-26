@@ -31,7 +31,7 @@ locals {
     "SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_subkey.value
     "HELPDESK_SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_helpdesk_subkey.value
     "TOKENIZER_API_KEY" : data.azurerm_key_vault_secret.key_vault_tokenizer_api_key.value
-    "HELPDESK_SUBKEY_ENV" : data.azurerm_key_vault_secret.key_vault_helpdesk_integration_test_api_key.value
+    "HELPDESK_SUBKEY" : data.azurerm_key_vault_secret.key_vault_helpdesk_integration_test_api_key.value
   }
   env_variables = {
     "CONTAINER_APP_ENVIRONMENT_NAME" : local.container_app_environment.name,
