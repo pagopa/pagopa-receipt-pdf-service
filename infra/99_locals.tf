@@ -12,14 +12,6 @@ locals {
   receipts_hostname = var.env == "prod" ? "weu${var.env}.receipts.internal.platform.pagopa.it" : "weu${var.env}.receipts.internal.${var.env}.platform.pagopa.it"
   receipt_pdf_service_url      = "https://${local.receipts_hostname}/pagopa-receipt-pdf-service"
 
-  receipts_service_api = {
-    display_name          = "Receipts Service PDF"
-    description           = "API to handle receipts"
-    path                  = "receipts/service"
-    subscription_required = true
-    service_url           = null
-  }
-
   receipt_service_helpdesk_api = {
     display_name          = "Receipt PDF Service - Helpdesk API"
     description           = "Receipt PDF Service API for helpdesk support"
