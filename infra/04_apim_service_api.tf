@@ -56,7 +56,5 @@ module "apim_api_receipts_api_v1" {
     host = local.apim.hostname
   })
 
-  xml_content = templatefile("./api/receipt-service/v1/_base_policy.xml", {
-    hostname = local.receipts_hostname
-  })
+  xml_content = file("./api/receipt-service/v1/_base_policy.xml")
 }

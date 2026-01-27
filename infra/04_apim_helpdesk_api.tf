@@ -29,7 +29,7 @@ module "apim_api_helpdesk_api_v1" {
   display_name = local.receipt_service_helpdesk_api.display_name
   path         = local.receipt_service_helpdesk_api.path
   protocols    = ["https"]
-  service_url  = local.receipt_pdf_service_url
+  service_url  = local.receipt_pdf_service_helpdesk_url
 
   content_format = "openapi"
   content_value = templatefile("../openapi/openapi-helpdesk.json", {
