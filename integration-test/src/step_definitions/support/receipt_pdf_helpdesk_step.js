@@ -140,8 +140,8 @@ Given("a receipt pdf with filename {string} stored into blob storage", async fun
     assert.notStrictEqual(blobStorageResponse.status, 500);
 });
 
-Given('a receipt-io-message with bizEventId {string} and messageId {string} stored into receipt-io-message datastore', async function (eventId, messageId) {
-    messageId = messageId;
+Given('a receipt-io-message with bizEventId {string} and messageId {string} stored into receipt-io-message datastore', async function (eventId, message_id) {
+    messageId = message_id;
     // prior cancellation to avoid dirty cases
     await deleteDocumentInReceiptIoMessageDatastore(messageId);
 
