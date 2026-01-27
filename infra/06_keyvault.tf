@@ -17,7 +17,7 @@ resource "azurerm_api_management_subscription" "receipt_service_helpdesk_subkey"
 
   api_management_name = local.apim.name
   resource_group_name = local.apim.rg
-  api_id              = module.apim_api_helpdesk_api_v1.id
+  api_id              = replace(module.apim_api_helpdesk_api_v1.id, ";rev=1", "")
   display_name        = "Subscription for Receipt Service Helpdesk integration tests"
   allow_tracing       = false
   state               = "active"
