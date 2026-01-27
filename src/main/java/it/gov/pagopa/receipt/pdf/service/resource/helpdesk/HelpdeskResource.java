@@ -213,7 +213,7 @@ public class HelpdeskResource {
                             description = "Success",
                             content =
                             @Content(
-                                    mediaType = MediaType.APPLICATION_OCTET_STREAM
+                                    mediaType = "application/pdf"
                             )
                     )
             }
@@ -231,7 +231,10 @@ public class HelpdeskResource {
 
         try {
             byte[] result = attachmentsService.getAttachmentBytesFromBlobStorage(fileName);
-            return RestResponse.ok(result);
+            return RestResponse.ResponseBuilder.ok((Object) result)
+                    .header("content-type", "application/pdf")
+                    .header("content-disposition", "attachment;")
+                    .build();
         } catch (BlobStorageClientException | AttachmentNotFoundException | IOException e) {
             String responseMsg = String.format("Unable to retrieve the receipt pdf with file name %s", sanitize(fileName));
             logger.error(LOG_ERROR_MESSAGE, "getReceiptPdf", responseMsg, e);
