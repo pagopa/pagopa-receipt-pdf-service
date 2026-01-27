@@ -5,6 +5,7 @@ import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
+import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -45,8 +46,6 @@ public class AttachmentResource {
 
     private static final String FISCAL_CODE_HEADER = "fiscal_code";
     private static final String THIRD_PARTY_ID_PARAM = "tp_id";
-    private static final String REGEX = "[\n\r]";
-    private static final String REPLACEMENT = "_";
     private static final int FISCAL_CODE_LENGTH = 16;
 
     private final AttachmentsService attachmentsService;
@@ -86,14 +85,14 @@ public class AttachmentResource {
             FiscalCodeNotAuthorizedException, InvalidCartException, CartNotFoundException {
 
         // replace new line and tab from user input to avoid log injection
-        thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
+        thirdPartyId = CommonUtils.sanitize(thirdPartyId);
 
         logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
         if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
             throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
         }
         // replace new line and tab from user input to avoid log injection
-        requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
+        requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
 
         AttachmentsDetailsResponse attachmentDetails =
                 attachmentsService.getAttachmentsDetails(thirdPartyId, requestFiscalCode);
@@ -128,8 +127,8 @@ public class AttachmentResource {
             InvalidReceiptException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, ErrorHandlingPdfAttachmentFileException, InvalidCartException, CartNotFoundException {
 
         // replace new line and tab from user input to avoid log injection
-        thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
-        attachmentUrl = attachmentUrl.replaceAll(REGEX, REPLACEMENT);
+        thirdPartyId = CommonUtils.sanitize(thirdPartyId);
+        attachmentUrl = CommonUtils.sanitize(attachmentUrl);
 
         logger.info(
                 "Received get attachment with name {} for receipt with id {}",
@@ -139,7 +138,7 @@ public class AttachmentResource {
             throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
         }
         // replace new line and tab from user input to avoid log injection
-        requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
+        requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
 
 
         File attachment = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
@@ -184,14 +183,14 @@ public class AttachmentResource {
             AttachmentNotFoundException, BlobStorageClientException, ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
 
         // replace new line and tab from user input to avoid log injection
-        thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
+        thirdPartyId = CommonUtils.sanitize(thirdPartyId);
 
         logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
         if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
             throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
         }
         // replace new line and tab from user input to avoid log injection
-        requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
+        requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
 
 
         File attachment = this.attachmentsService.getReceiptPdf(thirdPartyId, requestFiscalCode);
