@@ -178,9 +178,10 @@ public class AttachmentResource {
     @GET
     public RestResponse<byte[]> getReceiptPdf(
             @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
-            @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
-            throws InvalidFiscalCodeHeaderException,
-            FiscalCodeNotAuthorizedException, ErrorHandlingPdfAttachmentFileException, AttachmentNotFoundException, BlobStorageClientException {
+            @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode
+    )
+            throws InvalidFiscalCodeHeaderException, FiscalCodeNotAuthorizedException, ErrorHandlingPdfAttachmentFileException,
+            AttachmentNotFoundException, BlobStorageClientException, ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
 
         // replace new line and tab from user input to avoid log injection
         thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
