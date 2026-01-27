@@ -1,16 +1,12 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.cache.CacheResult;
-import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
-import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
-import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
-import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
+import it.gov.pagopa.receipt.pdf.service.client.*;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
+import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.*;
-import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
-import it.gov.pagopa.receipt.pdf.service.model.cart.CartPayment;
-import it.gov.pagopa.receipt.pdf.service.model.cart.MessageData;
+import it.gov.pagopa.receipt.pdf.service.model.cart.*;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
@@ -29,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
 @ApplicationScoped
@@ -36,6 +33,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
 
     public static final String CART = "_CART_";
     public static final String ANONIMO = "ANONIMO";
+    public static final int PDF_TEMPLATE_ERROR_CODE = 903;
     private final Logger logger = LoggerFactory.getLogger(AttachmentsServiceImpl.class);
 
     private final ReceiptCosmosClient cosmosClient;
@@ -166,7 +164,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                 throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_712, errMsg);
             }
 
-            if(cartForReceipt.getPayload().getMessagePayer() == null){
+            if (cartForReceipt.getPayload().getMessagePayer() == null) {
                 String errMsg =
                         String.format("The retrieved receipt metadata for cart %s has null payer message data",
                                 sanitize(cartId));
@@ -241,7 +239,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                             "Fiscal code is not authorized to access the receipts with name: %s, for receipt with id %s",
                             sanitize(attachmentUrl), sanitize(thirdPartyId));
             logger.error(errMsg);
-            throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_706, errMsg);
+            throw new FiscalCodeNotAuthorizedException(PDFS_706, errMsg);
         }
     }
 
@@ -261,7 +259,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                             "Fiscal code is not authorized to access the receipts with name: %s, for cart with id %s",
                             sanitize(attachmentUrl), sanitize(thirdPartyId));
             logger.error(errMsg);
-            throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_706, errMsg);
+            throw new FiscalCodeNotAuthorizedException(PDFS_706, errMsg);
         }
     }
 
@@ -565,6 +563,82 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             return !isDebtorAuthorized;
 
         }
+    }
 
+    @Override
+    public File getReceiptPdf(String thirdPartyId, String requestFiscalCode)
+            throws FiscalCodeNotAuthorizedException,
+            BlobStorageClientException, AttachmentNotFoundException {
+        // TODO logging errors
+        String attachmentUrl;
+        try {
+            if (thirdPartyId.contains(CART)) {
+                String cartId = thirdPartyId.split(CART)[0];
+
+                CartForReceipt cart = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
+
+                if (CartStatusType.pdfWaitingToBeGenerated().contains(cart.getStatus())) {
+                    throw new AttachmentNotFoundException(PDFS_714, PDFS_714.getErrorMessage());
+                }
+                if (CartStatusType.pdfFailedToBeGenerated().contains(cart.getStatus())) {
+                    if (cart.getReasonErr() != null && cart.getReasonErr().getCode() != PDF_TEMPLATE_ERROR_CODE) {
+                        throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
+                    }
+                    throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
+                }
+
+                String fiscalCode = getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
+                Payload cartPayload = cart.getPayload();
+                if (cartPayload.getPayerFiscalCode().equals(fiscalCode)) {
+                    attachmentUrl = cartPayload.getMdAttachPayer().getUrl();
+                } else {
+                    ReceiptMetadata mdAttach = cartPayload.getCart().stream()
+                            .filter(md -> md.getDebtorFiscalCode().equals(fiscalCode))
+                            .findFirst().orElseThrow(() -> new FiscalCodeNotAuthorizedException(
+                                    PDFS_706,
+                                    String.format("Fiscal code is not authorized to access the receipt with cart id %s", cartId)
+                            ))
+                            .getMdAttach();
+
+                    attachmentUrl = mdAttach.getUrl();
+                }
+            } else {
+                Receipt receipt = cosmosClient.getReceiptDocument(thirdPartyId);
+
+                if (ReceiptStatusType.pdfWaitingToBeGenerated().contains(receipt.getStatus())) {
+                    throw new AttachmentNotFoundException(PDFS_714, PDFS_714.getErrorMessage());
+                }
+                if (ReceiptStatusType.pdfFailedToBeGenerated().contains(receipt.getStatus())) {
+                    if (receipt.getReasonErr() != null && receipt.getReasonErr().getCode() != PDF_TEMPLATE_ERROR_CODE) {
+                        throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
+                    }
+                    throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
+                }
+
+                String fiscalCode = getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
+                if (receipt.getEventData().getDebtorFiscalCode().equals(fiscalCode)) {
+                    attachmentUrl = receipt.getMdAttach().getUrl();
+                } else if (receipt.getEventData().getPayerFiscalCode().equals(fiscalCode)) {
+                    attachmentUrl = receipt.getMdAttachPayer().getUrl();
+                } else {
+                    throw new FiscalCodeNotAuthorizedException(PDFS_706, String.format(
+                            "Fiscal code is not authorized to access the receipt with id %s", sanitize(thirdPartyId)));
+                }
+            }
+        } catch (ReceiptNotFoundException e) {
+            throw new AttachmentNotFoundException(PDFS_800, PDFS_800.getErrorMessage());
+        } catch (CartNotFoundException e) {
+            throw new AttachmentNotFoundException(PDFS_801, PDFS_801.getErrorMessage());
+        } catch (FiscalCodeNotAuthorizedException e) {
+            String errMsg = e.getMessage();
+            logger.error(errMsg);
+            throw new FiscalCodeNotAuthorizedException(PDFS_706, errMsg);
+        }
+
+        if (attachmentUrl == null || attachmentUrl.isEmpty() || attachmentUrl.isBlank()) {
+            throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage()); //TODO verify
+        }
+
+        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl);
     }
 }

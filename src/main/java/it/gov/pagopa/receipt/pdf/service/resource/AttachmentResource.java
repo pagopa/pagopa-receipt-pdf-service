@@ -2,6 +2,7 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 
 import io.quarkus.arc.profile.IfBuildProfile;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
+import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import jakarta.inject.Inject;
@@ -29,8 +30,6 @@ import java.io.IOException;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
-
-import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 
 /**
  * Resource class that expose the API to retrieve the attachments
@@ -90,8 +89,7 @@ public class AttachmentResource {
 
         logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
         if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
-            String errMsg = "Fiscal code header is null or not valid";
-            throw new InvalidFiscalCodeHeaderException(PDFS_901, errMsg);
+            throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
         }
         // replace new line and tab from user input to avoid log injection
         requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
@@ -137,14 +135,64 @@ public class AttachmentResource {
                 attachmentUrl,
                 thirdPartyId);
         if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
-            String errMsg = "Fiscal code header is null or not valid";
-            throw new InvalidFiscalCodeHeaderException(PDFS_901, errMsg);
+            throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
         }
         // replace new line and tab from user input to avoid log injection
         requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
 
 
         File attachment = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
+        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(attachment))) {
+            return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
+                    .header("content-type", "application/pdf")
+                    .header("content-disposition", "attachment;")
+                    .build();
+        } catch (IOException e) {
+            logger.error("Error handling the stream generated from pdf attachment");
+            throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
+        } finally {
+            if (attachment != null && attachment.exists()) {
+                clearTempDirectory(attachment.toPath().getParent());
+            }
+        }
+    }
+
+    @Operation(
+            summary = "Get attachment details",
+            description = "Retrieve the attachment details linked to the provided third party data id"
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(ref = "#/components/responses/InternalServerError"),
+                    @APIResponse(ref = "#/components/responses/AppException400"),
+                    @APIResponse(ref = "#/components/responses/AppException404"),
+                    @APIResponse(
+                            responseCode = "200",
+                            description = "Success",
+                            content = @Content(mediaType = "application/pdf")
+                    )
+            }
+    )
+    @Path("/{tp_id}/pdf")
+    @GET
+    public RestResponse<byte[]> getReceiptPdf(
+            @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
+            @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode)
+            throws InvalidFiscalCodeHeaderException,
+            FiscalCodeNotAuthorizedException, ErrorHandlingPdfAttachmentFileException, AttachmentNotFoundException, BlobStorageClientException {
+
+        // replace new line and tab from user input to avoid log injection
+        thirdPartyId = thirdPartyId.replaceAll(REGEX, REPLACEMENT);
+
+        logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
+        if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
+            throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
+        }
+        // replace new line and tab from user input to avoid log injection
+        requestFiscalCode = requestFiscalCode.replaceAll(REGEX, REPLACEMENT);
+
+
+        File attachment = this.attachmentsService.getReceiptPdf(thirdPartyId, requestFiscalCode);
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(attachment))) {
             return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
                     .header("content-type", "application/pdf")
