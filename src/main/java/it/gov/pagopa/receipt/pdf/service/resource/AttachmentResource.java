@@ -40,6 +40,7 @@ import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDF
 @IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "attachments"})
 public class AttachmentResource {
 
+    public static final String FILENAME_RESPONSE_HEADER = "filename";
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);
 
     private static final String FISCAL_CODE_HEADER = "fiscal_code";
@@ -197,6 +198,7 @@ public class AttachmentResource {
             return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
                     .header("content-type", "application/pdf")
                     .header("content-disposition", "attachment;")
+                    .header(FILENAME_RESPONSE_HEADER, attachment.getName())
                     .build();
         } catch (IOException e) {
             logger.error("Error handling the stream generated from pdf attachment");
