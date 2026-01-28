@@ -2,54 +2,6 @@
   "openapi" : "3.0.3",
   "components" : {
     "schemas" : {
-      "Attachment" : {
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "example" : "id_allegato"
-          },
-          "content_type" : {
-            "type" : "string",
-            "example" : "application/pdf"
-          },
-          "name" : {
-            "type" : "string",
-            "example" : "Allegato 1.pdf"
-          },
-          "url" : {
-            "type" : "string",
-            "example" : "<percorso relativo dell'allegato>"
-          }
-        }
-      },
-      "AttachmentsDetailsResponse" : {
-        "type" : "object",
-        "properties" : {
-          "attachments" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Attachment"
-            }
-          },
-          "details" : {
-            "$ref" : "#/components/schemas/Detail"
-          }
-        }
-      },
-      "Detail" : {
-        "type" : "object",
-        "properties" : {
-          "subject" : {
-            "type" : "string",
-            "example" : "Questo è il titolo del messaggio"
-          },
-          "markdown" : {
-            "type" : "string",
-            "example" : "Questo è il corpo del messaggio in formato **markdown**"
-          }
-        }
-      },
       "ErrorResponse" : {
         "type" : "object",
         "properties" : {
@@ -169,11 +121,11 @@
     "termsOfService" : "https://www.pagopa.gov.it/"
   },
   "tags" : [ {
-    "name" : "Attachments",
-    "description" : "Attachments operations"
-  }, {
     "name" : "Info",
     "description" : "Info operations"
+  }, {
+    "name" : "PDF",
+    "description" : "PDF operations"
   } ],
   "paths" : {
     "/info" : {
@@ -197,61 +149,12 @@
         }
       }
     },
-    "/messages/{tp_id}" : {
+    "/pdf/{tp_id}/pdf" : {
       "get" : {
-        "summary" : "Get attachment details",
-        "description" : "Retrieve the attachment details linked to the provided third party data id",
-        "tags" : [ "Attachments" ],
+        "summary" : "Get receipt pdf",
+        "description" : "Retrieve the pdf of the receipt with the provided third party id",
+        "tags" : [ "PDF" ],
         "parameters" : [ {
-          "name" : "tp_id",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "fiscal_code",
-          "in" : "query",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "500" : {
-            "$ref" : "#/components/responses/InternalServerError"
-          },
-          "400" : {
-            "$ref" : "#/components/responses/AppException400"
-          },
-          "404" : {
-            "$ref" : "#/components/responses/AppException404"
-          },
-          "200" : {
-            "description" : "Success",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AttachmentsDetailsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/messages/{tp_id}/{attachment_url}" : {
-      "get" : {
-        "summary" : "Get attachment",
-        "description" : "Retrieve the attachment linked to the provided third party data id from the provided attachment url",
-        "tags" : [ "Attachments" ],
-        "parameters" : [ {
-          "name" : "attachment_url",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
           "name" : "tp_id",
           "in" : "path",
           "required" : true,

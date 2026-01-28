@@ -57,7 +57,7 @@ public class PdfResource {
                     )
             }
     )
-    @Path("/{tp_id}/pdf")
+    @Path("/{tp_id}")
     @GET
     public RestResponse<byte[]> getReceiptPdf(
             @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
