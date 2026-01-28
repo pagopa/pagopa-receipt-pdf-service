@@ -149,7 +149,7 @@
         }
       }
     },
-    "/pdf/{tp_id}/pdf" : {
+    "/pdf/{tp_id}" : {
       "get" : {
         "summary" : "Get receipt pdf",
         "description" : "Retrieve the pdf of the receipt with the provided third party id",
