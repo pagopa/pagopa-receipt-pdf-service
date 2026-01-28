@@ -71,7 +71,7 @@ async function createDocumentInReceiptIoMessageDatastore(eventId, messageId) {
 
 async function deleteDocumentInReceiptIoMessageDatastore(id, partitionKey) {
     try {
-        return await receiptMessageContainer.item(id, id || partitionKey).delete();
+        return await receiptMessageContainer.item(id, partitionKey ?? id).delete();
     } catch (error) {
         if (error.code !== 404) {
             console.log(error)
