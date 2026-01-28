@@ -8,8 +8,8 @@ import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsErrorContainer;
@@ -37,7 +37,7 @@ class CartReceiptCosmosClientImplTest {
     private CartReceiptCosmosClient sut;
 
     private static Iterator<CartForReceipt> iteratorCartReceiptMock;
-    private static Iterator<IOMessage> iteratorIOMessageMock;
+    private static Iterator<CartIOMessage> iteratorIOMessageMock;
     private static Iterator<CartReceiptError> iteratorCartReceiptErrorMock;
 
 
@@ -58,9 +58,9 @@ class CartReceiptCosmosClientImplTest {
         iteratorIOMessageMock = mock(Iterator.class);
         CosmosContainer cosmosContainerIOMessagesMock = mock(CosmosContainer.class);
         doReturn(cosmosPagedIOMessageIterableMock).when(cosmosContainerIOMessagesMock).queryItems(anyString(), any(), any());
-        Annotation IOQualifier = new AnnotationLiteral<CartReceiptsIOMessagesContainer>() {
+        Annotation ioQualifier = new AnnotationLiteral<CartReceiptsIOMessagesContainer>() {
         };
-        QuarkusMock.installMockForType(cosmosContainerIOMessagesMock, CosmosContainer.class, IOQualifier);
+        QuarkusMock.installMockForType(cosmosContainerIOMessagesMock, CosmosContainer.class, ioQualifier);
         doReturn(iteratorIOMessageMock).when(cosmosPagedIOMessageIterableMock).iterator();
 
         // Cart Receipt Error
@@ -101,12 +101,12 @@ class CartReceiptCosmosClientImplTest {
     @SneakyThrows
     @Test
     void getCartIoMessageSuccess() {
-        IOMessage ioMessage = new IOMessage();
+        CartIOMessage ioMessage = new CartIOMessage();
 
         doReturn(true).when(iteratorIOMessageMock).hasNext();
         doReturn(ioMessage).when(iteratorIOMessageMock).next();
 
-        IOMessage result = sut.getCartIoMessage("messageId");
+        CartIOMessage result = sut.getCartIoMessage("messageId");
 
         assertEquals(ioMessage, result);
     }

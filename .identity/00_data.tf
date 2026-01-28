@@ -76,6 +76,11 @@ data "azurerm_key_vault_secret" "key_vault_tokenizer_api_key" {
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
+data "azurerm_key_vault_secret" "key_vault_helpdesk_integration_test_api_key" {
+  name         = "receipt-service-helpdesk-integration-test-subkey" # "integration-test-subkey"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
+}
+
 data "azurerm_key_vault_secret" "key_vault_integration_test_webhook_slack" {
   name         = "pagopa-pagamenti-integration-test-slack-webhook"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id

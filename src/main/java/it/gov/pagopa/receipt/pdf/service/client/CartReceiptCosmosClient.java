@@ -2,8 +2,8 @@ package it.gov.pagopa.receipt.pdf.service.client;
 
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 
 public interface CartReceiptCosmosClient {
@@ -24,7 +24,7 @@ public interface CartReceiptCosmosClient {
      * @return io message document
      * @throws IoMessageNotFoundException in case no document has been found with the given messageId
      */
-    IOMessage getCartIoMessage(String messageId) throws IoMessageNotFoundException;
+    CartIOMessage getCartIoMessage(String messageId) throws IoMessageNotFoundException;
 
     /**
      * Retrieve cartReceiptError document from CosmosDB database

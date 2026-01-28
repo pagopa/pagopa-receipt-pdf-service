@@ -45,6 +45,32 @@
           }
         }
       },
+      "CartIOMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "messageId": {
+            "type": "string"
+          },
+          "cartId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "userType": {
+            "$ref": "#/components/schemas/UserType"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "markdown": {
+            "type": "string"
+          }
+        }
+      },
       "CartItem": {
         "type": "object",
         "properties": {
@@ -461,8 +487,8 @@
     }
   },
   "info": {
-    "title": "PagoPa PDF Receipt Service",
-    "version": "0.14.3-1-rename-cart-id",
+    "title": "pagoPA PDF Receipt Service - Helpdesk",
+    "version": "0.14.4-1-fix-get-cart-io-message-api",
     "description": "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService": "https://www.pagopa.gov.it/"
   },
@@ -549,7 +575,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IOMessage"
+                  "$ref": "#/components/schemas/CartIOMessage"
                 }
               }
             }
@@ -738,7 +764,7 @@
           "200": {
             "description": "Success",
             "content": {
-              "application/octet-stream": {}
+              "application/pdf": {}
             }
           }
         }
