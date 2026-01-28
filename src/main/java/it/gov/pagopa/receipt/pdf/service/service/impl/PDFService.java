@@ -62,70 +62,9 @@ public class PDFService {
         String attachmentName;
 
         if (thirdPartyId.contains(CART)) {
-            String cartId = thirdPartyId.split(CART)[0];
-
-            CartForReceipt cart = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
-
-            if (CartStatusType.pdfWaitingToBeGenerated().contains(cart.getStatus())) {
-                throw new InvalidCartException(PDFS_714, PDFS_714.getErrorMessage());
-            }
-            if (CartStatusType.pdfFailedToBeGenerated().contains(cart.getStatus())) {
-                if (isCartInCriticalFailure(cart)) {
-                    throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
-                }
-                throw new InvalidCartException(PDFS_715, PDFS_715.getErrorMessage());
-            }
-
-            String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
-            Payload cartPayload = cart.getPayload();
-            if (Objects.equals(cartPayload.getPayerFiscalCode(), fiscalCode)) {
-                if (cartPayload.getMdAttachPayer() == null) {
-                    throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
-                }
-                attachmentName = cartPayload.getMdAttachPayer().getName();
-            } else {
-                ReceiptMetadata mdAttach = cartPayload.getCart().stream()
-                        .filter(md -> Objects.equals(md.getDebtorFiscalCode(), fiscalCode))
-                        .findFirst().orElseThrow(() -> new FiscalCodeNotAuthorizedException(
-                                PDFS_706,
-                                String.format("Fiscal code is not authorized to access the receipt with cart id %s", cartId)
-                        ))
-                        .getMdAttach();
-                if (mdAttach == null) {
-                    throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
-                }
-
-                attachmentName = mdAttach.getName();
-            }
+            attachmentName = getCartAttachmentName(thirdPartyId, requestFiscalCode);
         } else {
-            Receipt receipt = cosmosClient.getReceiptDocument(thirdPartyId);
-
-            if (ReceiptStatusType.pdfWaitingToBeGenerated().contains(receipt.getStatus())) {
-                throw new InvalidReceiptException(PDFS_714, PDFS_714.getErrorMessage());
-            }
-            if (ReceiptStatusType.pdfFailedToBeGenerated().contains(receipt.getStatus())) {
-                if (isSingleReceiptInCriticalFailure(receipt)) {
-                    throw new InvalidReceiptException(PDFS_715, PDFS_715.getErrorMessage());
-                }
-
-                throw new InvalidReceiptException(PDFS_716, PDFS_716.getErrorMessage());
-            }
-
-            String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
-            if (Objects.equals(receipt.getEventData().getDebtorFiscalCode(), fiscalCode)) {
-                if (receipt.getMdAttach() == null) {
-                    throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
-                }
-                attachmentName = receipt.getMdAttach().getName();
-            } else if (Objects.equals(receipt.getEventData().getPayerFiscalCode(), fiscalCode)) {
-                if (receipt.getMdAttachPayer() == null) {
-                    throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
-                }
-                attachmentName = receipt.getMdAttachPayer().getName();
-            } else {
-                throw new FiscalCodeNotAuthorizedException(PDFS_706, String.format(
-                        "Fiscal code is not authorized to access the receipt with id %s", sanitize(thirdPartyId)));
-            }
+            attachmentName = getReceiptAttachmentName(thirdPartyId, requestFiscalCode);
         }
 
         if (attachmentName == null || attachmentName.isEmpty() || attachmentName.isBlank()) {
@@ -133,6 +72,78 @@ public class PDFService {
         }
 
         return receiptBlobClient.getAttachmentFromBlobStorage(attachmentName);
+    }
+
+    private String getReceiptAttachmentName(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {
+        String attachmentName;
+        Receipt receipt = cosmosClient.getReceiptDocument(thirdPartyId);
+
+        if (ReceiptStatusType.pdfWaitingToBeGenerated().contains(receipt.getStatus())) {
+            throw new InvalidReceiptException(PDFS_714, PDFS_714.getErrorMessage());
+        }
+        if (ReceiptStatusType.pdfFailedToBeGenerated().contains(receipt.getStatus())) {
+            if (isSingleReceiptInCriticalFailure(receipt)) {
+                throw new InvalidReceiptException(PDFS_716, PDFS_716.getErrorMessage());
+            }
+            throw new InvalidReceiptException(PDFS_715, PDFS_715.getErrorMessage());
+        }
+
+        String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
+        if (Objects.equals(receipt.getEventData().getDebtorFiscalCode(), fiscalCode)) {
+            if (receipt.getMdAttach() == null) {
+                throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
+            }
+            attachmentName = receipt.getMdAttach().getName();
+        } else if (Objects.equals(receipt.getEventData().getPayerFiscalCode(), fiscalCode)) {
+            if (receipt.getMdAttachPayer() == null) {
+                throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
+            }
+            attachmentName = receipt.getMdAttachPayer().getName();
+        } else {
+            throw new FiscalCodeNotAuthorizedException(PDFS_706, String.format(
+                    "Fiscal code is not authorized to access the receipt with id %s", sanitize(thirdPartyId)));
+        }
+        return attachmentName;
+    }
+
+    private String getCartAttachmentName(String thirdPartyId, String requestFiscalCode) throws CartNotFoundException, InvalidCartException, FiscalCodeNotAuthorizedException {
+        String attachmentName;
+        String cartId = thirdPartyId.split(CART)[0];
+
+        CartForReceipt cart = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
+
+        if (CartStatusType.pdfWaitingToBeGenerated().contains(cart.getStatus())) {
+            throw new InvalidCartException(PDFS_714, PDFS_714.getErrorMessage());
+        }
+        if (CartStatusType.pdfFailedToBeGenerated().contains(cart.getStatus())) {
+            if (isCartInCriticalFailure(cart)) {
+                throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
+            }
+            throw new InvalidCartException(PDFS_715, PDFS_715.getErrorMessage());
+        }
+
+        String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
+        Payload cartPayload = cart.getPayload();
+        if (Objects.equals(cartPayload.getPayerFiscalCode(), fiscalCode)) {
+            if (cartPayload.getMdAttachPayer() == null) {
+                throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
+            }
+            attachmentName = cartPayload.getMdAttachPayer().getName();
+        } else {
+            ReceiptMetadata mdAttach = cartPayload.getCart().stream()
+                    .filter(md -> Objects.equals(md.getDebtorFiscalCode(), fiscalCode))
+                    .findFirst().orElseThrow(() -> new FiscalCodeNotAuthorizedException(
+                            PDFS_706,
+                            String.format("Fiscal code is not authorized to access the receipt with cart id %s", cartId)
+                    ))
+                    .getMdAttach();
+            if (mdAttach == null) {
+                throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
+            }
+
+            attachmentName = mdAttach.getName();
+        }
+        return attachmentName;
     }
 
     private static boolean isCartInCriticalFailure(CartForReceipt cart) {
