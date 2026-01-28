@@ -3,7 +3,7 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 import io.quarkus.arc.profile.IfBuildProfile;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
-import it.gov.pagopa.receipt.pdf.service.service.impl.PDFService;
+import it.gov.pagopa.receipt.pdf.service.service.impl.PdfService;
 import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -34,10 +34,10 @@ import static it.gov.pagopa.receipt.pdf.service.utils.Constants.*;
 @IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "pdf"})
 public class PdfResource {
     private final Logger logger = LoggerFactory.getLogger(PdfResource.class);
-    private final PDFService pdfService;
+    private final PdfService pdfService;
 
     @Inject
-    public PdfResource(PDFService pdfService) {
+    public PdfResource(PdfService pdfService) {
         this.pdfService = pdfService;
     }
 
