@@ -399,7 +399,7 @@ public class HelpdeskResource {
                             content =
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON,
-                                    schema = @Schema(implementation = IOMessage.class)
+                                    schema = @Schema(implementation = CartIOMessage.class)
                             )
                     )
             }
