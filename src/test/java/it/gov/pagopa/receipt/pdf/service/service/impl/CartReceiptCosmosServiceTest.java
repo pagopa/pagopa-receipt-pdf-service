@@ -6,8 +6,8 @@ import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.Aes256Exception;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import org.junit.jupiter.api.BeforeAll;
@@ -82,11 +82,11 @@ class CartReceiptCosmosServiceTest {
     @Test
     @DisplayName("getCartReceiptMessage: Success")
     void getCartReceiptMessageSuccess() throws IoMessageNotFoundException {
-        IOMessage expectedMessage = new IOMessage();
+        CartIOMessage expectedMessage = new CartIOMessage();
         expectedMessage.setMessageId(MESSAGE_ID);
         when(cartReceiptCosmosClientMock.getCartIoMessage(MESSAGE_ID)).thenReturn(expectedMessage);
 
-        IOMessage result = sut.getCartReceiptMessage(MESSAGE_ID);
+        CartIOMessage result = sut.getCartReceiptMessage(MESSAGE_ID);
 
         assertNotNull(result);
         assertEquals(MESSAGE_ID, result.getMessageId());

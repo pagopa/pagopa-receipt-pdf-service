@@ -9,6 +9,7 @@ import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsErrorContainer;
@@ -61,14 +62,13 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
     }
 
     @Override
-    public IOMessage getCartIoMessage(String messageId) throws IoMessageNotFoundException {
-
+    public CartIOMessage getCartIoMessage(String messageId) throws IoMessageNotFoundException {
         //Build query
         String query = String.format("SELECT * FROM c WHERE c.messageId = '%s'", messageId);
 
         //Query the container
-        CosmosPagedIterable<IOMessage> queryResponse = this.containerCartReceiptsIOMessagesEvent
-                .queryItems(query, new CosmosQueryRequestOptions(), IOMessage.class);
+        CosmosPagedIterable<CartIOMessage> queryResponse = this.containerCartReceiptsIOMessagesEvent
+                .queryItems(query, new CosmosQueryRequestOptions(), CartIOMessage.class);
 
         if (queryResponse.iterator().hasNext()) {
             return queryResponse.iterator().next();
