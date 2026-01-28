@@ -4,8 +4,8 @@ import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.exception.Aes256Exception;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -43,8 +43,8 @@ public class CartReceiptCosmosService {
         return receipt;
     }
 
-    public IOMessage getCartReceiptMessage(String messageId) throws IoMessageNotFoundException {
-        IOMessage message;
+    public CartIOMessage getCartReceiptMessage(String messageId) throws IoMessageNotFoundException {
+        CartIOMessage message;
         try {
             message = this.cartReceiptCosmosClient.getCartIoMessage(messageId);
         } catch (IoMessageNotFoundException e) {
