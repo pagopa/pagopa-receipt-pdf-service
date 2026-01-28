@@ -108,7 +108,9 @@ public class PDFService {
 
     private String getCartAttachmentName(String thirdPartyId, String requestFiscalCode) throws CartNotFoundException, InvalidCartException, FiscalCodeNotAuthorizedException {
         String attachmentName;
-        String cartId = thirdPartyId.split(CART)[0];
+        String[] splitId = thirdPartyId.split(CART);
+        String cartId = splitId[0];
+        String bizEventId = splitId.length > 1 ? splitId[1] : "";
 
         CartForReceipt cart = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
 
@@ -131,10 +133,13 @@ public class PDFService {
             attachmentName = cartPayload.getMdAttachPayer().getName();
         } else {
             ReceiptMetadata mdAttach = cartPayload.getCart().stream()
-                    .filter(md -> Objects.equals(md.getDebtorFiscalCode(), fiscalCode))
+                    .filter(md ->
+                            Objects.equals(md.getDebtorFiscalCode(), fiscalCode) &&
+                                    Objects.equals(md.getBizEventId(), bizEventId)
+                    )
                     .findFirst().orElseThrow(() -> new FiscalCodeNotAuthorizedException(
                             PDFS_706,
-                            String.format("Fiscal code is not authorized to access the receipt with cart id %s", cartId)
+                            String.format("Fiscal code is not authorized to access the receipt with biz event id %s", bizEventId)
                     ))
                     .getMdAttach();
             if (mdAttach == null) {
