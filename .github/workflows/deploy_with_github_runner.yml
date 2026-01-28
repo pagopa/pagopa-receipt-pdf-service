@@ -73,23 +73,25 @@ jobs:
       - name: Verify Environment Input
         shell: bash
         env:
-          ENV: ${{ inputs.environment }}
+          INPUT_ENV: ${{ inputs.environment }}
         run: |
-          if [[ "$ENV" != "dev" && "$ENV" != "uat" && "$ENV" != "prod" ]]; then
+          if [[ "$INPUT_ENV" != "dev" && "$INPUT_ENV" != "uat" && "$INPUT_ENV" != "prod" ]]; then
             echo "Input environment is invalid"
-            exit 0
+            exit 1 # fail the job on invalid input
           fi
 
       - name: Terraform Apply
         shell: bash
+        env:
+          INPUT_ENV: ${{ inputs.environment }}
         run: |
           export ARM_CLIENT_ID=$(az account show --query clientId --output tsv)
           export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
           export ARM_TENANT_ID=$(az account show --query tenantId --output tsv)
           export ARM_USE_OIDC=true
-          export ARM_ACCESS_KEY=$(az storage account keys list --resource-group io-infra-rg --account-name pagopainfraterraform${{inputs.environment}} --query '[0].value' -o tsv)
+          export ARM_ACCESS_KEY=$(az storage account keys list --resource-group io-infra-rg --account-name "pagopainfraterraform${INPUT_ENV}" --query '[0].value' -o tsv)
 
           cd ./infra
 
-          bash ./terraform.sh init weu-${{ inputs.environment }}
-          bash ./terraform.sh apply weu-${{ inputs.environment }} -auto-approve
+          bash ./terraform.sh init "weu-${INPUT_ENV}"
+          bash ./terraform.sh apply "weu-${INPUT_ENV}" -auto-approve
