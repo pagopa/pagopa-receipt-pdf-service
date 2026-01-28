@@ -117,7 +117,7 @@ class GetCartReceiptByOrgAndIUVTest {
         mockBizEvent.setTransactionDetails(TransactionDetails.builder().transaction(Transaction.builder().transactionId(CART_ID).build()).build());
 
         CartForReceipt mockReceipt = new CartForReceipt();
-        mockReceipt.setEventId(EVENT_ID);
+        mockReceipt.setCartId(EVENT_ID);
         mockReceipt.setId(CART_ID);
 
         when(bizEventCosmosClient.getBizEventDocumentByOrganizationFiscalCodeAndIUV(ORGANIZATION_FISCAL_CODE, IUV))
