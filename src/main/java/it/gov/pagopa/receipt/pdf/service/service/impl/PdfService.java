@@ -78,10 +78,10 @@ public class PdfService {
         String attachmentName;
         Receipt receipt = cosmosClient.getReceiptDocument(thirdPartyId);
 
-        if (ReceiptStatusType.pdfWaitingToBeGenerated().contains(receipt.getStatus())) {
+        if (ReceiptStatusType.PDF_WAITING_TO_BE_GENERATED.contains(receipt.getStatus())) {
             throw new InvalidReceiptException(PDFS_714, PDFS_714.getErrorMessage());
         }
-        if (ReceiptStatusType.pdfFailedToBeGenerated().contains(receipt.getStatus())) {
+        if (ReceiptStatusType.PDF_FAILED_TO_BE_GENERATED.contains(receipt.getStatus())) {
             if (isSingleReceiptInCriticalFailure(receipt)) {
                 throw new InvalidReceiptException(PDFS_716, PDFS_716.getErrorMessage());
             }
@@ -114,10 +114,10 @@ public class PdfService {
 
         CartForReceipt cart = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
 
-        if (CartStatusType.pdfWaitingToBeGenerated().contains(cart.getStatus())) {
+        if (CartStatusType.PDF_WAITING_TO_BE_GENERATED.contains(cart.getStatus())) {
             throw new InvalidCartException(PDFS_714, PDFS_714.getErrorMessage());
         }
-        if (CartStatusType.pdfFailedToBeGenerated().contains(cart.getStatus())) {
+        if (CartStatusType.PDF_FAILED_TO_BE_GENERATED.contains(cart.getStatus())) {
             if (isCartInCriticalFailure(cart)) {
                 throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
             }
@@ -151,7 +151,7 @@ public class PdfService {
         return attachmentName;
     }
 
-    private static boolean isCartInCriticalFailure(CartForReceipt cart) {
+    private boolean isCartInCriticalFailure(CartForReceipt cart) {
         return cart.getPayload() == null ||
                 cart.getPayload().getCart() == null ||
                 (cart.getPayload().getReasonErrPayer() == null && cart.getPayload().getCart().stream().allMatch(c -> c.getReasonErrDebtor() == null) ||
@@ -160,7 +160,7 @@ public class PdfService {
                                 c -> c.getReasonErrDebtor() != null && c.getReasonErrDebtor().getCode() == PDF_TEMPLATE_ERROR_CODE)));
     }
 
-    private static boolean isSingleReceiptInCriticalFailure(Receipt receipt) {
+    private boolean isSingleReceiptInCriticalFailure(Receipt receipt) {
         return (receipt.getReasonErr() == null && receipt.getReasonErrPayer() == null) ||
                 (receipt.getReasonErr() != null && receipt.getReasonErr().getCode() == PDF_TEMPLATE_ERROR_CODE) ||
                 (receipt.getReasonErrPayer() != null && receipt.getReasonErrPayer().getCode() == PDF_TEMPLATE_ERROR_CODE);

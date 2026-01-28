@@ -1,6 +1,6 @@
 package it.gov.pagopa.receipt.pdf.service.enumeration;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Enumeration of the receipt status
@@ -19,15 +19,24 @@ public enum ReceiptStatusType {
     NOT_TO_NOTIFY,
     TO_REVIEW;
 
-    public static List<ReceiptStatusType> pdfWaitingToBeGenerated(){
-        return List.of(INSERTED, RETRY);
-    }
+    public static final Set<ReceiptStatusType> PDF_WAITING_TO_BE_GENERATED = Set.of(
+            INSERTED,
+            RETRY
+    );
 
-    public static List<ReceiptStatusType> pdfGenerated(){
-        return List.of(GENERATED, SIGNED, IO_NOTIFIED, IO_ERROR_TO_NOTIFY, IO_NOTIFIER_RETRY, UNABLE_TO_SEND, NOT_TO_NOTIFY);
-    }
+    public static final Set<ReceiptStatusType> PDF_GENERATED = Set.of(
+            GENERATED,
+            SIGNED,
+            IO_NOTIFIED,
+            IO_ERROR_TO_NOTIFY,
+            IO_NOTIFIER_RETRY,
+            UNABLE_TO_SEND,
+            NOT_TO_NOTIFY
+    );
 
-    public static List<ReceiptStatusType> pdfFailedToBeGenerated(){
-        return List.of(NOT_QUEUE_SENT, FAILED, TO_REVIEW);
-    }
+    public static final Set<ReceiptStatusType> PDF_FAILED_TO_BE_GENERATED = Set.of(
+            NOT_QUEUE_SENT,
+            FAILED,
+            TO_REVIEW
+    );
 }
