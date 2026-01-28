@@ -1,10 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.exception.mapper;
 
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
-import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.exception.InvalidFiscalCodeHeaderException;
-import it.gov.pagopa.receipt.pdf.service.exception.PdfServiceException;
-import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -33,6 +30,14 @@ public class ExceptionMapper {
         String message = String.format("Receipt with the provided third party id: %s not found", receiptNotFoundException.getReceiptId());
         logger.error(message, receiptNotFoundException);
         return RestResponse.status(status, buildErrorResponse(receiptNotFoundException.getErrorCode(), status, message));
+    }
+
+    @ServerExceptionMapper
+    public RestResponse<ErrorResponse> mapCartNotFoundException(CartNotFoundException cartNotFoundException) {
+        Response.Status status = NOT_FOUND;
+        String message = String.format("Cart with the provided third party id: %s not found", cartNotFoundException.getReceiptId());
+        logger.error(message, cartNotFoundException);
+        return RestResponse.status(status, buildErrorResponse(cartNotFoundException.getErrorCode(), status, message));
     }
 
     @ServerExceptionMapper
