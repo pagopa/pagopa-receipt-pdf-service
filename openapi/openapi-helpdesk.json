@@ -488,7 +488,7 @@
   },
   "info": {
     "title": "pagoPA PDF Receipt Service - Helpdesk",
-    "version": "0.14.4-1-fix-get-cart-io-message-api",
+    "version": "0.14.4-2-rename-cart-id",
     "description": "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService": "https://www.pagopa.gov.it/"
   },
