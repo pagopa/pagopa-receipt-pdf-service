@@ -16,7 +16,8 @@ public enum ReceiptStatusType {
     IO_ERROR_TO_NOTIFY,
     IO_NOTIFIER_RETRY,
     UNABLE_TO_SEND,
-    NOT_TO_NOTIFY;
+    NOT_TO_NOTIFY,
+    TO_REVIEW;
 
     public static List<ReceiptStatusType> pdfWaitingToBeGenerated(){
         return List.of(INSERTED, RETRY);
@@ -27,6 +28,6 @@ public enum ReceiptStatusType {
     }
 
     public static List<ReceiptStatusType> pdfFailedToBeGenerated(){
-        return List.of(NOT_QUEUE_SENT, FAILED);
+        return List.of(NOT_QUEUE_SENT, FAILED, TO_REVIEW);
     }
 }
