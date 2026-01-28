@@ -1,25 +1,3 @@
-##############
-## Products ##
-##############
-
-module "apim_receipts_product" {
-  source = "./.terraform/modules/__v3__/api_management_product"
-
-  product_id   = "receipts"
-  display_name = "Receipts Service PDF"
-  description  = "Servizio per gestire recupero ricevute"
-
-  resource_group_name = local.apim.rg
-  api_management_name = local.apim.name
-
-  published             = true
-  subscription_required = true
-  approval_required     = true
-  subscriptions_limit   = 1000
-
-  policy_xml = file("./api_product/receipt-service/_base_policy.xml")
-}
-
 ####################
 # SERVICE API    #
 ####################
@@ -40,7 +18,7 @@ module "apim_api_receipts_api_v1" {
   name                  = format("%s-receipts-service-api", local.project)
   api_management_name = local.apim.name
   resource_group_name = local.apim.rg
-  product_ids           = [module.apim_receipts_product.product_id]
+  product_ids           = [local.apim.receipts_product_id]
   subscription_required = local.receipts_service_api.subscription_required
   version_set_id        = azurerm_api_management_api_version_set.api_receipts_api.id
   api_version           = "v1"

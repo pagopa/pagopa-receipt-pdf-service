@@ -7,6 +7,7 @@ locals {
     rg         = "${local.product}-api-rg"
     hostname     = "api.${var.apim_dns_zone_prefix}.${var.apim_dns_zone_prefix}"
     helpdesk_api_product_id = "technical_support_api"
+    receipts_product_id = "receipts"
   }
 
   receipts_hostname = var.env == "prod" ? "weu${var.env}.receipts.internal.platform.pagopa.it" : "weu${var.env}.receipts.internal.${var.env}.platform.pagopa.it"
