@@ -13,7 +13,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -31,6 +30,7 @@ import java.io.IOException;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.*;
 
 /**
  * Resource class that expose the API to retrieve the attachments
@@ -40,14 +40,7 @@ import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDF
 @LoggedAPI
 @IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "attachments"})
 public class AttachmentResource {
-
-    public static final String FILENAME_RESPONSE_HEADER = "filename";
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);
-
-    private static final String FISCAL_CODE_HEADER = "fiscal_code";
-    private static final String THIRD_PARTY_ID_PARAM = "tp_id";
-    private static final int FISCAL_CODE_LENGTH = 16;
-
     private final AttachmentsService attachmentsService;
 
     @Inject
@@ -152,69 +145,8 @@ public class AttachmentResource {
             throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
         } finally {
             if (attachment != null && attachment.exists()) {
-                clearTempDirectory(attachment.toPath().getParent());
+                CommonUtils.clearTempDirectory(attachment.toPath().getParent(), logger);
             }
-        }
-    }
-
-    @Operation(
-            summary = "Get attachment details",
-            description = "Retrieve the attachment details linked to the provided third party data id"
-    )
-    @APIResponses(
-            value = {
-                    @APIResponse(ref = "#/components/responses/InternalServerError"),
-                    @APIResponse(ref = "#/components/responses/AppException400"),
-                    @APIResponse(ref = "#/components/responses/AppException404"),
-                    @APIResponse(
-                            responseCode = "200",
-                            description = "Success",
-                            content = @Content(mediaType = "application/pdf")
-                    )
-            }
-    )
-    @Path("/{tp_id}/pdf")
-    @GET
-    public RestResponse<byte[]> getReceiptPdf(
-            @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
-            @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode
-    )
-            throws InvalidFiscalCodeHeaderException, FiscalCodeNotAuthorizedException, ErrorHandlingPdfAttachmentFileException,
-            AttachmentNotFoundException, BlobStorageClientException, ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
-
-        // replace new line and tab from user input to avoid log injection
-        thirdPartyId = CommonUtils.sanitize(thirdPartyId);
-
-        logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
-        if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
-            throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
-        }
-        // replace new line and tab from user input to avoid log injection
-        requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
-
-
-        File attachment = this.attachmentsService.getReceiptPdf(thirdPartyId, requestFiscalCode);
-        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(attachment))) {
-            return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
-                    .header("content-type", "application/pdf")
-                    .header("content-disposition", "attachment;")
-                    .header(FILENAME_RESPONSE_HEADER, attachment.getName())
-                    .build();
-        } catch (IOException e) {
-            logger.error("Error handling the stream generated from pdf attachment");
-            throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
-        } finally {
-            if (attachment != null && attachment.exists()) {
-                clearTempDirectory(attachment.toPath().getParent());
-            }
-        }
-    }
-
-    private void clearTempDirectory(java.nio.file.Path workingDirPath) {
-        try {
-            FileUtils.deleteDirectory(workingDirPath.toFile());
-        } catch (IOException e) {
-            logger.warn("Unable to clear working directory: {}", workingDirPath, e);
         }
     }
 }

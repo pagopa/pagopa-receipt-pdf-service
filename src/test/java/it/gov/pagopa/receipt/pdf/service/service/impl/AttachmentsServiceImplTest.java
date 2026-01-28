@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.CART;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -868,7 +869,7 @@ class AttachmentsServiceImplTest {
         when(cosmosClientCartMock.getCartForReceiptDocument(anyString())).thenReturn(cart);
         when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse(payer));
 
-        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART, payer);
+        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails(cartId + CART, payer);
 
         assertNotNull(resp);
         assertEquals(fileName, resp.getAttachments().get(0).getName());
@@ -899,7 +900,7 @@ class AttachmentsServiceImplTest {
         when(cosmosClientCartMock.getCartForReceiptDocument(anyString())).thenReturn(cart);
         when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse(debtor));
 
-        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART + bizId, debtor);
+        AttachmentsDetailsResponse resp = sut.getAttachmentsDetails(cartId + CART + bizId, debtor);
 
         assertNotNull(resp);
         assertEquals(fileName, resp.getAttachments().get(0).getName());
@@ -930,7 +931,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse("OTHER"));
 
         FiscalCodeNotAuthorizedException ex = assertThrows(FiscalCodeNotAuthorizedException.class,
-                () -> sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART + bizId, "OTHER"));
+                () -> sut.getAttachmentsDetails(cartId + CART + bizId, "OTHER"));
         assertEquals(AppErrorCodeEnum.PDFS_700, ex.getErrorCode());
     }
 
@@ -964,7 +965,7 @@ class AttachmentsServiceImplTest {
 
 
         InvalidReceiptException ex = assertThrows(InvalidReceiptException.class,
-                () -> sut.getAttachmentsDetails(cartId + AttachmentsServiceImpl.CART, payer));
+                () -> sut.getAttachmentsDetails(cartId + CART, payer));
         assertEquals(AppErrorCodeEnum.PDFS_713, ex.getErrorCode());
     }
 

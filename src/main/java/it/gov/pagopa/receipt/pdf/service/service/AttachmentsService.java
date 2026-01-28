@@ -49,21 +49,4 @@ public interface AttachmentsService {
      * @throws AttachmentNotFoundException thrown if the requested attachment was not found
      */
     byte[] getAttachmentBytesFromBlobStorage(String fileName) throws IOException, AttachmentNotFoundException, BlobStorageClientException;
-
-    /**
-     * Retrieve the PDF of a receipt using the given third party id and fiscalCode, only if the fiscal code is authorized to access it
-     *
-     * @param thirdPartyId      the id of the biz event for single receipt, the id of the transaction concatenated with the biz event for cart receipts
-     * @param requestFiscalCode the fiscal code of the user that request the receipt
-     * @return the details of the requested attachments
-     * @throws AttachmentNotFoundException      thrown if the requested attachment was not found
-     * @throws FiscalCodeNotAuthorizedException thrown if the fiscal code is not authorized to access the requested receipt
-     * @throws BlobStorageClientException       thrown for error when retrieving the attachment from the Blob Storage
-     * @throws ReceiptNotFoundException         thrown if the single receipt is not found
-     * @throws CartNotFoundException            thrown if the cart receipt is not found
-     * @throws InvalidReceiptException          thrown if the single receipt is in invalid state
-     * @throws InvalidCartException             thrown if the cart receipt is in invalid state
-     */
-    File getReceiptPdf(String thirdPartyId, String requestFiscalCode) throws FiscalCodeNotAuthorizedException,
-            BlobStorageClientException, AttachmentNotFoundException, ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException;
 }
