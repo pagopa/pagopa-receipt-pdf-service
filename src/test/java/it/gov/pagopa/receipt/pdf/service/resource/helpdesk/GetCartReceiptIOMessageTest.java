@@ -4,7 +4,7 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
-import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.service.impl.CartReceiptCosmosService;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class GetCartReceiptIOMessageTest {
 
     @Test
     void getCartReceiptIOMessage_Success() throws IoMessageNotFoundException {
-        IOMessage mockMessage = new IOMessage();
+        CartIOMessage mockMessage = new CartIOMessage();
         mockMessage.setMessageId(MESSAGE_ID);
 
         when(cartReceiptCosmosService.getCartReceiptMessage(MESSAGE_ID)).thenReturn(mockMessage);
@@ -54,7 +54,7 @@ class GetCartReceiptIOMessageTest {
 
     @Test
     void getCartReceiptIOMessage_NotFound_ExceptionThrown() throws IoMessageNotFoundException {
-        String expectedMessage = String.format("Unable to retrieve the receipt message with messageId %s", MESSAGE_ID);
+        String expectedMessage = String.format("Unable to retrieve the cart receipt message with messageId %s", MESSAGE_ID);
 
         when(cartReceiptCosmosService.getCartReceiptMessage(MESSAGE_ID))
                 .thenThrow(new IoMessageNotFoundException(expectedMessage));

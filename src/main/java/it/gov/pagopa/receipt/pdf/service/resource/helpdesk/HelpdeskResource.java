@@ -7,6 +7,7 @@ import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.biz.BizEvent;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
+import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
@@ -398,7 +399,7 @@ public class HelpdeskResource {
                             content =
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON,
-                                    schema = @Schema(implementation = IOMessage.class)
+                                    schema = @Schema(implementation = CartIOMessage.class)
                             )
                     )
             }
@@ -414,10 +415,10 @@ public class HelpdeskResource {
         }
 
         try {
-            IOMessage ioMessage = this.cartReceiptCosmosService.getCartReceiptMessage(messageId);
+            CartIOMessage ioMessage = this.cartReceiptCosmosService.getCartReceiptMessage(messageId);
             return RestResponse.ok(ioMessage);
         } catch (IoMessageNotFoundException e) {
-            String responseMsg = String.format("Unable to retrieve the receipt message with messageId %s", sanitize(messageId));
+            String responseMsg = String.format("Unable to retrieve the cart receipt message with messageId %s", sanitize(messageId));
             logger.error(LOG_ERROR_MESSAGE, "getCartReceiptMessage", responseMsg, e);
             return RestResponse.status(Response.Status.NOT_FOUND,
                     createProblemJson(Response.Status.NOT_FOUND, HELPDESK_SUFFIX, responseMsg));
