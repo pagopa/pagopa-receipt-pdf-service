@@ -42,11 +42,11 @@ public interface AttachmentsService {
     /**
      * Retrieve a PDF receipt from the blob storage
      *
-     * @param fileName file name of the PDF receipt
+     * @param attachmentName file name of the PDF receipt
      * @return the File with the reference to the attachment
      * @throws IOException
      * @throws BlobStorageClientException  thrown for error when retrieving the attachment from the Blob Storage
      * @throws AttachmentNotFoundException thrown if the requested attachment was not found
      */
-    byte[] getAttachmentBytesFromBlobStorage(String fileName) throws IOException, AttachmentNotFoundException, BlobStorageClientException;
+    byte[] getAttachmentBytesFromBlobStorage(String attachmentName) throws IOException, AttachmentNotFoundException, BlobStorageClientException;
 }

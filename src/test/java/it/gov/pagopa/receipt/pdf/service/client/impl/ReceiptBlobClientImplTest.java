@@ -29,6 +29,8 @@ import static org.mockito.Mockito.*;
 @QuarkusTest
 class ReceiptBlobClientImplTest {
 
+    public static final String ATTACHMENT_PDF = "attachment.pdf";
+    public static final String FILE_PDF = "file.pdf";
     @Inject
     private ReceiptBlobClient sut;
 
@@ -57,7 +59,7 @@ class ReceiptBlobClientImplTest {
                         any(Context.class)
                 );
 
-        File result = sut.getAttachmentFromBlobStorage(anyString());
+        File result = sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF);
 
         assertNotNull(result);
     }
@@ -72,7 +74,7 @@ class ReceiptBlobClientImplTest {
                         any(Context.class)
                 );
 
-        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(anyString()));
+        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_601, e.getErrorCode());
@@ -90,7 +92,7 @@ class ReceiptBlobClientImplTest {
                         any(Context.class)
                 );
 
-        AttachmentNotFoundException e = assertThrows(AttachmentNotFoundException.class, () -> sut.getAttachmentFromBlobStorage(anyString()));
+        AttachmentNotFoundException e = assertThrows(AttachmentNotFoundException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_602, e.getErrorCode());
@@ -108,7 +110,7 @@ class ReceiptBlobClientImplTest {
                         any(Context.class)
                 );
 
-        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(anyString()));
+        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_603, e.getErrorCode());

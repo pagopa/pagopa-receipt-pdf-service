@@ -52,13 +52,13 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
     /**
      * Retrieve a PDF receipt from the blob storage
      *
-     * @param fileName file name of the PDF receipt
+     * @param attachmentName file name of the PDF receipt
      * @return the file where the PDF receipt was stored
      */
-    public File getAttachmentFromBlobStorage(String fileName) throws BlobStorageClientException, AttachmentNotFoundException {
-        BlobClient blobClient = blobContainerClient.getBlobClient(sanitize(fileName));
+    public File getAttachmentFromBlobStorage(String attachmentName, String fileName) throws BlobStorageClientException, AttachmentNotFoundException {
+        BlobClient blobClient = blobContainerClient.getBlobClient(sanitize(attachmentName));
         String filePath = createTempDirectory(fileName);
-        downloadAttachment(fileName, blobClient, filePath);
+        downloadAttachment(attachmentName, blobClient, filePath);
         return new File(filePath);
     }
 
@@ -66,7 +66,7 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
         try {
             File workingDirectory = createWorkingDirectory();
             Path tempDirectory = Files.createTempDirectory(workingDirectory.toPath(), "receipt-pdf-service");
-            return tempDirectory.toAbsolutePath() + "/" + fileName;
+            return tempDirectory.toAbsolutePath() + "/" + (fileName == null ? "receiptPdf.pdf" : sanitize(fileName));
         } catch (IOException e) {
             logger.error("Error creating the temp directory to download the PDF receipt from Blob Storage");
             throw new BlobStorageClientException(PDFS_600, PDFS_600.getErrorMessage(),  e);

@@ -70,7 +70,7 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
         }
 
-        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentName);
+        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentName, attachmentName);
     }
 
     private String getReceiptAttachmentName(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {

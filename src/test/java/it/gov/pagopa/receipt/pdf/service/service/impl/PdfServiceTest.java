@@ -100,7 +100,7 @@ class PdfServiceTest {
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
             when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER)).thenReturn(new File("temp"));
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER, ATTACHMENT_NAME_PAYER)).thenReturn(new File("temp"));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE));
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
@@ -124,7 +124,7 @@ class PdfServiceTest {
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
             when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
 
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new File("temp"));
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1, ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new File("temp"));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, DEBTOR_FISCAL_CODE_1));
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
@@ -147,7 +147,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -168,7 +168,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -189,7 +189,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -210,7 +210,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -231,7 +231,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -252,7 +252,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -269,7 +269,7 @@ class PdfServiceTest {
             assertEquals(PDFS_700, exception.getErrorCode());
 
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -288,7 +288,7 @@ class PdfServiceTest {
             assertEquals(PDFS_706, exception.getErrorCode());
 
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -308,7 +308,7 @@ class PdfServiceTest {
             assertEquals(PDFS_716, exception.getErrorCode());
 
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -328,7 +328,7 @@ class PdfServiceTest {
             assertEquals(PDFS_716, exception.getErrorCode());
 
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -350,7 +350,7 @@ class PdfServiceTest {
             assertEquals(PDFS_716, exception.getErrorCode());
 
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         private Receipt getReceipt(ReceiptStatusType receiptStatusType, Integer errorCodePayer, Integer errorCodeDebtor) {
@@ -387,7 +387,7 @@ class PdfServiceTest {
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
             when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER)).thenReturn(new File("temp"));
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER, ATTACHMENT_NAME_PAYER)).thenReturn(new File("temp"));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE));
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
@@ -411,7 +411,7 @@ class PdfServiceTest {
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
             when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_DEBTOR_1, DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
 
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new File("temp"));
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1, ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new File("temp"));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, DEBTOR_FISCAL_CODE_1));
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
@@ -435,7 +435,7 @@ class PdfServiceTest {
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_2_TOKENIZED);
             when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_DEBTOR_2, DEBTOR_FISCAL_CODE_2)).thenReturn(searchTokenResponse);
 
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_2)).thenReturn(new File("temp"));
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_2, ATTACHMENT_NAME_DEBTOR_2)).thenReturn(new File("temp"));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_2, DEBTOR_FISCAL_CODE_2));
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
@@ -459,7 +459,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -480,7 +480,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -501,7 +501,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -522,7 +522,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -543,7 +543,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -564,7 +564,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -586,7 +586,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -608,7 +608,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -616,7 +616,7 @@ class PdfServiceTest {
                 "NOT_QUEUE_SENT",
                 "FAILED",
                 "TO_REVIEW"
-        }) // TODO verifica se distinguere errore in base a chi richiede
+        })
         void getReceiptPdf_Cart_KO_PayerRetryableFailure_Debtor1CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, ERROR_CODE_RETRYABLE, ERROR_CODE_CRITICAL, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
@@ -629,7 +629,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -650,7 +650,7 @@ class PdfServiceTest {
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -667,7 +667,7 @@ class PdfServiceTest {
             assertEquals(PDFS_700, exception.getErrorCode());
 
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -686,7 +686,7 @@ class PdfServiceTest {
             assertEquals(PDFS_706, exception.getErrorCode());
 
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -705,7 +705,7 @@ class PdfServiceTest {
             assertEquals(PDFS_706, exception.getErrorCode());
 
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -725,7 +725,7 @@ class PdfServiceTest {
             assertEquals(PDFS_716, exception.getErrorCode());
 
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -745,7 +745,7 @@ class PdfServiceTest {
             assertEquals(PDFS_716, exception.getErrorCode());
 
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @Test
@@ -765,7 +765,7 @@ class PdfServiceTest {
             assertEquals(PDFS_716, exception.getErrorCode());
 
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         @ParameterizedTest
@@ -787,7 +787,7 @@ class PdfServiceTest {
             assertEquals(PDFS_716, exception.getErrorCode());
 
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
-            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
+            verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString(), anyString());
         }
 
         private CartForReceipt getCart(CartStatusType cartStatusType, Integer errorCodePayer, Integer errorCodeDebtor1, Integer errorCodeDebtor2) {

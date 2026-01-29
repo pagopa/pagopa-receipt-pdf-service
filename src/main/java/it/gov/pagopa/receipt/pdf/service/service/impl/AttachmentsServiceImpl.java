@@ -74,9 +74,9 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     }
 
     @Override
-    public byte[] getAttachmentBytesFromBlobStorage(String fileName)
+    public byte[] getAttachmentBytesFromBlobStorage(String attachmentName)
             throws IOException, AttachmentNotFoundException, BlobStorageClientException {
-        File pdfFile = this.receiptBlobClient.getAttachmentFromBlobStorage(fileName);
+        File pdfFile = this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName, null);
         try (FileInputStream inputStream = new FileInputStream(pdfFile)) {
             return IOUtils.toByteArray(inputStream);
         } finally {
@@ -230,7 +230,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             getSingleReceiptAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
         }
 
-        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl);
+        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl, null);
     }
 
     private void getSingleReceiptAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {
