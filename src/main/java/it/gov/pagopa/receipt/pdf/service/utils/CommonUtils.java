@@ -4,10 +4,8 @@ import it.gov.pagopa.receipt.pdf.service.model.ProblemJson;
 import jakarta.ws.rs.core.Response;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
 
-import java.io.IOException;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.CART;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUtils {
@@ -49,11 +47,19 @@ public class CommonUtils {
                 .build();
     }
 
-    public static void clearTempDirectory(java.nio.file.Path workingDirPath, Logger logger) {
-        try {
-            FileUtils.deleteDirectory(workingDirPath.toFile());
-        } catch (IOException e) {
-            logger.warn("Unable to clear working directory: {}", workingDirPath, e);
+    public static boolean isCart(String thirdPartyId){
+        return thirdPartyId.contains(CART);
+    }
+
+    public static String getPaymentId(String thirdPartyId){
+        return thirdPartyId.split(CART)[0];
+    }
+
+    public static String getBizEventId(String thirdPartyId){
+        String[] splittedId = thirdPartyId.split(CART);
+        if(isCart(thirdPartyId)){
+            return splittedId.length > 1 ? splittedId[1] : null;
         }
+        return thirdPartyId;
     }
 }

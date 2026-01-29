@@ -34,9 +34,9 @@ public enum AppErrorCodeEnum {
     PDFS_712("PDFS_712", "The retrieved cart has null payer attachment info"),
     PDFS_713("PDFS_713", "The retrieved cart has null payer message data"),
 
-    PDFS_714("PDFS_714", "The PDF has not been generated yet"),
-    PDFS_715("PDFS_715", "The PDF failed to be generated, retry is possible"),
-    PDFS_716("PDFS_716", "The PDF failed to be generated, review is needed"),
+    PDFS_714("PDFS_714", "The PDF has not been generated yet."),
+    PDFS_715("PDFS_715", "The PDF generation failed. A retry is possible."),
+    PDFS_716("PDFS_716", "The PDF generation failed. Manual review is required."),
 
     PDFS_800("PDFS_800", "Receipt not found with the provided third party id"),
     PDFS_801("PDFS_801", "Cart not found with the provided third party id"),

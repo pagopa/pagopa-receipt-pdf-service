@@ -11,14 +11,14 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.CartStatusType;
 import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
+import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.Objects;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
-import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
-import static it.gov.pagopa.receipt.pdf.service.utils.Constants.CART;
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.*;
 
 @ApplicationScoped
 public class PdfService {
@@ -60,7 +60,7 @@ public class PdfService {
             ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
         String attachmentName;
 
-        if (thirdPartyId.contains(CART)) {
+        if (CommonUtils.isCart(thirdPartyId)) {
             attachmentName = getCartAttachmentName(thirdPartyId, requestFiscalCode);
         } else {
             attachmentName = getReceiptAttachmentName(thirdPartyId, requestFiscalCode);
@@ -72,13 +72,13 @@ public class PdfService {
 
         return ReceiptPdfResponse.builder()
                 .attachmentName(attachmentName)
-                .pdfFile(receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
+                .pdfFile(this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
                 .build();
     }
 
     private String getReceiptAttachmentName(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {
         String attachmentName;
-        Receipt receipt = cosmosClient.getReceiptDocument(thirdPartyId);
+        Receipt receipt = this.cosmosClient.getReceiptDocument(thirdPartyId);
 
         if (ReceiptStatusType.PDF_WAITING_TO_BE_GENERATED.contains(receipt.getStatus())) {
             throw new InvalidReceiptException(PDFS_714, PDFS_714.getErrorMessage());
@@ -110,9 +110,7 @@ public class PdfService {
 
     private String getCartAttachmentName(String thirdPartyId, String requestFiscalCode) throws CartNotFoundException, InvalidCartException, FiscalCodeNotAuthorizedException {
         String attachmentName;
-        String[] splitId = thirdPartyId.split(CART);
-        String cartId = splitId[0];
-        String bizEventId = splitId.length > 1 ? splitId[1] : "";
+        String cartId = CommonUtils.getPaymentId(thirdPartyId);
 
         CartForReceipt cart = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
 
@@ -134,6 +132,7 @@ public class PdfService {
             }
             attachmentName = cartPayload.getMdAttachPayer().getName();
         } else {
+            String bizEventId = CommonUtils.getBizEventId(thirdPartyId);
             ReceiptMetadata mdAttach = cartPayload.getCart().stream()
                     .filter(md ->
                             Objects.equals(md.getDebtorFiscalCode(), fiscalCode) &&
