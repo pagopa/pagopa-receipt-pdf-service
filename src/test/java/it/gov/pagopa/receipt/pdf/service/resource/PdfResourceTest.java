@@ -2,16 +2,15 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import it.gov.pagopa.receipt.pdf.service.model.ReceiptPdfResponse;
 import it.gov.pagopa.receipt.pdf.service.service.impl.PdfService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 import static io.restassured.RestAssured.given;
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
 import static it.gov.pagopa.receipt.pdf.service.utils.Constants.FILENAME_RESPONSE_HEADER;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -24,6 +23,7 @@ class PdfResourceTest {
     private static final String FISCAL_CODE = "AAAAAAAAAAAAAAAA";
     public static final String THIRD_PARTY_ID = "thirdPartyId";
     public static final String INVALID_CF = "invalidCF";
+    public static final String PDF_NAME = "pdfName";
 
     @InjectMock
     private PdfService pdfService;
@@ -31,15 +31,14 @@ class PdfResourceTest {
     @Test
     @SneakyThrows
     void getReceiptPdf_200() {
-        Path workingDirectory = Files.createTempDirectory("receipt-test");
-        Path pdfPath = workingDirectory.resolve("file.pdf");
-        byte[] pdfContent = "fake-pdf-content".getBytes();
-        Files.write(pdfPath, pdfContent);
-
-        File file = pdfPath.toFile();
+        byte[] pdf = "temp".getBytes(StandardCharsets.UTF_8);
+        ReceiptPdfResponse receiptPdfResponse = ReceiptPdfResponse.builder()
+                .pdfFile(new ByteArrayInputStream(pdf))
+                .attachmentName(PDF_NAME)
+                .build();
 
         when(pdfService.getReceiptPdf(THIRD_PARTY_ID, FISCAL_CODE))
-                .thenReturn(file);
+                .thenReturn(receiptPdfResponse);
 
         byte[] responseBytes =
                 given()
@@ -50,11 +49,11 @@ class PdfResourceTest {
                         .statusCode(200)
                         .contentType("application/pdf")
                         .header("content-disposition", "attachment;")
-                        .header(FILENAME_RESPONSE_HEADER, "file.pdf")
+                        .header(FILENAME_RESPONSE_HEADER, PDF_NAME)
                         .extract()
                         .asByteArray();
 
-        assertArrayEquals(pdfContent, responseBytes);
+        assertArrayEquals(pdf, responseBytes);
     }
 
     @Test
@@ -74,28 +73,4 @@ class PdfResourceTest {
         assertTrue(responseString.contains(PDFS_901.getErrorCode()));
         verify(pdfService, never()).getReceiptPdf(anyString(), anyString());
     }
-
-    @Test
-    @SneakyThrows
-    void getReceiptPdf_KO_IOException_While_Reading_Pdf_REST() {
-        Path tempDirectory = Files.createTempDirectory("receipt-pdf-io-error");
-        File invalidFile = tempDirectory.toFile();
-
-        when(pdfService.getReceiptPdf(THIRD_PARTY_ID, FISCAL_CODE))
-                .thenReturn(invalidFile);
-
-        String responseString = given()
-                .queryParam("fiscal_code", FISCAL_CODE)
-                .when()
-                .get("/pdf/" + THIRD_PARTY_ID)
-                .then()
-                .statusCode(500)
-                .contentType("application/json")
-                .extract()
-                .asString();
-
-        assertTrue(responseString.contains(PDFS_500.getErrorCode()));
-    }
-
-
 }

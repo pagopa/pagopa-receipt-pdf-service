@@ -1,7 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.client.PDVTokenizerClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -283,9 +283,9 @@ class AttachmentsServiceImplTest {
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
-        File result = sut.getAttachment(anyString(), FISCAL_CODE_B, fileNamePayer);
+        InputStream result = sut.getAttachment(anyString(), FISCAL_CODE_B, fileNamePayer);
 
         assertNotNull(result);
     }
@@ -298,9 +298,9 @@ class AttachmentsServiceImplTest {
         Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
-        File result = sut.getAttachment(anyString(), FISCAL_CODE_A, fileNameDebtor);
+        InputStream result = sut.getAttachment(anyString(), FISCAL_CODE_A, fileNameDebtor);
 
         assertNotNull(result);
     }
@@ -314,7 +314,7 @@ class AttachmentsServiceImplTest {
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(
                 FiscalCodeNotAuthorizedException.class,
@@ -333,7 +333,7 @@ class AttachmentsServiceImplTest {
         Receipt receipt = buildReceiptWithDifferentPayerDebtor(id, fileNameDebtor, fileNamePayer);
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(
                 FiscalCodeNotAuthorizedException.class,
@@ -351,7 +351,7 @@ class AttachmentsServiceImplTest {
         Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         FiscalCodeNotAuthorizedException e = assertThrows(
                 FiscalCodeNotAuthorizedException.class,
@@ -384,7 +384,7 @@ class AttachmentsServiceImplTest {
         Receipt receipt = buildReceiptWithSamePayerDebtor(id, fileNameDebtor);
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
         assertThrows(
                 FiscalCodeNotAuthorizedException.class,
@@ -418,10 +418,10 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_A));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
-        File result = sut.getAttachment("test_CART_", payerFiscalCode, fileNamePayer);
+        InputStream result = sut.getAttachment("test_CART_", payerFiscalCode, fileNamePayer);
 
         assertNotNull(result);
     }
@@ -453,10 +453,10 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(debtorFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_B));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
-        File result = sut.getAttachment("test_CART_biz1", debtorFiscalCode, fileNameDebtor);
+        InputStream result = sut.getAttachment("test_CART_biz1", debtorFiscalCode, fileNameDebtor);
 
         assertNotNull(result);
     }
@@ -474,7 +474,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_A));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         InvalidCartException e = assertThrows(
@@ -499,7 +499,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_A));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         InvalidCartException e = assertThrows(
@@ -526,7 +526,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_A));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         InvalidCartException e = assertThrows(
@@ -555,7 +555,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_A));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         InvalidCartException e = assertThrows(
@@ -593,7 +593,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_A));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         FiscalCodeNotAuthorizedException e = assertThrows(
@@ -630,7 +630,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_B));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         FiscalCodeNotAuthorizedException e = assertThrows(
@@ -661,7 +661,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_B));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         InvalidCartException e = assertThrows(
@@ -698,7 +698,7 @@ class AttachmentsServiceImplTest {
         when(restClientMock.searchToken(
                 new SearchTokenRequest(payerFiscalCode)))
                 .thenReturn(new SearchTokenResponse(TOKEN_B));
-        doReturn(mock(File.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString(), eq(null));
+        doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
 
         InvalidCartException e = assertThrows(

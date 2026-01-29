@@ -5,7 +5,6 @@ import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobStorageException;
-import com.azure.storage.blob.options.BlobDownloadToFileOptions;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
@@ -17,7 +16,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.time.Duration;
 
@@ -30,7 +30,6 @@ import static org.mockito.Mockito.*;
 class ReceiptBlobClientImplTest {
 
     public static final String ATTACHMENT_PDF = "attachment.pdf";
-    public static final String FILE_PDF = "file.pdf";
     @Inject
     private ReceiptBlobClient sut;
 
@@ -53,13 +52,17 @@ class ReceiptBlobClientImplTest {
     @SneakyThrows
     void getAttachmentFromBlobStorageSuccess() {
         doReturn(null).when(blobClientMockMock)
-                .downloadToFileWithResponse(
-                        any(BlobDownloadToFileOptions.class),
+                .downloadStreamWithResponse(
+                        any(OutputStream.class),
+                        eq(null),
+                        eq(null),
+                        eq(null),
+                        anyBoolean(),
                         any(Duration.class),
                         any(Context.class)
                 );
 
-        File result = sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF);
+        InputStream result = sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF);
 
         assertNotNull(result);
     }
@@ -68,13 +71,17 @@ class ReceiptBlobClientImplTest {
     @SneakyThrows
     void getAttachmentFromBlobStorageFailDownloadThrowsUncheckedIOException() {
         doThrow(UncheckedIOException.class).when(blobClientMockMock)
-                .downloadToFileWithResponse(
-                        any(BlobDownloadToFileOptions.class),
+                .downloadStreamWithResponse(
+                        any(OutputStream.class),
+                        eq(null),
+                        eq(null),
+                        eq(null),
+                        anyBoolean(),
                         any(Duration.class),
                         any(Context.class)
                 );
 
-        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF));
+        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_601, e.getErrorCode());
@@ -86,13 +93,17 @@ class ReceiptBlobClientImplTest {
         HttpResponse responseMock = mock(HttpResponse.class);
         doReturn(404).when(responseMock).getStatusCode();
         doThrow(new BlobStorageException("", responseMock, null)).when(blobClientMockMock)
-                .downloadToFileWithResponse(
-                        any(BlobDownloadToFileOptions.class),
+                .downloadStreamWithResponse(
+                        any(OutputStream.class),
+                        eq(null),
+                        eq(null),
+                        eq(null),
+                        anyBoolean(),
                         any(Duration.class),
                         any(Context.class)
                 );
 
-        AttachmentNotFoundException e = assertThrows(AttachmentNotFoundException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF));
+        AttachmentNotFoundException e = assertThrows(AttachmentNotFoundException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_602, e.getErrorCode());
@@ -104,13 +115,17 @@ class ReceiptBlobClientImplTest {
         HttpResponse responseMock = mock(HttpResponse.class);
         doReturn(500).when(responseMock).getStatusCode();
         doThrow(new BlobStorageException("", responseMock, null)).when(blobClientMockMock)
-                .downloadToFileWithResponse(
-                        any(BlobDownloadToFileOptions.class),
+                .downloadStreamWithResponse(
+                        any(OutputStream.class),
+                        eq(null),
+                        eq(null),
+                        eq(null),
+                        anyBoolean(),
                         any(Duration.class),
                         any(Context.class)
                 );
 
-        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF, FILE_PDF));
+        BlobStorageClientException e = assertThrows(BlobStorageClientException.class, () -> sut.getAttachmentFromBlobStorage(ATTACHMENT_PDF));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_603, e.getErrorCode());
