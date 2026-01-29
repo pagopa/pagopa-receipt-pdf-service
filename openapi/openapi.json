@@ -164,7 +164,7 @@
   },
   "info": {
     "title": "pagoPA PDF Receipt Service",
-    "version": "0.14.4-1-fix-get-cart-io-message-api",
+    "version": "0.14.5",
     "description": "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService": "https://www.pagopa.gov.it/"
   },
