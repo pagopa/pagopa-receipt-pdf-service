@@ -17,7 +17,6 @@ import java.io.File;
 import java.util.Objects;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_716;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 import static it.gov.pagopa.receipt.pdf.service.utils.Constants.CART;
 
@@ -152,17 +151,15 @@ public class PdfService {
     }
 
     private boolean isCartInCriticalFailure(CartForReceipt cart) {
-        return cart.getPayload() == null ||
-                cart.getPayload().getCart() == null ||
-                (cart.getPayload().getReasonErrPayer() == null && cart.getPayload().getCart().stream().allMatch(c -> c.getReasonErrDebtor() == null) ||
-                        (cart.getPayload().getReasonErrPayer() != null && cart.getPayload().getReasonErrPayer().getCode() == PDF_TEMPLATE_ERROR_CODE) ||
-                        (cart.getPayload().getCart().stream().anyMatch(
-                                c -> c.getReasonErrDebtor() != null && c.getReasonErrDebtor().getCode() == PDF_TEMPLATE_ERROR_CODE)));
+        return cart.getPayload() != null &&
+                ((cart.getPayload().getReasonErrPayer() != null && cart.getPayload().getReasonErrPayer().getCode() == PDF_TEMPLATE_ERROR_CODE) ||
+                        (cart.getPayload().getCart() != null && cart.getPayload().getCart().stream().anyMatch(
+                                c -> c.getReasonErrDebtor() != null && c.getReasonErrDebtor().getCode() == PDF_TEMPLATE_ERROR_CODE)
+                        ));
     }
 
     private boolean isSingleReceiptInCriticalFailure(Receipt receipt) {
-        return (receipt.getReasonErr() == null && receipt.getReasonErrPayer() == null) ||
-                (receipt.getReasonErr() != null && receipt.getReasonErr().getCode() == PDF_TEMPLATE_ERROR_CODE) ||
+        return (receipt.getReasonErr() != null && receipt.getReasonErr().getCode() == PDF_TEMPLATE_ERROR_CODE) ||
                 (receipt.getReasonErrPayer() != null && receipt.getReasonErrPayer().getCode() == PDF_TEMPLATE_ERROR_CODE);
     }
 }

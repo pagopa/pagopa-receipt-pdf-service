@@ -248,7 +248,7 @@ class PdfServiceTest {
                     InvalidReceiptException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, DEBTOR_FISCAL_CODE_1)
             );
-            assertEquals(PDFS_716, exception.getErrorCode());
+            assertEquals(PDFS_715, exception.getErrorCode());
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
@@ -560,7 +560,7 @@ class PdfServiceTest {
                     InvalidCartException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
-            assertEquals(PDFS_716, exception.getErrorCode());
+            assertEquals(PDFS_715, exception.getErrorCode());
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
@@ -582,7 +582,7 @@ class PdfServiceTest {
                     InvalidCartException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
-            assertEquals(PDFS_716, exception.getErrorCode());
+            assertEquals(PDFS_715, exception.getErrorCode());
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
@@ -604,7 +604,7 @@ class PdfServiceTest {
                     InvalidCartException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
-            assertEquals(PDFS_716, exception.getErrorCode());
+            assertEquals(PDFS_715, exception.getErrorCode());
 
             verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
