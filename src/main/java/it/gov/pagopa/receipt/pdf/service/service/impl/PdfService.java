@@ -5,6 +5,7 @@ import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
+import it.gov.pagopa.receipt.pdf.service.model.ReceiptPdfResponse;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartStatusType;
 import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
@@ -13,7 +14,6 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.io.File;
 import java.util.Objects;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
@@ -55,7 +55,7 @@ public class PdfService {
      * @throws InvalidReceiptException          thrown if the single receipt is in invalid state
      * @throws InvalidCartException             thrown if the cart receipt is in invalid state
      */
-    public File getReceiptPdf(String thirdPartyId, String requestFiscalCode) throws
+    public ReceiptPdfResponse getReceiptPdf(String thirdPartyId, String requestFiscalCode) throws
             FiscalCodeNotAuthorizedException, BlobStorageClientException, AttachmentNotFoundException,
             ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
         String attachmentName;
@@ -70,7 +70,10 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
         }
 
-        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentName, attachmentName);
+        return ReceiptPdfResponse.builder()
+                .attachmentName(attachmentName)
+                .pdfFile(receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
+                .build();
     }
 
     private String getReceiptAttachmentName(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {

@@ -22,10 +22,8 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -76,13 +74,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     @Override
     public byte[] getAttachmentBytesFromBlobStorage(String attachmentName)
             throws IOException, AttachmentNotFoundException, BlobStorageClientException {
-        File pdfFile = this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName, null);
-        try (FileInputStream inputStream = new FileInputStream(pdfFile)) {
+        try (InputStream inputStream = this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName)) {
             return IOUtils.toByteArray(inputStream);
-        } finally {
-            if (pdfFile != null) {
-                Files.deleteIfExists(pdfFile.toPath());
-            }
         }
     }
 
@@ -218,9 +211,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                 null;
     }
 
-
     @Override
-    public File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
+    public InputStream getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException,
             BlobStorageClientException, AttachmentNotFoundException, InvalidCartException, CartNotFoundException {
 
@@ -230,7 +222,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             getSingleReceiptAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
         }
 
-        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl, null);
+        return receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl);
     }
 
     private void getSingleReceiptAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException {

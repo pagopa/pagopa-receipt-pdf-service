@@ -3,8 +3,8 @@ package it.gov.pagopa.receipt.pdf.service.service;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Interface of the service to be used to retrieve the attachments
@@ -36,7 +36,7 @@ public interface AttachmentsService {
      * @throws BlobStorageClientException       thrown for error when retrieving the attachment from the Blob Storage
      * @throws AttachmentNotFoundException      thrown if the requested attachment was not found
      */
-    File getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
+    InputStream getAttachment(String thirdPartyId, String requestFiscalCode, String attachmentUrl)
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, BlobStorageClientException, AttachmentNotFoundException, InvalidCartException, CartNotFoundException;
 
     /**

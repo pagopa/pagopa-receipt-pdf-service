@@ -3,6 +3,7 @@ package it.gov.pagopa.receipt.pdf.service.resource;
 import io.quarkus.arc.profile.IfBuildProfile;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
+import it.gov.pagopa.receipt.pdf.service.model.ReceiptPdfResponse;
 import it.gov.pagopa.receipt.pdf.service.service.impl.PdfService;
 import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.inject.Inject;
@@ -19,10 +20,8 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
@@ -76,21 +75,16 @@ public class PdfResource {
         // replace new line and tab from user input to avoid log injection
         requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
 
-
-        File attachment = this.pdfService.getReceiptPdf(thirdPartyId, requestFiscalCode);
-        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(attachment))) {
+        ReceiptPdfResponse receiptPdfResponse = this.pdfService.getReceiptPdf(thirdPartyId, requestFiscalCode);
+        try (InputStream inputStream = receiptPdfResponse.getPdfFile()) {
             return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
                     .header("content-type", "application/pdf")
                     .header("content-disposition", "attachment;")
-                    .header(FILENAME_RESPONSE_HEADER, attachment.getName())
+                    .header(FILENAME_RESPONSE_HEADER, receiptPdfResponse.getAttachmentName())
                     .build();
         } catch (IOException e) {
             logger.error("Error handling the stream generated from pdf attachment");
             throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
-        } finally {
-            if (attachment != null && attachment.exists()) {
-                CommonUtils.clearTempDirectory(attachment.toPath().getParent(), logger);
-            }
         }
     }
 }
