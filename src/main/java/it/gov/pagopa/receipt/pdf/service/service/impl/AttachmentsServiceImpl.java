@@ -314,7 +314,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     }
 
     private CartForReceipt getCartReceipt(String cartId) throws CartNotFoundException, InvalidCartException {
-        CartForReceipt cartForReceipt = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
+        CartForReceipt cartForReceipt = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
 
         if (cartForReceipt == null) {
             String errMsg = String.format("The retrieved cart with id: %s, is null", sanitize(cartId));

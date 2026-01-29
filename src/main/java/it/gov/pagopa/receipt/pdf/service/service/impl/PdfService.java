@@ -112,7 +112,7 @@ public class PdfService {
         String attachmentName;
         String cartId = CommonUtils.getPaymentId(thirdPartyId);
 
-        CartForReceipt cart = cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
+        CartForReceipt cart = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
 
         if (CartStatusType.PDF_WAITING_TO_BE_GENERATED.contains(cart.getStatus())) {
             throw new InvalidCartException(PDFS_714, PDFS_714.getErrorMessage());
