@@ -1,5 +1,5 @@
 oa3_spec: ./openapi/openapi.json
-name: opex_pagopa-pdf-receipt-service
+name: opex_pagopa-receipt-service-messages
 location: West Europe
 timespan: 5m
 data_source: /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-api-rg/providers/Microsoft.ApiManagement/service/pagopa-p-apim

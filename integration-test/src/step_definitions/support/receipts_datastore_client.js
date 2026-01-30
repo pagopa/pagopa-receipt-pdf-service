@@ -19,8 +19,8 @@ const receiptCartErrorContainer = client.database(databaseId).container(receiptC
 const receiptCartMessageContainer = client.database(databaseId).container(receiptCartMessageContainerId);
 
 // RECEIPT
-async function createDocumentInReceiptsDatastore(id, fiscalCode, pdfName) {
-    let receipt = createReceipt(id, fiscalCode, pdfName);
+async function createDocumentInReceiptsDatastore(id, fiscalCode, pdfName, status, reasonErrorCode) {
+    let receipt = createReceipt(id, fiscalCode, pdfName, status, reasonErrorCode);
     try {
         return await receiptContainer.items.create(receipt);
     } catch (err) {
@@ -80,8 +80,8 @@ async function deleteDocumentInReceiptIoMessageDatastore(id, partitionKey) {
 }
 
 // CART RECEIPT
-async function createDocumentInReceiptsCartDatastore(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName) {
-    let receipt = createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName);
+async function createDocumentInReceiptsCartDatastore(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode) {
+    let receipt = createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode);
     try {
         return await receiptCartContainer.items.create(receipt);
     } catch (err) {

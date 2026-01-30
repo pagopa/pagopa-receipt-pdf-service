@@ -6,6 +6,6 @@ tags = {
   CreatedBy   = "Terraform"
   Environment = "Prod"
   Owner       = "pagoPA"
-  Source      = "https://github.com/pagopa/pagopa-pdf-receipt-service"
+  Source      = "https://github.com/pagopa/pagopa-receipt-pdf-service"
   CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
 }

@@ -1,6 +1,7 @@
 const axios = require("axios");
 
 const uri = process.env.SERVICE_URI;
+const uri_pdf = process.env.SERVICE_PDF_URI;
 const environment = process.env.ENVIRONMENT;
 const tokenizer_url = process.env.TOKENIZER_URL;
 
@@ -17,6 +18,12 @@ function getAttachmentDetails(receiptId, fiscalCode) {
 
 function getAttachment(receiptId, blobName, fiscalCode) {
 	let url = uri + "/" + receiptId + "/" + blobName;
+
+	return httpGET(url, fiscalCode);
+}
+
+function getReceiptPdf(thirdPartyId, fiscalCode) {
+	let url = uri_pdf + "/" + thirdPartyId;
 
 	return httpGET(url, fiscalCode);
 }
@@ -39,7 +46,7 @@ function httpGET(url, fiscalCode) {
 		});
 }
 
-function createReceipt(id, fiscalCode, pdfName) {
+function createReceipt(id, fiscalCode, pdfName, status, reasonErrorCode) {
 	let receipt =
 	{
 		"eventId": id,
@@ -47,26 +54,31 @@ function createReceipt(id, fiscalCode, pdfName) {
 			"debtorFiscalCode": fiscalCode,
 			"payerFiscalCode": fiscalCode
 		},
-		"status": "IO_NOTIFIED",
+		"status": status ? status : "IO_NOTIFIED",
 		"mdAttach": {
 			"name": pdfName,
 			"url": pdfName
 		},
-		"id": id
+		"id": id,
+		"reasonErr": reasonErrorCode ? { "code": reasonErrorCode } : undefined
 	}
 	return receipt
 }
 
-function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName) {
+function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode) {
 	let receipt =
 	{
-		"eventId": id,
+		"cartId": id,
+		"eventId": id, //TODO remove
 		"version": "1",
 		"payload": {
 			"payerFiscalCode": payerFiscalCode,
 			"mdAttachPayer": {
 				"name": pdfName,
 				"url": pdfName
+			},
+			"reasonErrPayer": {
+				"code": payerReasonErrCode
 			},
 			"messagePayer": {
 				"subject": "Payer subject",
@@ -85,7 +97,10 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 					"messageDebtor": {
 						"subject": "Cart Debtor subject",
 						"markdown": "Cart Debtor **markdown**"
-					}
+					},
+					"reasonErrDebtor": {
+						"code": debtorReasonErrCode
+					},
 				},
 				{
 					"bizEventId": payerBizEventId,
@@ -103,7 +118,7 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 				}
 			]
 		},
-		"status": "IO_NOTIFIED",
+		"status": status ? status :"IO_NOTIFIED",
 		"id": id
 	}
 	return receipt
@@ -208,5 +223,6 @@ module.exports = {
 	createReceiptCartError,
 	createEventWithIUVAndOrgCode,
 	createEvent,
-	createReceiptCartMessage
+	createReceiptCartMessage,
+	getReceiptPdf
 }

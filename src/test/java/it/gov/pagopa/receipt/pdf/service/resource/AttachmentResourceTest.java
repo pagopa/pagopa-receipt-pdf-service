@@ -1,8 +1,8 @@
 package it.gov.pagopa.receipt.pdf.service.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
 import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
 import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
@@ -13,8 +13,8 @@ import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -206,10 +206,8 @@ class AttachmentResourceTest {
     @Test
     @SneakyThrows
     void getAttachmentSuccess() {
-        File tempDirectory = Files.createTempDirectory("test").toFile();
-        File file = Files.createTempFile(tempDirectory.toPath(), "receipt", ".pdf").toFile();
-
-        doReturn(file).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
+        byte[] attachment = "".getBytes(StandardCharsets.UTF_8);
+        doReturn(new ByteArrayInputStream(attachment)).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
 
         byte[] response =
                 given()
@@ -224,8 +222,7 @@ class AttachmentResourceTest {
 
 
         assertNotNull(response);
-        assertFalse(file.exists());
-        assertFalse(tempDirectory.exists());
+        assertArrayEquals(attachment, response);
 
     }
 
@@ -330,31 +327,5 @@ class AttachmentResourceTest {
         assertNotNull(response.getDetail());
         assertNotNull(response.getTitle());
 
-    }
-
-    @Test
-    @SneakyThrows
-    void getAttachmentFailReadingAttachmentFileContent() {
-        doReturn(new File("")).when(attachmentsServiceMock).getAttachment(THIRD_PARTY_ID, FISCAL_CODE, ATTACHMENT_URL);
-
-        String responseString =
-                given()
-                        .queryParam("fiscal_code", FISCAL_CODE)
-                        .when().get(String.format("/messages/%s/%s", THIRD_PARTY_ID, ATTACHMENT_URL))
-                        .then()
-                        .statusCode(500)
-                        .contentType("application/json")
-                        .extract()
-                        .asString();
-
-
-        assertNotNull(responseString);
-        ErrorResponse response = objectMapper.readValue(responseString, ErrorResponse.class);
-        assertNotNull(response);
-        assertEquals(PDFS_500.getErrorCode(), response.getInstance());
-        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-        assertEquals(INTERNAL_SERVER_ERROR.getReasonPhrase(), response.getTitle());
-        assertNotNull(response.getDetail());
-        assertNotNull(response.getTitle());
     }
 }

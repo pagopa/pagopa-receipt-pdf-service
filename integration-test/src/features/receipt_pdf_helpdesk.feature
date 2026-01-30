@@ -31,8 +31,8 @@ Feature: All about payment events to recover managed by Azure functions receipt-
     Then the api response has a 200 Http status
     And the receipt-message has messageId "receipt-helpdesk-int-test-message-id-5"
     And the receipt-message has eventId "receipt-helpdesk-int-test-id-5"
-  
   ## CART RECEIPT
+
   Scenario: getCartReceipt API return receipt stored on datastore
     Given a cart with id "receipt-cart-helpdesk-int-test-id-1" stored into cart datastore
     When getCartReceipt API is called with cartId "receipt-cart-helpdesk-int-test-id-1"
@@ -59,4 +59,3 @@ Feature: All about payment events to recover managed by Azure functions receipt-
     Then the api response has a 200 Http status
     And the receipt-message has messageId "receipt-cart-helpdesk-int-test-message-id-4"
     And the receipt-message has eventId "receipt-cart-helpdesk-int-test-id-4"
-

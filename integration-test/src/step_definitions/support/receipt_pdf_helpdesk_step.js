@@ -34,7 +34,7 @@ const {
     getCartReceiptError,
     getCartReceiptMessage
 } = require("./api_helpdesk_client");
-const { uploadBlobFromLocalPath, deleteBlob } = require("./blob_storage_client");
+const { createBlobPdf, deleteReceiptAttachment } = require("./receipts_blob_storage_client");
 
 // set timeout for Hooks function, it allows to wait for long task
 setDefaultTimeout(360 * 1000);
@@ -49,6 +49,8 @@ let receiptMessage = null;
 let receiptPdfFileName = null;
 let cartId = null;
 let cartErrorId = null;
+
+const content = "Hello world!";
 
 // After each Scenario
 After(async function () {
@@ -67,10 +69,7 @@ After(async function () {
         await deleteDocumentFromReceiptsCartErrorDatastore(receiptError.id);
     }
     if (receiptPdfFileName != null) {
-        await deleteBlob(receiptPdfFileName);
-        if (fs.existsSync(receiptPdfFileName)) {
-            fs.unlinkSync(receiptPdfFileName);
-        }
+        await deleteReceiptAttachment(receiptPdfFileName);
     }
     if (messageId != null) {
         await deleteDocumentInReceiptIoMessageDatastore(messageId);
@@ -133,10 +132,9 @@ Given('a receipt-error with bizEventId {string} and status {string} stored into 
 Given("a receipt pdf with filename {string} stored into blob storage", async function (fileName) {
     receiptPdfFileName = fileName;
     // prior cancellation to avoid dirty cases
-    await deleteBlob(fileName);
+    await deleteReceiptAttachment(fileName);
 
-    fs.writeFileSync(fileName, "", "binary");
-    let blobStorageResponse = await uploadBlobFromLocalPath(fileName, fileName);
+    let blobStorageResponse = await createBlobPdf(fileName, content);
     assert.notStrictEqual(blobStorageResponse.status, 500);
 });
 

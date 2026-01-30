@@ -5,6 +5,8 @@ import jakarta.ws.rs.core.Response;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.CART;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUtils {
 
@@ -43,5 +45,21 @@ public class CommonUtils {
                 .detail(suffix.concat(message))
                 .status(status.getStatusCode())
                 .build();
+    }
+
+    public static boolean isCart(String thirdPartyId){
+        return thirdPartyId.contains(CART);
+    }
+
+    public static String getPaymentId(String thirdPartyId){
+        return thirdPartyId.split(CART)[0];
+    }
+
+    public static String getBizEventId(String thirdPartyId){
+        String[] splittedId = thirdPartyId.split(CART);
+        if(isCart(thirdPartyId)){
+            return splittedId.length > 1 ? splittedId[1] : null;
+        }
+        return thirdPartyId;
     }
 }
