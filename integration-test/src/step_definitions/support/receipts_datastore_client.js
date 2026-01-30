@@ -19,8 +19,8 @@ const receiptCartErrorContainer = client.database(databaseId).container(receiptC
 const receiptCartMessageContainer = client.database(databaseId).container(receiptCartMessageContainerId);
 
 // RECEIPT
-async function createDocumentInReceiptsDatastore(id, fiscalCode, pdfName) {
-    let receipt = createReceipt(id, fiscalCode, pdfName);
+async function createDocumentInReceiptsDatastore(id, fiscalCode, pdfName, status, reasonErrorCode) {
+    let receipt = createReceipt(id, fiscalCode, pdfName, status, reasonErrorCode);
     try {
         return await receiptContainer.items.create(receipt);
     } catch (err) {

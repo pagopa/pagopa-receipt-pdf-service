@@ -1,6 +1,6 @@
 const assert = require('assert');
 const { Given, When, Then, After } = require('@cucumber/cucumber');
-const { getAttachmentDetails, getAttachment, createToken} = require("./common.js");
+const { getAttachmentDetails, getAttachment, createToken, getReceiptPdf} = require("./common.js");
 const { createDocumentInReceiptsDatastore, deleteDocumentFromReceiptsDatastore, createDocumentInReceiptsCartDatastore, deleteDocumentFromReceiptsCartDatastore } = require("./receipts_datastore_client.js");
 const { createBlobPdf, deleteReceiptAttachment } = require("./receipts_blob_storage_client.js");
 
@@ -62,7 +62,6 @@ When('an Http GET request is sent to the receipt-service getAttachmentDetails wi
   this.response = await getAttachmentDetails("id", null);
 });
 
-
 Then('response body contains receipt id {string}', function (receiptId) {
   assert.strictEqual(this.response?.data?.attachments?.[0]?.id, receiptId);
 });
@@ -112,6 +111,22 @@ Then('response body has the expected data content', function () {
   assert.strictEqual(this.response.data, content);
 });
 
+// getReceiptPdf
+Given('a receipt with id {string} and debtorFiscalCode {string} and mdAttachmentName {string} and status {string} and reasonErrorCode {int} stored on receipts datastore', async function (id, fiscalCode, blobName, status, reasonErrorCode) {
+  this.receiptId = id;
+  // prior cancellation to avoid dirty cases
+  await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
+
+  let pdvResponse = await createToken(fiscalCode);
+  await createToken('INVALID_FISCCODE');
+
+  let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, pdvResponse.token, blobName, status, reasonErrorCode);
+  assert.strictEqual(cosmosResponse.statusCode, 201);
+});
+
+When('an Http GET request is sent to the receipt-service getReceiptPdf with thirdPartyId {string} and fiscal_code param with value {string}', async function (thirdPartyId, fiscalCode) {
+  this.response = await getReceiptPdf(thirdPartyId, fiscalCode);
+});
 
 //COMMON
 
