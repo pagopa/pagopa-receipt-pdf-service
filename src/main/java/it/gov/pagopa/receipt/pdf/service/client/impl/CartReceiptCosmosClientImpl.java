@@ -43,7 +43,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
 
     public CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException {
         // Build query
-        String query = String.format("SELECT * FROM c WHERE c.eventId = '%s'", cartId);
+        String query = String.format("SELECT * FROM c WHERE c.cartId = '%s'", cartId);
 
         // Query the container
         CosmosPagedIterable<CartForReceipt> queryResponse =

@@ -60,7 +60,7 @@ function createReceipt(id, fiscalCode, pdfName) {
 function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName) {
 	let receipt =
 	{
-		"eventId": id,
+		"cartId": id,
 		"version": "1",
 		"payload": {
 			"payerFiscalCode": payerFiscalCode,
