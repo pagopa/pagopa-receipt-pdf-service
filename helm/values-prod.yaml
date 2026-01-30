@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service'
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: '0.14.4-2-rename-cart-id'
+    tag: '0.14.6'
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -20,7 +20,7 @@ microservice-chart: &microservice-chart
     initialDelaySeconds: 30
     failureThreshold: 6
     periodSeconds: 10
-  deployment:
+  deployment: &deployment
     create: true
     replicas: 3 # equals to HPA min
     strategy:
@@ -68,7 +68,7 @@ microservice-chart: &microservice-chart
     limits:
       memory: '1512Mi'
       cpu: '900m'
-  autoscaling:
+  autoscaling: &autoscaling
     enable: true
     minReplica: 3
     maxReplica: 10
@@ -176,11 +176,18 @@ microservice-chart: &microservice-chart
 pagopa-receipt-pdf-service-helpdesk:
   !!merge <<: *microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service-helpdesk'
+  deployment:
+    !!merge <<: *deployment
+    replicas: 1 # equals to HPA min
   ingress:
     !!merge <<: *ingress
     path: /pagopa-receipt-pdf-service-helpdesk/(.*)
   resources:
     !!merge <<: *resources
+  autoscaling:
+    !!merge <<: *autoscaling
+    minReplica: 1
+    maxReplica: 3
   envConfig:
     !!merge <<: *envConfig
     APP_NAME: 'pdf-receipt-service-helpdesk'
