@@ -60,21 +60,25 @@ function createReceipt(id, fiscalCode, pdfName, status, reasonErrorCode) {
 			"url": pdfName
 		},
 		"id": id,
-		"reasonErr": reasonErrorCode ? {"code": reasonErrorCode} : undefined
+		"reasonErr": reasonErrorCode ? { "code": reasonErrorCode } : undefined
 	}
 	return receipt
 }
 
-function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName) {
+function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode) {
 	let receipt =
 	{
-		"eventId": id,
+		"cartId": id,
+		"eventId": id, //TODO remove
 		"version": "1",
 		"payload": {
 			"payerFiscalCode": payerFiscalCode,
 			"mdAttachPayer": {
 				"name": pdfName,
 				"url": pdfName
+			},
+			"reasonErrPayer": {
+				"code": payerReasonErrCode
 			},
 			"messagePayer": {
 				"subject": "Payer subject",
@@ -93,7 +97,10 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 					"messageDebtor": {
 						"subject": "Cart Debtor subject",
 						"markdown": "Cart Debtor **markdown**"
-					}
+					},
+					"reasonErrDebtor": {
+						"code": debtorReasonErrCode
+					},
 				},
 				{
 					"bizEventId": payerBizEventId,
@@ -111,7 +118,7 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 				}
 			]
 		},
-		"status": "IO_NOTIFIED",
+		"status": status ? status :"IO_NOTIFIED",
 		"id": id
 	}
 	return receipt

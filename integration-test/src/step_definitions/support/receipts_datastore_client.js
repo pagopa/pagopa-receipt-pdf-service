@@ -80,8 +80,8 @@ async function deleteDocumentInReceiptIoMessageDatastore(id, partitionKey) {
 }
 
 // CART RECEIPT
-async function createDocumentInReceiptsCartDatastore(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName) {
-    let receipt = createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName);
+async function createDocumentInReceiptsCartDatastore(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode) {
+    let receipt = createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode);
     try {
         return await receiptCartContainer.items.create(receipt);
     } catch (err) {

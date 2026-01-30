@@ -11,6 +11,7 @@ After(async function () {
   // remove event
   if (this.receiptId != null) {
       await deleteDocumentFromReceiptsDatastore(this.receiptId, this.receiptId);
+      await deleteDocumentFromReceiptsCartDatastore(this.receiptId, this.receiptId);
   }
   if (this.blobName != null) {
     await deleteReceiptAttachment(this.blobName);
@@ -121,6 +122,20 @@ Given('a receipt with id {string} and debtorFiscalCode {string} and mdAttachment
   await createToken('INVALID_FISCCODE');
 
   let cosmosResponse = await createDocumentInReceiptsDatastore(this.receiptId, pdvResponse.token, blobName, status, reasonErrorCode);
+  assert.strictEqual(cosmosResponse.statusCode, 201);
+});
+
+Given('a cart receipt with id {string} a payerFiscalCode {string} with bizEventId {string} and debtorFiscalCode {string} with bizEventId {string}, pdfName {string}, status {string} and payerReasonErrCode {int} and debtorReasonErrCode {int} stored on cart-for-receipts datastore', async function (id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode) {
+  this.receiptId = id;
+  // prior cancellation to avoid dirty cases
+  await deleteDocumentFromReceiptsCartDatastore(this.receiptId, this.receiptId);
+
+  let pdvPayerResponse = await createToken(payerFiscalCode);
+  let pdvDebtorFiscalCodeResponse = await createToken(debtorFiscalCode);
+  await createToken('INVALID_FISCCODE');
+
+  let cosmosResponse = await createDocumentInReceiptsCartDatastore(this.receiptId, pdvPayerResponse.token, payerBizEventId, pdvDebtorFiscalCodeResponse.token, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode);
+
   assert.strictEqual(cosmosResponse.statusCode, 201);
 });
 
