@@ -38,7 +38,7 @@ function httpGET(url, fiscalCode, isProductInternal = false) {
 	if (environment === "local") {
 		queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : '';
 	} else {
-		headers = fiscalCode ? { "fiscal_code": fiscalCode } : {};
+		headers = fiscalCode ? {...headers, "fiscal_code": fiscalCode } : {};
 	}
 
 	return axios.get(url + queryParams, { headers })
