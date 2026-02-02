@@ -20,7 +20,7 @@ module "apim_api_pdf_api_v1" {
   resource_group_name = local.apim.rg
   product_ids           = [local.apim.receipts_internal_product_id]
   subscription_required = local.receipts_service_pdf_api.subscription_required
-  version_set_id        = azurerm_api_management_api_version_set.api_receipts_api.id
+  version_set_id        = azurerm_api_management_api_version_set.api_pdf_api.id
   api_version           = "v1"
 
   description  = local.receipts_service_pdf_api.description
