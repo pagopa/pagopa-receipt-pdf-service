@@ -11,8 +11,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
-
 @ApplicationScoped
 public class TokenizerService {
     private final Logger logger = LoggerFactory.getLogger(TokenizerService.class);
@@ -23,7 +21,7 @@ public class TokenizerService {
         this.pdvTokenizerClient = pdvTokenizerClient;
     }
 
-    public SearchTokenResponse getSearchTokenResponse(String thirdPartyId, String requestFiscalCode)
+    public SearchTokenResponse getSearchTokenResponse(String requestFiscalCode)
             throws FiscalCodeNotAuthorizedException {
         SearchTokenResponse searchTokenResponse;
         try {
@@ -33,10 +31,7 @@ public class TokenizerService {
                 throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
             }
         } catch (Exception e) {
-            String errMsg =
-                    String.format(
-                            "Could not recover fiscal code token for authentication in the request with id: %s",
-                            sanitize(thirdPartyId));
+            String errMsg = "Could not recover fiscal code token for authentication in the request";
             logger.error(errMsg, e);
             throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
         }

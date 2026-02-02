@@ -68,7 +68,7 @@ public class PdfResource {
         // replace new line and tab from user input to avoid log injection
         thirdPartyId = CommonUtils.sanitize(thirdPartyId);
 
-        logger.info("Received get attachment details for receipt with id {}", thirdPartyId);
+        logger.info("Received get PDF for receipt with id {}", thirdPartyId);
         if (requestFiscalCode == null || requestFiscalCode.length() != FISCAL_CODE_LENGTH) {
             throw new InvalidFiscalCodeHeaderException(PDFS_901, PDFS_901.getErrorMessage());
         }

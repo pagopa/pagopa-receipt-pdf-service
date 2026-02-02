@@ -100,7 +100,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
@@ -124,7 +124,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
 
             when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
@@ -148,7 +148,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_714, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -170,7 +170,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -191,7 +191,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -212,7 +212,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -233,7 +233,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -255,7 +255,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -265,7 +265,7 @@ class PdfServiceTest {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE);
+            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -284,7 +284,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(INVALID_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, INVALID_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(INVALID_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -304,7 +304,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -324,7 +324,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -346,7 +346,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -390,7 +390,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
@@ -414,7 +414,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_DEBTOR_1, DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
 
             when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
@@ -438,7 +438,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_2_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_DEBTOR_2, DEBTOR_FISCAL_CODE_2)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_2)).thenReturn(searchTokenResponse);
 
             when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_2)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
@@ -463,7 +463,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_714, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -485,7 +485,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -506,7 +506,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -527,7 +527,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -548,7 +548,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -570,7 +570,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -593,7 +593,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -616,7 +616,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -637,7 +637,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -658,7 +658,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString(), anyString());
+            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -668,7 +668,7 @@ class PdfServiceTest {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE);
+            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -687,7 +687,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(INVALID_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_PAYER, INVALID_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(INVALID_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -706,7 +706,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_INVALID_BIZ_EVENT, DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -726,7 +726,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -746,7 +746,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_DEBTOR_1, DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -766,7 +766,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_2_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_DEBTOR_2, DEBTOR_FISCAL_CODE_2)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_2)).thenReturn(searchTokenResponse);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -788,7 +788,7 @@ class PdfServiceTest {
 
             SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
             searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,

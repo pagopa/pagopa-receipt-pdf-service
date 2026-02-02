@@ -14,11 +14,13 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.MDC;
 
 import java.util.Objects;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.*;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.MDC_THIRD_PARTY_ID;
 
 @ApplicationScoped
 public class PdfService {
@@ -60,20 +62,26 @@ public class PdfService {
             ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
         String attachmentName;
 
-        if (CommonUtils.isCart(thirdPartyId)) {
-            attachmentName = getCartAttachmentName(thirdPartyId, requestFiscalCode);
-        } else {
-            attachmentName = getReceiptAttachmentName(thirdPartyId, requestFiscalCode);
-        }
+        try {
+            MDC.put(MDC_THIRD_PARTY_ID, thirdPartyId);
 
-        if (attachmentName == null || attachmentName.isEmpty() || attachmentName.isBlank()) {
-            throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
-        }
+            if (CommonUtils.isCart(thirdPartyId)) {
+                attachmentName = getCartAttachmentName(thirdPartyId, requestFiscalCode);
+            } else {
+                attachmentName = getReceiptAttachmentName(thirdPartyId, requestFiscalCode);
+            }
 
-        return ReceiptPdfResponse.builder()
-                .attachmentName(attachmentName)
-                .pdfFile(this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
-                .build();
+            if (attachmentName == null || attachmentName.isEmpty() || attachmentName.isBlank()) {
+                throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
+            }
+
+            return ReceiptPdfResponse.builder()
+                    .attachmentName(attachmentName)
+                    .pdfFile(this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
+                    .build();
+        } finally {
+            MDC.remove(MDC_THIRD_PARTY_ID);
+        }
     }
 
     private String getReceiptAttachmentName(
@@ -93,7 +101,7 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
-        String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
+        String fiscalCode = this.tokenizerService.getSearchTokenResponse(requestFiscalCode).getToken();
         if (Objects.equals(receipt.getEventData().getDebtorFiscalCode(), fiscalCode)) {
             if (receipt.getMdAttach() == null) {
                 throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
@@ -130,7 +138,7 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
-        String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
+        String fiscalCode = this.tokenizerService.getSearchTokenResponse(requestFiscalCode).getToken();
         Payload cartPayload = cart.getPayload();
         if (Objects.equals(cartPayload.getPayerFiscalCode(), fiscalCode)) {
             if (cartPayload.getMdAttachPayer() == null) {

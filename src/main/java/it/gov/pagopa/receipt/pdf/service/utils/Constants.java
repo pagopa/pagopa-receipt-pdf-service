@@ -11,5 +11,5 @@ public class Constants {
     public static final String FILENAME_RESPONSE_HEADER = "filename";
     public static final String CART = "_CART_";
 
-
+    public static final String MDC_THIRD_PARTY_ID = "thirdPartyId";
 }
