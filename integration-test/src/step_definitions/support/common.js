@@ -69,7 +69,6 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 	let receipt =
 	{
 		"cartId": id,
-		"eventId": id, //TODO remove
 		"version": "1",
 		"payload": {
 			"payerFiscalCode": payerFiscalCode,

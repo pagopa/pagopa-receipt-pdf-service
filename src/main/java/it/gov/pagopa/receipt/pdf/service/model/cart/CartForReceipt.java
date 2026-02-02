@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class CartForReceipt {
 
-    private String eventId;
+    private String cartId;
     private String id;
     private String version;
     private Payload payload;
