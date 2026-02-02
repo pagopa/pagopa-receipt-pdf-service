@@ -24,9 +24,9 @@ locals {
   }
 
   receipts_service_pdf_api = {
-    display_name          = "Receipts Service PDF"
+    display_name          = "Receipts Service PDF - API for BizEventService"
     description           = "API to handle the retrieve of receipt's PDF"
-    path                  = "receipts/service"
+    path                  = "receipts/pdf/service"
     subscription_required = true
     service_url           = local.receipt_pdf_service_url
   }
