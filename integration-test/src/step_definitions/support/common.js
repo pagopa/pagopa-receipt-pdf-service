@@ -4,8 +4,10 @@ const uri = process.env.SERVICE_URI;
 const uri_pdf = process.env.SERVICE_PDF_URI;
 const environment = process.env.ENVIRONMENT;
 const tokenizer_url = process.env.TOKENIZER_URL;
+const subkey = process.env.SUBKEY || "";
+const pdf_subkey = process.env.PDF_SUBKEY || "";
 
-axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = process.env.SUBKEY || ""; // for all requests
+axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = subkey; // for all requests
 if (process.env.canary) {
 	axios.defaults.headers.common['X-CANARY'] = 'canary' // for all requests
 }
@@ -25,12 +27,14 @@ function getAttachment(receiptId, blobName, fiscalCode) {
 function getReceiptPdf(thirdPartyId, fiscalCode) {
 	let url = uri_pdf + "/" + thirdPartyId;
 
-	return httpGET(url, fiscalCode);
+	return httpGET(url, fiscalCode, true);
 }
 
-function httpGET(url, fiscalCode) {
+function httpGET(url, fiscalCode, isProductInternal = false) {
 	let queryParams = '';
-	let headers = {};
+	let headers = {
+		'Ocp-Apim-Subscription-Key': isProductInternal ? pdf_subkey : subkey
+	};
 	if (environment === "local") {
 		queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : '';
 	} else {
