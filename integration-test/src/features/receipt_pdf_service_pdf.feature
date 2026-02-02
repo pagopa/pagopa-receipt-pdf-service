@@ -10,13 +10,13 @@ Feature: Retrieve receipt attachments
   Scenario: Error PDFS_714 when retrieving a pdf not yet generated
     Given a receipt with id "receipt-service-pdf-int-test-id-2" and debtorFiscalCode "VALID_FISCALCODE" and mdAttachmentName "VALID_ATTACHMENT_NAME.pdf" and status "INSERTED" and reasonErrorCode 0 stored on receipts datastore
     When an Http GET request is sent to the receipt-service getReceiptPdf with thirdPartyId "receipt-service-pdf-int-test-id-2" and fiscal_code param with value "VALID_FISCALCODE"
-    Then response has a 500 Http status
+    Then response has a 404 Http status
     And application error code is "PDFS_714"
 
   Scenario: Error PDFS_715 when retrieving a pdf with a retryable error
     Given a receipt with id "receipt-service-pdf-int-test-id-3" and debtorFiscalCode "VALID_FISCALCODE" and mdAttachmentName "VALID_ATTACHMENT_NAME.pdf" and status "FAILED" and reasonErrorCode 900 stored on receipts datastore
     When an Http GET request is sent to the receipt-service getReceiptPdf with thirdPartyId "receipt-service-pdf-int-test-id-3" and fiscal_code param with value "VALID_FISCALCODE"
-    Then response has a 500 Http status
+    Then response has a 404 Http status
     And application error code is "PDFS_715"
 
   Scenario: Error PDFS_716 when retrieving a pdf with a critical error that needs review
@@ -49,13 +49,13 @@ Feature: Retrieve receipt attachments
   Scenario: Error PDFS_714 when retrieving a cart pdf not yet generated
     Given a cart receipt with id "receipt-cart-service-pdf-int-test-id-3" a payerFiscalCode "VLD_PAYER_FISCAL" with bizEventId "payer-31b43ccf-9cbb-4637-9027-415303e7c1d1" and debtorFiscalCode "VLD_DEBTOR_FISCA" with bizEventId "debtor-363eb6c9-781a-4b62-87d7-b5365d2e9b55", pdfName "null", status "INSERTED" and payerReasonErrCode 0 and debtorReasonErrCode 0 stored on cart-for-receipts datastore
     When an Http GET request is sent to the receipt-service getReceiptPdf with thirdPartyId "receipt-cart-service-pdf-int-test-id-3_CART_" and fiscal_code param with value "VLD_PAYER_FISCAL"
-    Then response has a 500 Http status
+    Then response has a 404 Http status
     And application error code is "PDFS_714"
 
   Scenario: Error PDFS_715 when retrieving a cart pdf with a retryable error
     Given a cart receipt with id "receipt-cart-service-pdf-int-test-id-4" a payerFiscalCode "VLD_PAYER_FISCAL" with bizEventId "payer-31b43ccf-9cbb-4637-9027-415303e7c1d1" and debtorFiscalCode "VLD_DEBTOR_FISCA" with bizEventId "debtor-363eb6c9-781a-4b62-87d7-b5365d2e9b55", pdfName "null", status "FAILED" and payerReasonErrCode 900 and debtorReasonErrCode 900 stored on cart-for-receipts datastore
     When an Http GET request is sent to the receipt-service getReceiptPdf with thirdPartyId "receipt-cart-service-pdf-int-test-id-4_CART_" and fiscal_code param with value "VLD_PAYER_FISCAL"
-    Then response has a 500 Http status
+    Then response has a 404 Http status
     And application error code is "PDFS_715"
 
   Scenario: Error PDFS_716 when retrieving a cart pdf with debtor critical error that needs review

@@ -16,6 +16,7 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.EventData;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReasonError;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -132,16 +133,17 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = ReceiptStatusType.class, names = {
                 "INSERTED",
                 "RETRY"
         })
-        void getReceiptPdf_Receipt_KO_Still_Generating(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Receipt_KO_Still_Generating(ReceiptStatusType status) {
             Receipt receipt = getReceipt(status, null, null);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            InvalidReceiptException exception = assertThrows(
-                    InvalidReceiptException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)
             );
             assertEquals(PDFS_714, exception.getErrorCode());
@@ -152,17 +154,18 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = ReceiptStatusType.class, names = {
                 "NOT_QUEUE_SENT",
                 "FAILED",
                 "TO_REVIEW"
         })
-        void getReceiptPdf_Receipt_KO_RetryableFailure(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Receipt_KO_RetryableFailure(ReceiptStatusType status) {
             Receipt receipt = getReceipt(status, ERROR_CODE_RETRYABLE, null);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            InvalidReceiptException exception = assertThrows(
-                    InvalidReceiptException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)
             );
             assertEquals(PDFS_715, exception.getErrorCode());
@@ -236,17 +239,18 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = ReceiptStatusType.class, names = {
                 "NOT_QUEUE_SENT",
                 "FAILED",
                 "TO_REVIEW"
         })
-        void getReceiptPdf_Receipt_KO_CriticalFailure_EmptyReasonErr(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Receipt_KO_CriticalFailure_EmptyReasonErr(ReceiptStatusType status) {
             Receipt receipt = getReceipt(status, null, null);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            InvalidReceiptException exception = assertThrows(
-                    InvalidReceiptException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, DEBTOR_FISCAL_CODE_1)
             );
             assertEquals(PDFS_715, exception.getErrorCode());
@@ -443,17 +447,18 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = CartStatusType.class, names = {
                 "WAITING_FOR_BIZ_EVENT",
                 "INSERTED",
                 "RETRY"
         })
-        void getReceiptPdf_Cart_KO_Still_Generating(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Cart_KO_Still_Generating(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            InvalidCartException exception = assertThrows(
-                    InvalidCartException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
             assertEquals(PDFS_714, exception.getErrorCode());
@@ -464,17 +469,18 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = CartStatusType.class, names = {
                 "NOT_QUEUE_SENT",
                 "FAILED",
                 "TO_REVIEW"
         })
-        void getReceiptPdf_Cart_KO_RetryableFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Cart_KO_RetryableFailure(CartStatusType status) {
             CartForReceipt cart = getCart(status, ERROR_CODE_RETRYABLE, null, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            InvalidCartException exception = assertThrows(
-                    InvalidCartException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
             assertEquals(PDFS_715, exception.getErrorCode());
@@ -548,17 +554,18 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = CartStatusType.class, names = {
                 "NOT_QUEUE_SENT",
                 "FAILED",
                 "TO_REVIEW"
         })
-        void getReceiptPdf_Cart_KO_EmptyReasonErr(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Cart_KO_EmptyReasonErr(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            InvalidCartException exception = assertThrows(
-                    InvalidCartException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
             assertEquals(PDFS_715, exception.getErrorCode());
@@ -569,18 +576,19 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = CartStatusType.class, names = {
                 "NOT_QUEUE_SENT",
                 "FAILED",
                 "TO_REVIEW"
         })
-        void getReceiptPdf_Cart_KO_EmptyPayload(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Cart_KO_EmptyPayload(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
             cart.setPayload(null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            InvalidCartException exception = assertThrows(
-                    InvalidCartException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
             assertEquals(PDFS_715, exception.getErrorCode());
@@ -591,18 +599,19 @@ class PdfServiceTest {
         }
 
         @ParameterizedTest
+        @SneakyThrows
         @EnumSource(value = CartStatusType.class, names = {
                 "NOT_QUEUE_SENT",
                 "FAILED",
                 "TO_REVIEW"
         })
-        void getReceiptPdf_Cart_KO_EmptyCart(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+        void getReceiptPdf_Cart_KO_EmptyCart(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
             cart.getPayload().setCart(null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            InvalidCartException exception = assertThrows(
-                    InvalidCartException.class,
+            AttachmentNotFoundException exception = assertThrows(
+                    AttachmentNotFoundException.class,
                     () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)
             );
             assertEquals(PDFS_715, exception.getErrorCode());

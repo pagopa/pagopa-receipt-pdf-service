@@ -76,18 +76,21 @@ public class PdfService {
                 .build();
     }
 
-    private String getReceiptAttachmentName(String thirdPartyId, String requestFiscalCode) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException {
+    private String getReceiptAttachmentName(
+            String thirdPartyId,
+            String requestFiscalCode
+    ) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException, AttachmentNotFoundException {
         String attachmentName;
         Receipt receipt = this.cosmosClient.getReceiptDocument(thirdPartyId);
 
         if (ReceiptStatusType.PDF_WAITING_TO_BE_GENERATED.contains(receipt.getStatus())) {
-            throw new InvalidReceiptException(PDFS_714, PDFS_714.getErrorMessage());
+            throw new AttachmentNotFoundException(PDFS_714, PDFS_714.getErrorMessage());
         }
         if (ReceiptStatusType.PDF_FAILED_TO_BE_GENERATED.contains(receipt.getStatus())) {
             if (isSingleReceiptInCriticalFailure(receipt)) {
                 throw new InvalidReceiptException(PDFS_716, PDFS_716.getErrorMessage());
             }
-            throw new InvalidReceiptException(PDFS_715, PDFS_715.getErrorMessage());
+            throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
         String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
@@ -108,20 +111,23 @@ public class PdfService {
         return attachmentName;
     }
 
-    private String getCartAttachmentName(String thirdPartyId, String requestFiscalCode) throws CartNotFoundException, InvalidCartException, FiscalCodeNotAuthorizedException {
+    private String getCartAttachmentName(
+            String thirdPartyId,
+            String requestFiscalCode
+    ) throws CartNotFoundException, InvalidCartException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException {
         String attachmentName;
         String cartId = CommonUtils.getPaymentId(thirdPartyId);
 
         CartForReceipt cart = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
 
         if (CartStatusType.PDF_WAITING_TO_BE_GENERATED.contains(cart.getStatus())) {
-            throw new InvalidCartException(PDFS_714, PDFS_714.getErrorMessage());
+            throw new AttachmentNotFoundException(PDFS_714, PDFS_714.getErrorMessage());
         }
         if (CartStatusType.PDF_FAILED_TO_BE_GENERATED.contains(cart.getStatus())) {
             if (isCartInCriticalFailure(cart)) {
                 throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
             }
-            throw new InvalidCartException(PDFS_715, PDFS_715.getErrorMessage());
+            throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
         String fiscalCode = this.tokenizerService.getSearchTokenResponse(thirdPartyId, requestFiscalCode).getToken();
