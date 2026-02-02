@@ -116,7 +116,7 @@
   },
   "info" : {
     "title" : "pagoPA PDF Receipt Service",
-    "version" : "0.14.5",
+    "version" : "0.14.7",
     "description" : "Expose APIs used by IO backend to retrieved payment receipts",
     "termsOfService" : "https://www.pagopa.gov.it/"
   },

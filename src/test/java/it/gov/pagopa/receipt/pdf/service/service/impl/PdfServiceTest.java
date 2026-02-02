@@ -793,7 +793,7 @@ class PdfServiceTest {
 
         private CartForReceipt getCart(CartStatusType cartStatusType, Integer errorCodePayer, Integer errorCodeDebtor1, Integer errorCodeDebtor2) {
             return CartForReceipt.builder()
-                    .eventId(CART_ID)
+                    .cartId(CART_ID)
                     .status(cartStatusType)
                     .payload(
                             Payload.builder()
