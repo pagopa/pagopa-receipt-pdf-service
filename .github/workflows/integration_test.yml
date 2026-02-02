@@ -49,6 +49,7 @@ jobs:
         shell: bash
         env:
           SUBKEY_ENV: ${{ secrets.SUBKEY }}
+          PDF_SUBKEY_ENV: ${{ secrets.PDF_SUBKEY }}
           HELPDESK_SUBKEY_ENV: ${{ secrets.HELPDESK_SUBKEY }}
           CUCUMBER_PUBLISH_TOKEN_ENV: ${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
           RECEIPTS_STORAGE_CONN_STRING_ENV: ${{ secrets.RECEIPTS_STORAGE_CONN_STRING }}
@@ -63,6 +64,7 @@ jobs:
           export RECEIPTS_COSMOS_CONN_STRING="$RECEIPTS_COSMOS_CONN_STRING_ENV"
           export BIZEVENTS_COSMOS_CONN_STRING="$BIZEVENTS_COSMOS_CONN_STRING_ENV"
           export TOKENIZER_API_KEY="$TOKENIZER_API_KEY_ENV"
+          export PDF_SUBKEY="$PDF_SUBKEY_ENV"
           
           cd ./integration-test
           chmod +x ./run_integration_test.sh
