@@ -11,7 +11,7 @@ import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_800;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_801;
 
 
 @ApplicationScoped
@@ -32,13 +32,13 @@ public class CartReceiptCosmosService {
             receipt = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
         } catch (CartNotFoundException e) {
             String errorMsg = String.format("Receipt not found with the cart id %s", cartId);
-            throw new CartNotFoundException(PDFS_800, errorMsg, e);
+            throw new CartNotFoundException(PDFS_801, errorMsg, e);
 
         }
 
         if (receipt == null) {
             String errorMsg = String.format("Receipt retrieved with the cart id %s is null", cartId);
-            throw new CartNotFoundException(PDFS_800, errorMsg);
+            throw new CartNotFoundException(PDFS_801, errorMsg);
         }
         return receipt;
     }
