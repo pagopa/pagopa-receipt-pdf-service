@@ -3,7 +3,6 @@ const axios = require("axios");
 const uri = process.env.SERVICE_URI;
 const uri_pdf = process.env.SERVICE_PDF_URI;
 const environment = process.env.ENVIRONMENT;
-const tokenizer_url = process.env.TOKENIZER_URL;
 const subkey = process.env.SUBKEY || "";
 const pdf_subkey = process.env.PDF_SUBKEY || "";
 
@@ -127,21 +126,6 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 	return receipt
 }
 
-async function createToken(fiscalCode) {
-	let token_api_key = process.env.TOKENIZER_API_KEY;
-	let headers = {
-		"x-api-key": token_api_key
-	};
-
-	return await axios.put(tokenizer_url, { "pii": fiscalCode }, { headers })
-		.then(res => {
-			return res.data;
-		})
-		.catch(error => {
-			return error.response;
-		});
-}
-
 const getTokenizedBizEvent = () => {
 	let environment = process.env.ENVIRONMENT || "";
 	if (environment === "uat") {
@@ -219,7 +203,6 @@ module.exports = {
 	createReceipt,
 	getAttachmentDetails,
 	getAttachment,
-	createToken,
 	createCartReceipt,
 	createReceiptError,
 	createReceiptMessage,
