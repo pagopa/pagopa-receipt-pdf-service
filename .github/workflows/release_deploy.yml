@@ -120,7 +120,7 @@ jobs:
     needs: [ deploy_aks ]
     runs-on: ubuntu-latest
     name: Notify
-    if: always()
+    if: always() && (needs.setup.outputs.environment == 'prod' || needs.setup.outputs.environment == 'all')
     steps:
       - name: Report Status
         if: always()
