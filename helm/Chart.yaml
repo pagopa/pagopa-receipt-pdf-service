@@ -2,8 +2,8 @@ apiVersion: v2
 name: pagopareceiptpdfservice
 description: Microservice pagopa-receipt-pdf-service
 type: application
-version: 0.86.0
-appVersion: 0.14.7-1-PIDM-1421-api-getreceiptpdf
+version: 0.87.0
+appVersion: 0.14.7-2-PIDM-1421-api-getreceiptpdf
 dependencies:
   - name: microservice-chart
     version: 8.0.2
