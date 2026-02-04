@@ -120,7 +120,7 @@ jobs:
     needs: [ deploy_aks ]
     runs-on: ubuntu-latest
     name: Notify
-    if: always()
+    if: always() && (needs.setup.outputs.environment == 'prod' || needs.setup.outputs.environment == 'all')
     steps:
       - name: Report Status
         if: always()
@@ -128,7 +128,6 @@ jobs:
         with:
           status: ${{ needs.deploy_aks.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          notify_when: 'failure,skipped'
           notification_title: '{workflow} has {status_message}'
           message_format: '{emoji} <{workflow_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to Repo <{repo_url}|{repo}>'

@@ -10,7 +10,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_600;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_601;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_602;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -62,7 +62,7 @@ class GetReceiptPDFTest {
         String expectedMessage = String.format("Unable to retrieve the receipt pdf with file name %s", FILE_NAME);
 
         when(attachmentsServiceMock.getAttachmentBytesFromBlobStorage(FILE_NAME))
-                .thenThrow(new BlobStorageClientException(PDFS_600, PDFS_600.getErrorMessage()));
+                .thenThrow(new BlobStorageClientException(PDFS_601, PDFS_601.getErrorMessage()));
 
         given()
                 .pathParam("file-name", FILE_NAME)

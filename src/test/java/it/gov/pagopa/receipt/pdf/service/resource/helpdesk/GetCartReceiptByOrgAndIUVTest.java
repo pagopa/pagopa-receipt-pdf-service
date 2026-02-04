@@ -133,6 +133,6 @@ class GetCartReceiptByOrgAndIUVTest {
                 .then()
                 .statusCode(HttpStatus.SC_OK)
                 .contentType(ContentType.JSON)
-                .body("eventId", equalTo(EVENT_ID));
+                .body("cartId", equalTo(EVENT_ID));
     }
 }

@@ -28,8 +28,9 @@ locals {
     "RECEIPTS_STORAGE_CONN_STRING" : data.azurerm_storage_account.receipts_sa.primary_connection_string,
     "RECEIPTS_COSMOS_CONN_STRING" : "AccountEndpoint=https://pagopa-${var.env_short}-${local.location_short}-${local.domain}-ds-cosmos-account.documents.azure.com:443/;AccountKey=${data.azurerm_cosmosdb_account.receipts_cosmos.primary_key};",
     "BIZEVENTS_COSMOS_CONN_STRING" : "AccountEndpoint=https://pagopa-${var.env_short}-${local.location_short}-bizevents-ds-cosmos-account.documents.azure.com:443/;AccountKey=${data.azurerm_cosmosdb_account.bizevents_cosmos.primary_key};",
-    "SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_subkey.value
-    "TOKENIZER_API_KEY" : data.azurerm_key_vault_secret.key_vault_tokenizer_api_key.value
+    "SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_subkey.value,
+    "PDF_SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_pdf_subkey.value,
+    "TOKENIZER_API_KEY" : data.azurerm_key_vault_secret.key_vault_tokenizer_api_key.value,
     "HELPDESK_SUBKEY" : data.azurerm_key_vault_secret.key_vault_helpdesk_integration_test_api_key.value
   }
   env_variables = {

@@ -4,8 +4,6 @@ import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobStorageException;
-import com.azure.storage.blob.models.DownloadRetryOptions;
-import com.azure.storage.blob.options.BlobDownloadToFileOptions;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.BlobStorageClientException;
@@ -15,15 +13,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashSet;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
@@ -52,42 +46,49 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
     /**
      * Retrieve a PDF receipt from the blob storage
      *
-     * @param fileName file name of the PDF receipt
+     * @param attachmentName file name of the PDF receipt
      * @return the file where the PDF receipt was stored
      */
-    public File getAttachmentFromBlobStorage(String fileName) throws BlobStorageClientException, AttachmentNotFoundException {
-        BlobClient blobClient = blobContainerClient.getBlobClient(sanitize(fileName));
-        String filePath = createTempDirectory();
-        downloadAttachment(fileName, blobClient, filePath);
-        return new File(filePath);
+    public InputStream getAttachmentFromBlobStorage(String attachmentName) throws BlobStorageClientException, AttachmentNotFoundException {
+        BlobClient blobClient = blobContainerClient.getBlobClient(sanitize(attachmentName));
+        return downloadAttachment(attachmentName, blobClient);
     }
 
-    private String createTempDirectory() throws BlobStorageClientException {
-        try {
-            File workingDirectory = createWorkingDirectory();
-            Path tempDirectory = Files.createTempDirectory(workingDirectory.toPath(), "receipt-pdf-service");
-            return tempDirectory.toAbsolutePath() + "/receiptPdf.pdf";
-        } catch (IOException e) {
-            logger.error("Error creating the temp directory to download the PDF receipt from Blob Storage");
-            throw new BlobStorageClientException(PDFS_600, PDFS_600.getErrorMessage(),  e);
-        }
-    }
+    private InputStream downloadAttachment(
+            String fileName,
+            BlobClient blobClient
+    ) throws BlobStorageClientException, AttachmentNotFoundException {
 
-    private void downloadAttachment(String fileName, BlobClient blobClient, String filePath) throws BlobStorageClientException, AttachmentNotFoundException {
         try {
-            blobClient.downloadToFileWithResponse(
-                    getBlobDownloadToFileOptions(filePath),
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+            blobClient.downloadStreamWithResponse(
+                    outputStream,
+                    null,   // BlobRange (null = entire blob)
+                    null,   // DownloadRetryOptions
+                    null,   // RequestConditions
+                    false,  // rangeGetContentMd5
                     Duration.ofSeconds(timeout),
-                    Context.NONE);
+                    Context.NONE
+            );
+
+            return new ByteArrayInputStream(outputStream.toByteArray());
+
         } catch (UncheckedIOException e) {
-            logger.error("I/O error downloading the PDF receipt from Blob Storage");
-            throw new BlobStorageClientException(PDFS_601, PDFS_601.getErrorMessage(),  e);
+            logger.error("I/O error downloading the PDF receipt from Blob Storage", e);
+            throw new BlobStorageClientException(
+                    PDFS_601,
+                    PDFS_601.getErrorMessage(),
+                    e
+            );
+
         } catch (BlobStorageException e) {
             String errMsg;
             if (e.getStatusCode() == 404) {
                 errMsg = String.format("PDF receipt with name: %s not found in Blob Storage: %s", sanitize(fileName), blobClient.getAccountName());
                 logger.error(errMsg);
-                throw new AttachmentNotFoundException(PDFS_602, errMsg, fileName, e);
+                throw new AttachmentNotFoundException(PDFS_602, errMsg, fileName, e
+                );
             }
             errMsg = String.format("Unable to download the PDF receipt with name: %s from Blob Storage: %s. Error message from server: %s",
                     sanitize(fileName),
@@ -97,25 +98,5 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
             logger.error(errMsg);
             throw new BlobStorageClientException(PDFS_603, errMsg, e);
         }
-    }
-
-    private BlobDownloadToFileOptions getBlobDownloadToFileOptions(String filePath) {
-        return new BlobDownloadToFileOptions(filePath)
-                .setDownloadRetryOptions(new DownloadRetryOptions().setMaxRetryRequests(maxRetryRequests))
-                .setOpenOptions(new HashSet<>(
-                        Arrays.asList(
-                                StandardOpenOption.CREATE_NEW,
-                                StandardOpenOption.WRITE,
-                                StandardOpenOption.READ
-                        ))
-                );
-    }
-
-    private File createWorkingDirectory() throws IOException {
-        File workingDirectory = new File("temp");
-        if (!workingDirectory.exists()) {
-            Files.createDirectory(workingDirectory.toPath());
-        }
-        return workingDirectory;
     }
 }

@@ -1,10 +1,12 @@
 const axios = require("axios");
 
 const uri = process.env.SERVICE_URI;
+const uri_pdf = process.env.SERVICE_PDF_URI;
 const environment = process.env.ENVIRONMENT;
-const tokenizer_url = process.env.TOKENIZER_URL;
+const subkey = process.env.SUBKEY || "";
+const pdf_subkey = process.env.PDF_SUBKEY || "";
 
-axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = process.env.SUBKEY || ""; // for all requests
+axios.defaults.headers.common['Ocp-Apim-Subscription-Key'] = subkey; // for all requests
 if (process.env.canary) {
 	axios.defaults.headers.common['X-CANARY'] = 'canary' // for all requests
 }
@@ -21,13 +23,21 @@ function getAttachment(receiptId, blobName, fiscalCode) {
 	return httpGET(url, fiscalCode);
 }
 
-function httpGET(url, fiscalCode) {
+function getReceiptPdf(thirdPartyId, fiscalCode) {
+	let url = uri_pdf + "/" + thirdPartyId;
+
+	return httpGET(url, fiscalCode, true);
+}
+
+function httpGET(url, fiscalCode, isProductInternal = false) {
 	let queryParams = '';
-	let headers = {};
+	let headers = {
+		'Ocp-Apim-Subscription-Key': isProductInternal ? pdf_subkey : subkey
+	};
 	if (environment === "local") {
 		queryParams = fiscalCode ? `?fiscal_code=${fiscalCode}` : '';
 	} else {
-		headers = fiscalCode ? { "fiscal_code": fiscalCode } : {};
+		headers = fiscalCode ? {...headers, "fiscal_code": fiscalCode } : {};
 	}
 
 	return axios.get(url + queryParams, { headers })
@@ -39,7 +49,7 @@ function httpGET(url, fiscalCode) {
 		});
 }
 
-function createReceipt(id, fiscalCode, pdfName) {
+function createReceipt(id, fiscalCode, pdfName, status, reasonErrorCode) {
 	let receipt =
 	{
 		"eventId": id,
@@ -47,17 +57,18 @@ function createReceipt(id, fiscalCode, pdfName) {
 			"debtorFiscalCode": fiscalCode,
 			"payerFiscalCode": fiscalCode
 		},
-		"status": "IO_NOTIFIED",
+		"status": status ? status : "IO_NOTIFIED",
 		"mdAttach": {
 			"name": pdfName,
 			"url": pdfName
 		},
-		"id": id
+		"id": id,
+		"reasonErr": reasonErrorCode ? { "code": reasonErrorCode } : undefined
 	}
 	return receipt
 }
 
-function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName) {
+function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCode, debtorBizEventId, pdfName, status, payerReasonErrCode, debtorReasonErrCode) {
 	let receipt =
 	{
 		"cartId": id,
@@ -67,6 +78,9 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 			"mdAttachPayer": {
 				"name": pdfName,
 				"url": pdfName
+			},
+			"reasonErrPayer": {
+				"code": payerReasonErrCode
 			},
 			"messagePayer": {
 				"subject": "Payer subject",
@@ -85,7 +99,10 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 					"messageDebtor": {
 						"subject": "Cart Debtor subject",
 						"markdown": "Cart Debtor **markdown**"
-					}
+					},
+					"reasonErrDebtor": {
+						"code": debtorReasonErrCode
+					},
 				},
 				{
 					"bizEventId": payerBizEventId,
@@ -103,25 +120,10 @@ function createCartReceipt(id, payerFiscalCode, payerBizEventId, debtorFiscalCod
 				}
 			]
 		},
-		"status": "IO_NOTIFIED",
+		"status": status ? status :"IO_NOTIFIED",
 		"id": id
 	}
 	return receipt
-}
-
-async function createToken(fiscalCode) {
-	let token_api_key = process.env.TOKENIZER_API_KEY;
-	let headers = {
-		"x-api-key": token_api_key
-	};
-
-	return await axios.put(tokenizer_url, { "pii": fiscalCode }, { headers })
-		.then(res => {
-			return res.data;
-		})
-		.catch(error => {
-			return error.response;
-		});
 }
 
 const getTokenizedBizEvent = () => {
@@ -201,12 +203,12 @@ module.exports = {
 	createReceipt,
 	getAttachmentDetails,
 	getAttachment,
-	createToken,
 	createCartReceipt,
 	createReceiptError,
 	createReceiptMessage,
 	createReceiptCartError,
 	createEventWithIUVAndOrgCode,
 	createEvent,
-	createReceiptCartMessage
+	createReceiptCartMessage,
+	getReceiptPdf
 }

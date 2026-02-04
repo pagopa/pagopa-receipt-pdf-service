@@ -1,6 +1,8 @@
 package it.gov.pagopa.receipt.pdf.service.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorAPICategory;
+import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -46,7 +48,7 @@ class CommonUtilsTest {
         );
     }
 
-    public static void generateOpenApi(String filename) throws Exception {
+    public static void generateOpenApi(String filename, AppErrorAPICategory category) throws Exception {
         String responseString =
                 given()
                         .when().get("/q/openapi?format=json")
@@ -61,10 +63,28 @@ class CommonUtilsTest {
         String formatted = objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(swagger);
+        formatted = formatted.replace("placeholder-for-replace", getAppErrorCodes(category));
 
         Path basePath = Paths.get("openapi/");
         Files.createDirectories(basePath);
         Files.write(basePath.resolve(filename), formatted.getBytes());
+    }
+
+    private static String getAppErrorCodes(AppErrorAPICategory category) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("\\n ### APP ERROR CODES ### \\n\\n\\n <details><summary>Details</summary>\\n **NAME** | **DESCRIPTION** \\n- | - ");
+        for (AppErrorCodeEnum errorCode : AppErrorCodeEnum.values()) {
+            if (errorCode.getCategory().contains(category)) {
+                stringBuilder
+                        .append("\\n **")
+                        .append(errorCode.getErrorCode())
+                        .append("** | ")
+                        .append(errorCode.getErrorMessage());
+            }
+        }
+        stringBuilder.append(" \\n\\n </details> \\n");
+        return stringBuilder.toString();
     }
 }
 

@@ -71,6 +71,11 @@ data "azurerm_key_vault_secret" "key_vault_integration_test_subkey" {
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
+data "azurerm_key_vault_secret" "key_vault_integration_test_pdf_subkey" {
+  name         = "apikey-service-internal-receipt" # "integration-test-pdf-subkey"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
+}
+
 data "azurerm_key_vault_secret" "key_vault_tokenizer_api_key" {
   name         = "tokenizer-api-key"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
