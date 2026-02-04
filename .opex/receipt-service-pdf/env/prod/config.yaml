@@ -7,6 +7,7 @@ resource_type: api-management
 action_groups:
   - /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-monitor-rg/providers/microsoft.insights/actionGroups/PagoPA
   - /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-monitor-rg/providers/microsoft.insights/actionGroups/SlackPagoPA
+  - /subscriptions/b9fc9419-6097-45fe-9f74-ba0641c91912/resourceGroups/pagopa-p-monitor-rg/providers/microsoft.insights/actionGroups/Opsgenie
 availability_threshold: 0.90
 response_time_threshold: 9.0
 overrides:
