@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>it.gov.pagopa</groupId>
   <artifactId>pdf-receipt-service</artifactId>
-  <version>0.14.7-3-PIDM-1421-api-getreceiptpdf</version>
+  <version>0.15.0</version>
   <name>pagopa-pdf-receipt-service</name>
   <properties>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
