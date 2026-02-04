@@ -13,7 +13,7 @@ response_time_threshold: 9.0
 overrides:
   hosts:
     - api.platform.pagopa.it
-  base_path: "/receipts/{product}/{version}"
+  base_path: "/receipts/service/v1"
   endpoints:
     GET /messages/{tp_id}/{attachment_url}:
       response_time_threshold: 3 # Default: 1
