@@ -11,8 +11,21 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.servers.Server;
+import org.eclipse.microprofile.openapi.annotations.servers.ServerVariable;
 
 @OpenAPIDefinition(
+        servers = {
+                @Server(url = "http://localhost:8080", description = "Localhost base URL"),
+                @Server(url = "https://{host}/{product}/v1", description = "Base URL",
+                        variables = {
+                                @ServerVariable(name = "host",
+                                        enumeration = {"api.dev.platform.pagopa.it", "api.uat.platform.pagopa.it", "api.platform.pagopa.it"},
+                                        defaultValue = "api.dev.platform.pagopa.it"),
+                                @ServerVariable(name = "product",
+                                        enumeration = {"receipts/helpdesk/service", "receipts/service", "receipts/internal/service"},
+                                        defaultValue = "receipts/service")})
+        },
     components =
         @Components(
             responses = {
