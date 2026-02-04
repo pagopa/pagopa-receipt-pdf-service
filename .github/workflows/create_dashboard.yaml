@@ -2,14 +2,6 @@ name: Create Dashboard
 
 # Controls when the workflow will run
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'openapi/**'
-      - '.github/workflows/create_dashboard.yaml'
-      - '.opex/**'
-
   workflow_dispatch:
 
 permissions:
@@ -26,7 +18,7 @@ jobs:
     strategy:
       matrix:
         environment: [prod]
-        product: [pdf-receipt-service]
+        product: [receipt-service-pdf, receipt-service-messages]
       max-parallel: 1
     environment:
       name: ${{ matrix.environment }}
