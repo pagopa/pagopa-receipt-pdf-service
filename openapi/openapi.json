@@ -171,33 +171,6 @@
   "servers" : [ {
     "url" : "http://localhost:8080",
     "description" : "Localhost base URL"
-  }, {
-    "url" : "https://{host}/receipts/helpdesk/service/v1",
-    "description" : "Base URL",
-    "variables" : {
-      "host" : {
-        "enum" : [ "api.dev.platform.pagopa.it", "api.uat.platform.pagopa.it", "api.platform.pagopa.it" ],
-        "default" : "api.dev.platform.pagopa.it"
-      }
-    }
-  }, {
-    "url" : "https://{host}/receipts/service/v1",
-    "description" : "Base URL",
-    "variables" : {
-      "host" : {
-        "enum" : [ "api.dev.platform.pagopa.it", "api.uat.platform.pagopa.it", "api.platform.pagopa.it" ],
-        "default" : "api.dev.platform.pagopa.it"
-      }
-    }
-  }, {
-    "url" : "https://{host}/receipts/internal/service/v1",
-    "description" : "Base URL",
-    "variables" : {
-      "host" : {
-        "enum" : [ "api.dev.platform.pagopa.it", "api.uat.platform.pagopa.it", "api.platform.pagopa.it" ],
-        "default" : "api.dev.platform.pagopa.it"
-      }
-    }
   } ],
   "tags" : [ {
     "name" : "Attachments",
