@@ -154,16 +154,10 @@ public class ApiLoggingFilter {
 				var key = item.getKey();
 				var value = item.getValue();
 
-				if ("fiscal_code".equals(key) ){
-					value = value.stream()
-							.map(v -> {
-								int l = v.length() / 2;
-								return "*".repeat(l) + v.substring(l);
-							})
-							.toList();
+				if (!"fiscal_code".equals(key) ){
+					params.put(key, value);
 				}
 
-				params.put(key, value);
 			}
 		}
 		return toJsonString(params);
