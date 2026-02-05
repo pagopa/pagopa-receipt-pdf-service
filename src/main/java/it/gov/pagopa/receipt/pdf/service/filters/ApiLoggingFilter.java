@@ -3,6 +3,7 @@ package it.gov.pagopa.receipt.pdf.service.filters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.ws.rs.core.Response;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -149,7 +150,21 @@ public class ApiLoggingFilter {
 		Map<String, Object> params = new HashMap<>();
 		MultivaluedMap<String, String> queryParams = ctx.getUriInfo().getQueryParameters();
 		if (queryParams != null && !queryParams.isEmpty()) {
-			params.putAll(queryParams);
+			for (var item : queryParams.entrySet()) {
+				var key = item.getKey();
+				var value = item.getValue();
+
+				if ("fiscal_code".equals(key) ){
+					value = value.stream()
+							.map(v -> {
+								int l = v.length() / 2;
+								return "*".repeat(l) + v.substring(l);
+							})
+							.toList();
+				}
+
+				params.put(key, value);
+			}
 		}
 		return toJsonString(params);
 	}

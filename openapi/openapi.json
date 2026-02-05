@@ -1,228 +1,212 @@
 {
-  "openapi": "3.0.3",
-  "components": {
-    "schemas": {
-      "Attachment": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "id_allegato"
+  "openapi" : "3.0.3",
+  "components" : {
+    "schemas" : {
+      "Attachment" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "example" : "id_allegato"
           },
-          "content_type": {
-            "type": "string",
-            "example": "application/pdf"
+          "content_type" : {
+            "type" : "string",
+            "example" : "application/pdf"
           },
-          "name": {
-            "type": "string",
-            "example": "Allegato 1.pdf"
+          "name" : {
+            "type" : "string",
+            "example" : "Allegato 1.pdf"
           },
-          "url": {
-            "type": "string",
-            "example": "<percorso relativo dell'allegato>"
+          "url" : {
+            "type" : "string",
+            "example" : "<percorso relativo dell'allegato>"
           }
         }
       },
-      "AttachmentsDetailsResponse": {
-        "type": "object",
-        "properties": {
-          "attachments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Attachment"
+      "AttachmentsDetailsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "attachments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Attachment"
             }
           },
-          "details": {
-            "$ref": "#/components/schemas/Detail"
+          "details" : {
+            "$ref" : "#/components/schemas/Detail"
           }
         }
       },
-      "Detail": {
-        "type": "object",
-        "properties": {
-          "subject": {
-            "type": "string",
-            "example": "Questo è il titolo del messaggio"
+      "Detail" : {
+        "type" : "object",
+        "properties" : {
+          "subject" : {
+            "type" : "string",
+            "example" : "Questo è il titolo del messaggio"
           },
-          "markdown": {
-            "type": "string",
-            "example": "Questo è il corpo del messaggio in formato **markdown**"
+          "markdown" : {
+            "type" : "string",
+            "example" : "Questo è il corpo del messaggio in formato **markdown**"
           }
         }
       },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
           },
-          "title": {
-            "type": "string",
-            "example": "Internal Server Error"
+          "title" : {
+            "type" : "string",
+            "example" : "Internal Server Error"
           },
-          "status": {
-            "format": "int32",
-            "type": "integer",
-            "example": 500
+          "status" : {
+            "format" : "int32",
+            "type" : "integer",
+            "example" : 500
           },
-          "detail": {
-            "type": "string",
-            "example": "An unexpected error has occurred. Please contact support."
+          "detail" : {
+            "type" : "string",
+            "example" : "An unexpected error has occurred. Please contact support."
           },
-          "instance": {
-            "type": "string",
-            "example": "PDFS-500"
+          "instance" : {
+            "type" : "string",
+            "example" : "PDFS-500"
           }
         }
       },
-      "InfoResponse": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "pagopa-receipt-pdf-service"
+      "InfoResponse" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "example" : "pagopa-receipt-pdf-service"
           },
-          "version": {
-            "type": "string",
-            "example": "1.2.3"
+          "version" : {
+            "type" : "string",
+            "example" : "1.2.3"
           },
-          "environment": {
-            "type": "string",
-            "example": "dev"
+          "environment" : {
+            "type" : "string",
+            "example" : "dev"
           },
-          "description": {
-            "type": "string",
-            "example": "Receipt PDF Service"
+          "description" : {
+            "type" : "string",
+            "example" : "Receipt PDF Service"
           },
-          "profiles": {
-            "type": "array",
-            "items": {
-              "type": "string"
+          "profiles" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
             },
-            "example": "dev"
+            "example" : "dev"
           }
         }
       }
     },
-    "responses": {
-      "AppException400": {
-        "description": "Default app exception for status 400",
-        "content": {
-          "application/json": {
-            "examples": {
-              "Error": {
-                "value": {
-                  "type": "",
-                  "title": "Bad Request",
-                  "status": 400,
-                  "detail": "The provided third party id [<td_id>] is invalid",
-                  "instance": "PDFS_703"
+    "responses" : {
+      "AppException400" : {
+        "description" : "Default app exception for status 400",
+        "content" : {
+          "application/json" : {
+            "examples" : {
+              "Error" : {
+                "value" : {
+                  "type" : "",
+                  "title" : "Bad Request",
+                  "status" : 400,
+                  "detail" : "The provided third party id [<td_id>] is invalid",
+                  "instance" : "PDFS_703"
                 }
               }
             },
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
             }
           }
         }
       },
-      "AppException404": {
-        "description": "Default app exception for status 404",
-        "content": {
-          "application/json": {
-            "example": {
-              "type": "",
-              "title": "Not Found",
-              "status": 404,
-              "detail": "Third party id [<td_id>] not found",
-              "instance": "PDFS_900"
+      "AppException404" : {
+        "description" : "Default app exception for status 404",
+        "content" : {
+          "application/json" : {
+            "example" : {
+              "type" : "",
+              "title" : "Not Found",
+              "status" : 404,
+              "detail" : "Third party id [<td_id>] not found",
+              "instance" : "PDFS_900"
             },
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
             }
           }
         }
       },
-      "InternalServerError": {
-        "description": "Internal Server Error",
-        "content": {
-          "application/json": {
-            "example": {
-              "type": "",
-              "title": "Internal Server Error",
-              "status": 500,
-              "detail": "An unexpected error has occurred. Please contact support.",
-              "instance": "PDFS_603"
+      "InternalServerError" : {
+        "description" : "Internal Server Error",
+        "content" : {
+          "application/json" : {
+            "example" : {
+              "type" : "",
+              "title" : "Internal Server Error",
+              "status" : 500,
+              "detail" : "An unexpected error has occurred. Please contact support.",
+              "instance" : "PDFS_603"
             },
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorResponse"
             }
           }
         }
       }
     }
   },
-  "info": {
-    "title": "pagoPA PDF Receipt Service",
-    "version": "0.15.0",
-    "description": "Expose APIs used by IO backend to retrieved payment receipts \n ### APP ERROR CODES ### \n\n\n <details><summary>Details</summary>\n **NAME** | **DESCRIPTION** \n- | - \n **PDFS_400** | An unexpected error has occurred, see logs for more info\n **PDFS_500** | I/O error when reading the temporary file with the receipt PDF content retrieved from Blob Storage\n **PDFS_601** | I/O error when downloading the PDF receipt from Blob Storage\n **PDFS_602** | Error when downloading the PDF receipt from Blob Storage, the requested attachment was not found\n **PDFS_603** | Some error occurred when downloading the PDF receipt from Blob Storage\n **PDFS_700** | Fiscal code not authorized to access the requested receipts details\n **PDFS_701** | The retrieved receipt is null\n **PDFS_702** | The retrieved receipt has null event data\n **PDFS_703** | The retrieved receipt has null debtor fiscal code\n **PDFS_704** | The retrieved receipt has null debtor attachment info\n **PDFS_705** | The retrieved receipt has null payer attachment info\n **PDFS_706** | Fiscal code not authorized to access the requested receipt document\n **PDFS_707** | The retrieved cart is null\n **PDFS_708** | The retrieved cart has null payload\n **PDFS_709** | The retrieved cart has null debtors fiscal code\n **PDFS_710** | The retrieved cart has null attachment info\n **PDFS_711** | The retrieved cart has null debtor attachment info\n **PDFS_712** | The retrieved cart has null payer attachment info\n **PDFS_713** | The retrieved cart has null payer message data\n **PDFS_800** | Receipt not found with the provided third party id\n **PDFS_801** | Cart not found with the provided third party id\n **PDFS_901** | Invalid fiscal code header, null or length not equal to 16 \n\n </details> \n",
-    "termsOfService": "https://www.pagopa.gov.it/"
+  "info" : {
+    "title" : "pagoPA PDF Receipt Service",
+    "version" : "0.15.0",
+    "description" : "Expose APIs used by IO backend to retrieved payment receipts \n ### APP ERROR CODES ### \n\n\n <details><summary>Details</summary>\n **NAME** | **DESCRIPTION** \n- | - \n **PDFS_400** | An unexpected error has occurred, see logs for more info\n **PDFS_500** | I/O error when reading the temporary file with the receipt PDF content retrieved from Blob Storage\n **PDFS_601** | I/O error when downloading the PDF receipt from Blob Storage\n **PDFS_602** | Error when downloading the PDF receipt from Blob Storage, the requested attachment was not found\n **PDFS_603** | Some error occurred when downloading the PDF receipt from Blob Storage\n **PDFS_700** | Fiscal code not authorized to access the requested receipts details\n **PDFS_701** | The retrieved receipt is null\n **PDFS_702** | The retrieved receipt has null event data\n **PDFS_703** | The retrieved receipt has null debtor fiscal code\n **PDFS_704** | The retrieved receipt has null debtor attachment info\n **PDFS_705** | The retrieved receipt has null payer attachment info\n **PDFS_706** | Fiscal code not authorized to access the requested receipt document\n **PDFS_707** | The retrieved cart is null\n **PDFS_708** | The retrieved cart has null payload\n **PDFS_709** | The retrieved cart has null debtors fiscal code\n **PDFS_710** | The retrieved cart has null attachment info\n **PDFS_711** | The retrieved cart has null debtor attachment info\n **PDFS_712** | The retrieved cart has null payer attachment info\n **PDFS_713** | The retrieved cart has null payer message data\n **PDFS_800** | Receipt not found with the provided third party id\n **PDFS_801** | Cart not found with the provided third party id\n **PDFS_901** | Invalid fiscal code header, null or length not equal to 16 \n\n </details> \n",
+    "termsOfService" : "https://www.pagopa.gov.it/"
   },
-  "servers": [
-    {
-      "url": "http://localhost:8080",
-      "description": "Localhost base URL"
-    },
-    {
-      "url": "https://{host}/{product}/v1",
-      "description": "Base URL",
-      "variables": {
-        "host": {
-          "enum": [
-            "api.dev.platform.pagopa.it",
-            "api.uat.platform.pagopa.it",
-            "api.platform.pagopa.it"
-          ],
-          "default": "api.dev.platform.pagopa.it"
-        },
-        "product": {
-          "enum": [
-            "receipts/helpdesk/service",
-            "receipts/service",
-            "receipts/internal/service"
-          ],
-          "default": "receipts/service"
-        }
+  "servers" : [ {
+    "url" : "http://localhost:8080",
+    "description" : "Localhost base URL"
+  }, {
+    "url" : "https://{host}/{product}/v1",
+    "description" : "Base URL",
+    "variables" : {
+      "host" : {
+        "enum" : [ "api.dev.platform.pagopa.it", "api.uat.platform.pagopa.it", "api.platform.pagopa.it" ],
+        "default" : "api.dev.platform.pagopa.it"
+      },
+      "product" : {
+        "enum" : [ "receipts/helpdesk/service", "receipts/service", "receipts/internal/service" ],
+        "default" : "receipts/service"
       }
     }
-  ],
-  "tags": [
-    {
-      "name": "Attachments",
-      "description": "Attachments operations"
-    },
-    {
-      "name": "Info",
-      "description": "Info operations"
-    }
-  ],
-  "paths": {
-    "/info": {
-      "get": {
-        "summary": "Get info of Receipt PDF Service",
-        "tags": [
-          "Info"
-        ],
-        "responses": {
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
+  } ],
+  "tags" : [ {
+    "name" : "Attachments",
+    "description" : "Attachments operations"
+  }, {
+    "name" : "Info",
+    "description" : "Info operations"
+  } ],
+  "paths" : {
+    "/info" : {
+      "get" : {
+        "summary" : "Get info of Receipt PDF Service",
+        "tags" : [ "Info" ],
+        "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
           },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InfoResponse"
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InfoResponse"
                 }
               }
             }
@@ -230,46 +214,41 @@
         }
       }
     },
-    "/messages/{tp_id}": {
-      "get": {
-        "summary": "Get attachment details",
-        "description": "Retrieve the attachment details linked to the provided third party data id",
-        "tags": [
-          "Attachments"
-        ],
-        "parameters": [
-          {
-            "name": "tp_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "fiscal_code",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
+    "/messages/{tp_id}" : {
+      "get" : {
+        "summary" : "Get attachment details",
+        "description" : "Retrieve the attachment details linked to the provided third party data id",
+        "tags" : [ "Attachments" ],
+        "parameters" : [ {
+          "name" : "tp_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
           }
-        ],
-        "responses": {
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
+        }, {
+          "name" : "fiscal_code",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
           },
-          "400": {
-            "$ref": "#/components/responses/AppException400"
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
           },
-          "404": {
-            "$ref": "#/components/responses/AppException404"
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
           },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttachmentsDetailsResponse"
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AttachmentsDetailsResponse"
                 }
               }
             }
@@ -277,52 +256,46 @@
         }
       }
     },
-    "/messages/{tp_id}/{attachment_url}": {
-      "get": {
-        "summary": "Get attachment",
-        "description": "Retrieve the attachment linked to the provided third party data id from the provided attachment url",
-        "tags": [
-          "Attachments"
-        ],
-        "parameters": [
-          {
-            "name": "attachment_url",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "tp_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "fiscal_code",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
+    "/messages/{tp_id}/{attachment_url}" : {
+      "get" : {
+        "summary" : "Get attachment",
+        "description" : "Retrieve the attachment linked to the provided third party data id from the provided attachment url",
+        "tags" : [ "Attachments" ],
+        "parameters" : [ {
+          "name" : "attachment_url",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
           }
-        ],
-        "responses": {
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
+        }, {
+          "name" : "tp_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "fiscal_code",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "500" : {
+            "$ref" : "#/components/responses/InternalServerError"
           },
-          "400": {
-            "$ref": "#/components/responses/AppException400"
+          "400" : {
+            "$ref" : "#/components/responses/AppException400"
           },
-          "404": {
-            "$ref": "#/components/responses/AppException404"
+          "404" : {
+            "$ref" : "#/components/responses/AppException404"
           },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/pdf": {}
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/pdf" : { }
             }
           }
         }
