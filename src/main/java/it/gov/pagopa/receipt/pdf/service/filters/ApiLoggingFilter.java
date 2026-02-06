@@ -3,7 +3,6 @@ package it.gov.pagopa.receipt.pdf.service.filters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.ws.rs.core.Response;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
