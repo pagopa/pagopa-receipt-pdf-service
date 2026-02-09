@@ -149,7 +149,15 @@ public class ApiLoggingFilter {
 		Map<String, Object> params = new HashMap<>();
 		MultivaluedMap<String, String> queryParams = ctx.getUriInfo().getQueryParameters();
 		if (queryParams != null && !queryParams.isEmpty()) {
-			params.putAll(queryParams);
+			for (var item : queryParams.entrySet()) {
+				var key = item.getKey();
+				var value = item.getValue();
+
+				if (!"fiscal_code".equals(key) ){
+					params.put(key, value);
+				}
+
+			}
 		}
 		return toJsonString(params);
 	}
