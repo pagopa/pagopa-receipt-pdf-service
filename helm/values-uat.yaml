@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service'
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: '0.15.1'
+    tag: '0.15.2-improve-log'
     pullPolicy: Always
   livenessProbe:
     httpGet:
