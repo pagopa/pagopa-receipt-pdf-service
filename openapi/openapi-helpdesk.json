@@ -497,28 +497,6 @@
     {
       "url": "http://localhost:8080",
       "description": "Localhost base URL"
-    },
-    {
-      "url": "https://{host}/{product}/v1",
-      "description": "Base URL",
-      "variables": {
-        "host": {
-          "enum": [
-            "api.dev.platform.pagopa.it",
-            "api.uat.platform.pagopa.it",
-            "api.platform.pagopa.it"
-          ],
-          "default": "api.dev.platform.pagopa.it"
-        },
-        "product": {
-          "enum": [
-            "receipts/helpdesk/service",
-            "receipts/service",
-            "receipts/internal/service"
-          ],
-          "default": "receipts/service"
-        }
-      }
     }
   ],
   "tags": [
