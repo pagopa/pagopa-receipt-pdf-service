@@ -86,8 +86,7 @@ class ApiLoggingFilterTest {
 
         String argsJson = MDC.get(ApiLoggingFilter.ARGS);
         assertNotNull(argsJson);
-        assertTrue(argsJson.contains("fiscal_code"));
-        assertTrue(argsJson.contains("AAAAAAAAAAAAAAAA"));
+        assertFalse(argsJson.contains("fiscal_code"));
     }
 
     @Test
