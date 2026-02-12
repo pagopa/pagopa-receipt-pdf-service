@@ -12,7 +12,6 @@ import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.servers.Server;
-import org.eclipse.microprofile.openapi.annotations.servers.ServerVariable;
 
 @OpenAPIDefinition(
         servers = {
