@@ -94,7 +94,7 @@ microservice-chart: &microservice-chart
     DEFAULT_LOGGING_LEVEL: 'INFO'
     COSMOS_RECEIPT_ENDPOINT: 'https://pagopa-d-weu-receipts-ds-cosmos-account.documents.azure.com:443/'
     COSMOS_RECEIPT_DB_NAME: 'db'
-    COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: 'receipts'
+    COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: 'receipts-pk'
     COSMOS_RECEIPT_CONTAINER_RECEIPTS_ERROR_NAME: 'receipts-message-errors'
     COSMOS_RECEIPT_CONTAINER_RECEIPTS_IO_MESSAGES_EVENT_NAME: 'receipts-io-messages-evt'
     COSMOS_RECEIPT_CONTAINER_CART_NAME: 'cart-for-receipts'
