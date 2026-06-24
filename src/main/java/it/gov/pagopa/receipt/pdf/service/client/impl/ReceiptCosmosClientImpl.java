@@ -2,7 +2,8 @@ package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
-import com.azure.cosmos.util.CosmosPagedIterable;
+import com.azure.cosmos.models.SqlParameter;
+import com.azure.cosmos.models.SqlQuerySpec;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
@@ -17,6 +18,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
 /**
@@ -26,8 +29,6 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
 
     private static final String DOCUMENT_NOT_FOUND_ERR_MSG = "Document not found in the defined container";
-
-    private static final String FIND_RECEIPT_QUERY = "SELECT * FROM c WHERE c.eventId = '%s'";
 
     private final Logger logger = LoggerFactory.getLogger(ReceiptCosmosClientImpl.class);
 
@@ -51,18 +52,22 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      * @throws ReceiptNotFoundException in case no receipt has been found with the given idEvent
      */
     public Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException {
-        String query = String.format(FIND_RECEIPT_QUERY, thirdPartyId);
+        SqlQuerySpec querySpec = new SqlQuerySpec(
+                "SELECT * FROM c WHERE c.eventId = @eventId",
+                List.of(new SqlParameter("@eventId", thirdPartyId))
+        );
 
         //Query the container
-        CosmosPagedIterable<Receipt> queryResponse = this.containerReceipts
-                .queryItems(query, new CosmosQueryRequestOptions(), Receipt.class);
-
-        if (!queryResponse.iterator().hasNext()) {
-            String errMsg = String.format("Receipt with id %s not found in the defined container: %s", sanitize(thirdPartyId), containerReceipts.getId());
-            logger.error(errMsg);
-            throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
-        }
-        return queryResponse.iterator().next();
+        return this.containerReceipts
+                .queryItems(querySpec, new CosmosQueryRequestOptions(), Receipt.class)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> {
+                    String errMsg = String.format("Receipt with id %s not found in the defined container: %s",
+                            sanitize(thirdPartyId), containerReceipts.getId());
+                    logger.error(errMsg);
+                    return new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
+                });
     }
 
     /**
@@ -74,18 +79,18 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      */
     @Override
     public IOMessage getIoMessage(String messageId) throws IoMessageNotFoundException {
-
         //Build query
-        String query = String.format("SELECT * FROM c WHERE c.messageId = '%s'", messageId);
+        SqlQuerySpec querySpec = new SqlQuerySpec(
+                "SELECT * FROM c WHERE c.messageId = @messageId",
+                List.of(new SqlParameter("@messageId", messageId))
+        );
 
         //Query the container
-        CosmosPagedIterable<IOMessage> queryResponse = this.containerReceiptsIOMessagesEvent
-                .queryItems(query, new CosmosQueryRequestOptions(), IOMessage.class);
-
-        if (queryResponse.iterator().hasNext()) {
-            return queryResponse.iterator().next();
-        }
-        throw new IoMessageNotFoundException(DOCUMENT_NOT_FOUND_ERR_MSG);
+        return this.containerReceiptsIOMessagesEvent
+                .queryItems(querySpec, new CosmosQueryRequestOptions(), IOMessage.class)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IoMessageNotFoundException(DOCUMENT_NOT_FOUND_ERR_MSG));
     }
 
     /**
@@ -98,16 +103,17 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
     @Override
     public ReceiptError getReceiptError(String bizEventId) throws ReceiptNotFoundException {
         //Build query
-        String query = "SELECT * FROM c WHERE c.bizEventId = " + "'" + bizEventId + "'";
+        SqlQuerySpec querySpec = new SqlQuerySpec(
+                "SELECT * FROM c WHERE c.bizEventId = @bizEventId",
+                List.of(new SqlParameter("@bizEventId", bizEventId))
+        );
 
         //Query the container
-        CosmosPagedIterable<ReceiptError> queryResponse = containerReceiptsError
-                .queryItems(query, new CosmosQueryRequestOptions(), ReceiptError.class);
-
-        if (queryResponse.iterator().hasNext()) {
-            return queryResponse.iterator().next();
-        }
-        throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, DOCUMENT_NOT_FOUND_ERR_MSG);
+        return containerReceiptsError
+                .queryItems(querySpec, new CosmosQueryRequestOptions(), ReceiptError.class)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, DOCUMENT_NOT_FOUND_ERR_MSG));
     }
 
 }
