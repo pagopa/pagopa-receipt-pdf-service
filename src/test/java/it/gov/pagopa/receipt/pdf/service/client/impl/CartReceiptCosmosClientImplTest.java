@@ -1,6 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.models.SqlQuerySpec;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -8,9 +9,12 @@ import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
+import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
+import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsErrorContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsIOMessagesContainer;
@@ -19,15 +23,18 @@ import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import java.lang.annotation.Annotation;
-import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 @QuarkusTest
 class CartReceiptCosmosClientImplTest {
@@ -36,42 +43,53 @@ class CartReceiptCosmosClientImplTest {
     @Inject
     private CartReceiptCosmosClient sut;
 
-    private static Iterator<CartForReceipt> iteratorCartReceiptMock;
-    private static Iterator<CartIOMessage> iteratorIOMessageMock;
-    private static Iterator<CartReceiptError> iteratorCartReceiptErrorMock;
+    private static Stream<CartForReceipt> cartReceiptStreamMock;
+    private static Stream<CartIOMessage> ioMessageStreamMock;
+    private static Stream<CartReceiptError> cartReceiptErrorStreamMock;
 
 
     @BeforeAll
     static void setUp() {
-        // Cart receipt
-        CosmosPagedIterable<CartForReceipt> cosmosPagedCartReceiptIterableMock = mock(CosmosPagedIterable.class);
-        iteratorCartReceiptMock = mock(Iterator.class);
-        CosmosContainer cosmosContainerCartReceiptMock = mock(CosmosContainer.class);
-        doReturn(cosmosPagedCartReceiptIterableMock).when(cosmosContainerCartReceiptMock).queryItems(anyString(), any(), any());
-        Annotation cartQualifier = new AnnotationLiteral<CartContainer>() {
-        };
-        QuarkusMock.installMockForType(cosmosContainerCartReceiptMock, CosmosContainer.class, cartQualifier);
-        doReturn(iteratorCartReceiptMock).when(cosmosPagedCartReceiptIterableMock).iterator();
+        CosmosContainer containerCartReceiptMock = Mockito.mock(CosmosContainer.class);
+        QuarkusMock.installMockForType(
+                containerCartReceiptMock,
+                CosmosContainer.class,
+                new AnnotationLiteral<CartContainer>() {
+                }
+        );
 
-        // IO Messages
-        CosmosPagedIterable<CartForReceipt> cosmosPagedIOMessageIterableMock = mock(CosmosPagedIterable.class);
-        iteratorIOMessageMock = mock(Iterator.class);
-        CosmosContainer cosmosContainerIOMessagesMock = mock(CosmosContainer.class);
-        doReturn(cosmosPagedIOMessageIterableMock).when(cosmosContainerIOMessagesMock).queryItems(anyString(), any(), any());
-        Annotation ioQualifier = new AnnotationLiteral<CartReceiptsIOMessagesContainer>() {
-        };
-        QuarkusMock.installMockForType(cosmosContainerIOMessagesMock, CosmosContainer.class, ioQualifier);
-        doReturn(iteratorIOMessageMock).when(cosmosPagedIOMessageIterableMock).iterator();
+        CosmosContainer containerIOMessagesMock = Mockito.mock(CosmosContainer.class);
+        QuarkusMock.installMockForType(
+                containerIOMessagesMock,
+                CosmosContainer.class,
+                new AnnotationLiteral<CartReceiptsIOMessagesContainer>() {
+                }
+        );
 
-        // Cart Receipt Error
-        CosmosPagedIterable<CartForReceipt> cosmosPagedCartReceiptErrorIterableMock = mock(CosmosPagedIterable.class);
-        iteratorCartReceiptErrorMock = mock(Iterator.class);
-        CosmosContainer cosmosContainerCartReceiptErrorMock = mock(CosmosContainer.class);
-        doReturn(cosmosPagedCartReceiptErrorIterableMock).when(cosmosContainerCartReceiptErrorMock).queryItems(anyString(), any(), any());
-        Annotation cartReceiptErrorQualifier = new AnnotationLiteral<CartReceiptsErrorContainer>() {
-        };
-        QuarkusMock.installMockForType(cosmosContainerCartReceiptErrorMock, CosmosContainer.class, cartReceiptErrorQualifier);
-        doReturn(iteratorCartReceiptErrorMock).when(cosmosPagedCartReceiptErrorIterableMock).iterator();
+        CosmosContainer containerCartReceiptErrorMock = Mockito.mock(CosmosContainer.class);
+        QuarkusMock.installMockForType(
+                containerCartReceiptErrorMock,
+                CosmosContainer.class,
+                new AnnotationLiteral<CartReceiptsErrorContainer>() {
+                }
+        );
+
+        CosmosPagedIterable<Receipt> mockCartReceiptsIterable = Mockito.mock(CosmosPagedIterable.class);
+        cartReceiptStreamMock = Mockito.mock(Stream.class);
+        CosmosPagedIterable<IOMessage> mockIOMessageIterable = Mockito.mock(CosmosPagedIterable.class);
+        ioMessageStreamMock = Mockito.mock(Stream.class);
+        CosmosPagedIterable<ReceiptError> mockCartReceiptErrorIterable = Mockito.mock(CosmosPagedIterable.class);
+        cartReceiptErrorStreamMock = Mockito.mock(Stream.class);
+
+        doReturn(mockCartReceiptsIterable).when(containerCartReceiptMock)
+                .queryItems(any(SqlQuerySpec.class), any(), eq(CartForReceipt.class));
+        doReturn(cartReceiptStreamMock).when(mockCartReceiptsIterable).stream();
+        doReturn(mockIOMessageIterable)
+                .when(containerIOMessagesMock).queryItems(any(SqlQuerySpec.class), any(), eq(CartIOMessage.class));
+        doReturn(ioMessageStreamMock).when(mockIOMessageIterable).stream();
+        doReturn(mockCartReceiptErrorIterable)
+                .when(containerCartReceiptErrorMock).queryItems(any(SqlQuerySpec.class), any(), eq(CartReceiptError.class));
+        doReturn(cartReceiptErrorStreamMock).when(mockCartReceiptErrorIterable).stream();
     }
 
     @SneakyThrows
@@ -79,10 +97,9 @@ class CartReceiptCosmosClientImplTest {
     void getCartForReceiptDocumentSuccess() {
         CartForReceipt cart = new CartForReceipt();
 
-        doReturn(true).when(iteratorCartReceiptMock).hasNext();
-        doReturn(cart).when(iteratorCartReceiptMock).next();
+        doReturn(Optional.of(cart)).when(cartReceiptStreamMock).findFirst();
 
-        CartForReceipt result = sut.getCartForReceiptDocument("id");
+        CartForReceipt result = assertDoesNotThrow(() -> sut.getCartForReceiptDocument("id"));
 
         assertEquals(cart, result);
     }
@@ -90,7 +107,7 @@ class CartReceiptCosmosClientImplTest {
     @SneakyThrows
     @Test
     void getCartForReceiptDocumentNotFound() {
-        doReturn(false).when(iteratorCartReceiptMock).hasNext();
+        doReturn(Optional.empty()).when(cartReceiptStreamMock).findFirst();
 
         CartNotFoundException e = assertThrows(CartNotFoundException.class, () -> sut.getCartForReceiptDocument("id"));
 
@@ -103,10 +120,9 @@ class CartReceiptCosmosClientImplTest {
     void getCartIoMessageSuccess() {
         CartIOMessage ioMessage = new CartIOMessage();
 
-        doReturn(true).when(iteratorIOMessageMock).hasNext();
-        doReturn(ioMessage).when(iteratorIOMessageMock).next();
+        doReturn(Optional.of(ioMessage)).when(ioMessageStreamMock).findFirst();
 
-        CartIOMessage result = sut.getCartIoMessage("messageId");
+        CartIOMessage result = assertDoesNotThrow(() -> sut.getCartIoMessage("messageId"));
 
         assertEquals(ioMessage, result);
     }
@@ -114,9 +130,10 @@ class CartReceiptCosmosClientImplTest {
     @SneakyThrows
     @Test
     void getCartIoMessageNotFound() {
-        doReturn(false).when(iteratorIOMessageMock).hasNext();
+        doReturn(Optional.empty()).when(ioMessageStreamMock).findFirst();
 
-        IoMessageNotFoundException e = assertThrows(IoMessageNotFoundException.class, () -> sut.getCartIoMessage("messageId"));
+        IoMessageNotFoundException e =
+                assertThrows(IoMessageNotFoundException.class, () -> sut.getCartIoMessage("messageId"));
 
         assertNotNull(e);
         assertEquals(DOCUMENT_NOT_FOUND_ERR_MSG, e.getMessage());
@@ -127,10 +144,9 @@ class CartReceiptCosmosClientImplTest {
     void getCartReceiptErrorSuccess() {
         CartReceiptError cartReceiptError = new CartReceiptError();
 
-        doReturn(true).when(iteratorCartReceiptErrorMock).hasNext();
-        doReturn(cartReceiptError).when(iteratorCartReceiptErrorMock).next();
+        doReturn(Optional.of(cartReceiptError)).when(cartReceiptErrorStreamMock).findFirst();
 
-        CartReceiptError result = sut.getCartReceiptError("cartId");
+        CartReceiptError result = assertDoesNotThrow(() -> sut.getCartReceiptError("cartId"));
 
         assertEquals(cartReceiptError, result);
     }
@@ -138,9 +154,10 @@ class CartReceiptCosmosClientImplTest {
     @SneakyThrows
     @Test
     void getCartReceiptErrorFound() {
-        doReturn(false).when(iteratorCartReceiptErrorMock).hasNext();
+        doReturn(Optional.empty()).when(cartReceiptErrorStreamMock).findFirst();
 
-        CartNotFoundException e = assertThrows(CartNotFoundException.class, () -> sut.getCartReceiptError("cartId"));
+        CartNotFoundException e =
+                assertThrows(CartNotFoundException.class, () -> sut.getCartReceiptError("cartId"));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_801, e.getErrorCode());
