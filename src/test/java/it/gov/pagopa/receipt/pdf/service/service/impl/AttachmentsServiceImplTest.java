@@ -132,7 +132,10 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsFailReceiptNull() {
         doReturn(null).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(
+                InvalidReceiptException.class,
+                () -> sut.getAttachmentsDetails("tp-id", FISCAL_CODE_A)
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_701, e.getErrorCode());
@@ -143,7 +146,10 @@ class AttachmentsServiceImplTest {
     void getAttachmentDetailsFailEventDataNull() {
         doReturn(Receipt.builder().numRetry(0).build()).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(
+                InvalidReceiptException.class,
+                () -> sut.getAttachmentsDetails("tp-id", FISCAL_CODE_A)
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_702, e.getErrorCode());
@@ -215,7 +221,10 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(
+                InvalidReceiptException.class,
+                () -> sut.getAttachmentsDetails("tp-id", FISCAL_CODE_A)
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_705, e.getErrorCode());
@@ -237,7 +246,10 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
-        InvalidReceiptException e = assertThrows(InvalidReceiptException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_A));
+        InvalidReceiptException e = assertThrows(
+                InvalidReceiptException.class,
+                () -> sut.getAttachmentsDetails("tp-id", FISCAL_CODE_A)
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_705, e.getErrorCode());
@@ -268,7 +280,10 @@ class AttachmentsServiceImplTest {
 
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
 
-        FiscalCodeNotAuthorizedException e = assertThrows(FiscalCodeNotAuthorizedException.class, () -> sut.getAttachmentsDetails(anyString(), FISCAL_CODE_B));
+        FiscalCodeNotAuthorizedException e = assertThrows(
+                FiscalCodeNotAuthorizedException.class,
+                () -> sut.getAttachmentsDetails("tp-id", FISCAL_CODE_B)
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_700, e.getErrorCode());
@@ -285,7 +300,7 @@ class AttachmentsServiceImplTest {
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
-        InputStream result = sut.getAttachment(anyString(), FISCAL_CODE_B, fileNamePayer);
+        InputStream result = assertDoesNotThrow(() -> sut.getAttachment("tp-id", FISCAL_CODE_B, fileNamePayer));
 
         assertNotNull(result);
     }
@@ -300,7 +315,7 @@ class AttachmentsServiceImplTest {
         doReturn(receipt).when(cosmosClientReceiptsMock).getReceiptDocument(anyString());
         doReturn(mock(InputStream.class)).when(receiptBlobClientMock).getAttachmentFromBlobStorage(anyString());
 
-        InputStream result = sut.getAttachment(anyString(), FISCAL_CODE_A, fileNameDebtor);
+        InputStream result = assertDoesNotThrow(() -> sut.getAttachment("tp-id", FISCAL_CODE_A, fileNameDebtor));
 
         assertNotNull(result);
     }
@@ -318,7 +333,8 @@ class AttachmentsServiceImplTest {
 
         FiscalCodeNotAuthorizedException e = assertThrows(
                 FiscalCodeNotAuthorizedException.class,
-                () -> sut.getAttachment(anyString(), FISCAL_CODE_B, fileNameDebtor));
+                () -> sut.getAttachment("tp-id", FISCAL_CODE_B, fileNameDebtor)
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
@@ -337,7 +353,8 @@ class AttachmentsServiceImplTest {
 
         FiscalCodeNotAuthorizedException e = assertThrows(
                 FiscalCodeNotAuthorizedException.class,
-                () -> sut.getAttachment(anyString(), FISCAL_CODE_A, fileNamePayer));
+                () -> sut.getAttachment("tp-id", FISCAL_CODE_A, fileNamePayer)
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
@@ -355,7 +372,8 @@ class AttachmentsServiceImplTest {
 
         FiscalCodeNotAuthorizedException e = assertThrows(
                 FiscalCodeNotAuthorizedException.class,
-                () -> sut.getAttachment(anyString(), FISCAL_CODE_A, UUID.randomUUID().toString()));
+                () -> sut.getAttachment("tp-id", FISCAL_CODE_A, UUID.randomUUID().toString())
+        );
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_706, e.getErrorCode());
@@ -373,7 +391,8 @@ class AttachmentsServiceImplTest {
 
         assertThrows(
                 FiscalCodeNotAuthorizedException.class,
-                () -> sut.getAttachmentsDetails(anyString(), MISSING_FISCAL_CODE));
+                () -> sut.getAttachmentsDetails("tp-id", MISSING_FISCAL_CODE)
+        );
     }
 
     @Test
@@ -388,7 +407,8 @@ class AttachmentsServiceImplTest {
 
         assertThrows(
                 FiscalCodeNotAuthorizedException.class,
-                () -> sut.getAttachment(anyString(), MISSING_FISCAL_CODE, fileNameDebtor));
+                () -> sut.getAttachment("tp-id", MISSING_FISCAL_CODE, fileNameDebtor)
+        );
 
     }
 
