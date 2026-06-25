@@ -13,6 +13,11 @@ resource "azurerm_api_management_api_version_set" "api_pdf_api" {
 
 
 module "apim_api_pdf_api_v1" {
+  depends_on = [
+    azurerm_api_management_api_version_set.api_pdf_api,
+    azurerm_api_management_named_value.pdf_service_cache_salt
+  ]
+
   source = "./.terraform/modules/__v3__/api_management_api"
 
   name                  = format("%s-receipts-service-pdf-api", local.project)

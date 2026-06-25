@@ -42,3 +42,20 @@ resource "azurerm_api_management_subscription" "receipt_service_internal_subkey"
   allow_tracing       = false
   state               = "active"
 }
+
+resource "random_password" "pdf_service_cache_salt" {
+  length           = 48
+  special          = true
+  override_special = "_-"
+  # Rotate by tainting this resource (or changing keepers) when needed.
+  keepers = {
+    version = "v1"
+  }
+}
+
+resource "azurerm_key_vault_secret" "pdf_service_cache_salt" {
+  name         = "pdf-service-cache-salt"
+  value        = random_password.pdf_service_cache_salt.result
+  content_type = "text/plain"
+  key_vault_id = data.azurerm_key_vault.kv.id
+}

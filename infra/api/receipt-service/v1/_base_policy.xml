@@ -7,14 +7,17 @@
         <!-- Cache lookup only for GET /messages/{tp_id} (JSON). The others endpoints are excluded -->
         <choose>
             <when condition="@(context.Operation.Id == "get-messages-tp_id")">
-                <!-- Build a unique, privacy-safe cache key: PDF_SERVICE_<tp_id>_<sha256(fiscal_code)>.
-                     The fiscal_code is hashed (SHA-256, hex) to avoid storing PII in the cache key. -->
+                <!-- Build a unique, privacy-safe cache key: PDF_SERVICE_<tp_id>_<sha256(salt|fiscal_code)>.
+                     The fiscal_code is salted (APIM named value, sourced from Key Vault) and hashed
+                     with SHA-256 (hex) to avoid storing PII in the cache key and to mitigate
+                     enumeration attacks (italian fiscal codes have limited entropy). -->
                 <set-variable name="pdf_service_get_messages_cacheKey" value="@{
                     string tpId = context.Request.MatchedParameters.GetValueOrDefault("tp_id","");
                     string fc = context.Request.Headers.GetValueOrDefault("fiscal_code","").Trim().ToUpperInvariant();
+                    string salt = "{{pdf-service-cache-salt}}";
                     string fcHash = "";
                     using (var sha = System.Security.Cryptography.SHA256.Create()) {
-                        byte[] hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(fc));
+                        byte[] hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(salt + "|" + fc));
                         var sb = new System.Text.StringBuilder(hash.Length * 2);
                         foreach (byte b in hash) { sb.Append(b.ToString("x2")); }
                         fcHash = sb.ToString();
