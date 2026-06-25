@@ -4,12 +4,26 @@
         <set-query-parameter name="fiscal_code" exists-action="override">
             <value>@(context.Request.Headers.GetValueOrDefault("fiscal_code",""))</value>
         </set-query-parameter>
-        <!-- Cache lookup only for GET /messages/{tp_id} (JSON). The PDF endpoint /messages/{tp_id}/{attachment_url} and /info are excluded -->
+        <!-- Cache lookup only for GET /messages/{tp_id} (JSON). The others endpoints are excluded -->
         <choose>
-            <when condition="@(System.Text.RegularExpressions.Regex.IsMatch(context.Request.Url.Path, "/messages/[^/]+/?$"))">
-                <cache-lookup-value key="@("msg-" + context.Request.Url.Path)" variable-name="cachedBody" caching-type="internal" />
+            <when condition="@(context.Operation.Id == "get-messages-tp_id")">
+                <!-- Build a unique, privacy-safe cache key: PDF_SERVICE_<tp_id>_<sha256(fiscal_code)>.
+                     The fiscal_code is hashed (SHA-256, hex) to avoid storing PII in the cache key. -->
+                <set-variable name="pdf_service_get_messages_cacheKey" value="@{
+                    string tpId = context.Request.MatchedParameters.GetValueOrDefault("tp_id","");
+                    string fc = context.Request.Headers.GetValueOrDefault("fiscal_code","").Trim().ToUpperInvariant();
+                    string fcHash = "";
+                    using (var sha = System.Security.Cryptography.SHA256.Create()) {
+                        byte[] hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(fc));
+                        var sb = new System.Text.StringBuilder(hash.Length * 2);
+                        foreach (byte b in hash) { sb.Append(b.ToString("x2")); }
+                        fcHash = sb.ToString();
+                    }
+                    return "PDF_SERVICE_" + tpId + "_" + fcHash;
+                }" />
+                <cache-lookup-value key="@((string)context.Variables["cacheKey"])" variable-name="cachedBody" caching-type="internal" />
                 <choose>
-                    <when condition="@(context.Variables.ContainsKey("cachedBody"))">
+                    <when condition="@(context.Variables.ContainsKey("pdf_service_get_messages_cachedBody"))">
                         <return-response>
                             <set-status code="200" reason="OK" />
                             <set-header name="Content-Type" exists-action="override">
@@ -18,7 +32,7 @@
                             <set-header name="X-Cache" exists-action="override">
                                 <value>HIT</value>
                             </set-header>
-                            <set-body>@((string)context.Variables["cachedBody"])</set-body>
+                            <set-body>@((string)context.Variables["pdf_service_get_messages_cachedBody"])</set-body>
                         </return-response>
                     </when>
                 </choose>
@@ -27,10 +41,11 @@
     </inbound>
     <outbound>
         <base />
-        <!-- Store response in the APIM internal cache only for GET /messages/{tp_id} (JSON), TTL 2 min (120s) -->
+        <!-- Store response in the APIM internal cache only for GET /messages/{tp_id} (JSON), TTL 2 min (120s).
+             Reuses the pdf_service_get_messages_cacheKey computed in <inbound> so lookup and store are always aligned. -->
         <choose>
-            <when condition="@(System.Text.RegularExpressions.Regex.IsMatch(context.Request.Url.Path, "/messages/[^/]+/?$") && context.Response.StatusCode == 200)">
-                <cache-store-value key="@("msg-" + context.Request.Url.Path)" value="@(context.Response.Body.As<string>(preserveContent: true))" duration="120" caching-type="internal" />
+            <when condition="@(context.Variables.ContainsKey("pdf_service_get_messages_cacheKey") && context.Response.StatusCode == 200 && context.Operation.Id == "get-messages-tp_id"))">
+                <cache-store-value key="@((string)context.Variables["pdf_service_get_messages_cacheKey"])" value="@(context.Response.Body.As<string>(preserveContent: true))" duration="120" caching-type="internal" />
             </when>
         </choose>
     </outbound>
