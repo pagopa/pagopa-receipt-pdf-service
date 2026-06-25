@@ -44,7 +44,7 @@
         <!-- Store response in the APIM internal cache only for GET /messages/{tp_id} (JSON), TTL 2 min (120s).
              Reuses the pdf_service_get_messages_cacheKey computed in <inbound> so lookup and store are always aligned. -->
         <choose>
-            <when condition="@(context.Variables.ContainsKey("pdf_service_get_messages_cacheKey") && context.Response.StatusCode == 200 && context.Operation.Id == "get-messages-tp_id"))">
+            <when condition="@(context.Variables.ContainsKey("pdf_service_get_messages_cacheKey") && context.Response.StatusCode == 200 && context.Operation.Id == "get-messages-tp_id")">
                 <cache-store-value key="@((string)context.Variables["pdf_service_get_messages_cacheKey"])" value="@(context.Response.Body.As<string>(preserveContent: true))" duration="120" caching-type="internal" />
             </when>
         </choose>
