@@ -34,7 +34,6 @@ public final class PerfTracer implements AutoCloseable {
     public static final String MDC_PREFIX = "perf.";
     public static final String MDC_STEP = MDC_PREFIX + "step";
     public static final String MDC_ELAPSED_MS = MDC_PREFIX + "elapsedMs";
-    private static final String PERF_LOG_MESSAGE = "perf";
 
     private final Logger logger;
     private final String step;
@@ -71,10 +70,11 @@ public final class PerfTracer implements AutoCloseable {
         if (!stopWatch.isStopped()) {
             stopWatch.stop();
         }
+        long time = stopWatch.getTime();
         MDC.put(MDC_STEP, step);
-        MDC.put(MDC_ELAPSED_MS, String.valueOf(stopWatch.getTime()));
+        MDC.put(MDC_ELAPSED_MS, String.valueOf(time));
         try {
-            logger.info(PERF_LOG_MESSAGE);
+            logger.info("Step {} execution completed in {} ms", step, time);
         } finally {
             MDC.remove(MDC_STEP);
             MDC.remove(MDC_ELAPSED_MS);
