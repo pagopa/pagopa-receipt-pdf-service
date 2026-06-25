@@ -12,11 +12,11 @@ import java.util.List;
  * with SLF4J MDC, so that each measured step becomes a structured log line
  * (JSON fields when {@code quarkus-logging-json} is on the classpath).
  *
- * <p>Emitted MDC fields (all prefixed with {@code perf.} to be easily filtered on ELK):
+ * <p>Emitted MDC fields (all prefixed with {@code perf_} to be easily filtered on ELK):
  * <ul>
- *     <li>{@code perf.step} - logical name of the measured block</li>
- *     <li>{@code perf.elapsedMs} - elapsed time in milliseconds</li>
- *     <li>{@code perf.<tag>} - any custom tag added via {@link #tag(String, Object)}</li>
+ *     <li>{@code perf_step} - logical name of the measured block</li>
+ *     <li>{@code perf_elapsedMs} - elapsed time in milliseconds</li>
+ *     <li>{@code perf_<tag>} - any custom tag added via {@link #tag(String, Object)}</li>
  * </ul>
  *
  * <p>Usage:
@@ -27,11 +27,11 @@ import java.util.List;
  * }
  * }</pre>
  *
- * Example ELK query: {@code mdc.perf.step:"cosmos.getReceiptDocument" AND mdc.perf.elapsedMs:>500}
+ * Example ELK query: {@code mdc.perf_step:"cosmos.getReceiptDocument" AND mdc.perf_elapsedMs:>500}
  */
 public final class PerfTracer implements AutoCloseable {
 
-    public static final String MDC_PREFIX = "perf.";
+    public static final String MDC_PREFIX = "perf_";
     public static final String MDC_STEP = MDC_PREFIX + "step";
     public static final String MDC_ELAPSED_MS = MDC_PREFIX + "elapsedMs";
 
@@ -51,7 +51,7 @@ public final class PerfTracer implements AutoCloseable {
     }
 
     /**
-     * Adds an additional MDC field, prefixed with {@code perf.}, available on the final
+     * Adds an additional MDC field, prefixed with {@code perf_}, available on the final
      * log line emitted by {@link #close()}.
      */
     public PerfTracer tag(String key, Object value) {
