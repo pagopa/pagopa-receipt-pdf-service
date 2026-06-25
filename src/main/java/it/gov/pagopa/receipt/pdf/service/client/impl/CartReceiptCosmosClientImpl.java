@@ -13,6 +13,7 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsErrorContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsIOMessagesContainer;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,12 +45,26 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
         // Build query
         String query = String.format("SELECT * FROM c WHERE c.cartId = '%s'", cartId);
 
-        // Query the container
-        CosmosPagedIterable<CartForReceipt> queryResponse =
-                this.containerCartReceipts.queryItems(
-                        query, new CosmosQueryRequestOptions(), CartForReceipt.class);
+        CosmosPagedIterable<CartForReceipt> queryResponse;
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.queryItems")
+                .tag("container", containerCartReceipts.getId())) {
+            queryResponse = this.containerCartReceipts.queryItems(
+                    query, new CosmosQueryRequestOptions(), CartForReceipt.class);
+        }
 
-        if (!queryResponse.iterator().hasNext()) {
+        boolean hasNext;
+        CartForReceipt cart = null;
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.iterateFirst")
+                .tag("container", containerCartReceipts.getId())) {
+            var iterator = queryResponse.iterator();
+            hasNext = iterator.hasNext();
+            t.tag("found", hasNext);
+            if (hasNext) {
+                cart = iterator.next();
+            }
+        }
+
+        if (!hasNext) {
             String errMsg =
                     String.format(
                             "Cart with id %s not found in the defined container: %s",
@@ -57,7 +72,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
             logger.error(errMsg);
             throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
         }
-        return queryResponse.iterator().next();
+        return cart;
     }
 
     @Override
