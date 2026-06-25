@@ -21,7 +21,7 @@
                     }
                     return "PDF_SERVICE_" + tpId + "_" + fcHash;
                 }" />
-                <cache-lookup-value key="@((string)context.Variables["cacheKey"])" variable-name="cachedBody" caching-type="internal" />
+                <cache-lookup-value key="@((string)context.Variables["pdf_service_get_messages_cacheKey"])" variable-name="pdf_service_get_messages_cachedBody" caching-type="internal" />
                 <choose>
                     <when condition="@(context.Variables.ContainsKey("pdf_service_get_messages_cachedBody"))">
                         <return-response>
