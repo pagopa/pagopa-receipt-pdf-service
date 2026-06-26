@@ -5,6 +5,7 @@ import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenRequest;
 import it.gov.pagopa.receipt.pdf.service.model.SearchTokenResponse;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -23,18 +24,21 @@ public class TokenizerService {
 
     public SearchTokenResponse getSearchTokenResponse(String requestFiscalCode)
             throws FiscalCodeNotAuthorizedException {
-        SearchTokenResponse searchTokenResponse;
-        try {
-            searchTokenResponse =
+        try (PerfTracer tracer = PerfTracer.start(logger, "tokenizer.searchToken.http")) {
+            SearchTokenResponse searchTokenResponse =
                     pdvTokenizerClient.searchToken(new SearchTokenRequest(requestFiscalCode));
-            if (searchTokenResponse == null || searchTokenResponse.getToken() == null) {
+            boolean hasToken = searchTokenResponse != null && searchTokenResponse.getToken() != null;
+            tracer.tag("hasToken", hasToken).tag("status", hasToken ? "ok" : "missingToken");
+            if (!hasToken) {
                 throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
             }
+            return searchTokenResponse;
+        } catch (FiscalCodeNotAuthorizedException e) {
+            throw e;
         } catch (Exception e) {
             String errMsg = "Could not recover fiscal code token for authentication in the request";
             logger.error(errMsg, e);
             throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, errMsg);
         }
-        return searchTokenResponse;
     }
 }

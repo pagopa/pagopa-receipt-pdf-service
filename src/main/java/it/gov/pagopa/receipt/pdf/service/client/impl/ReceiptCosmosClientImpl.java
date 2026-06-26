@@ -13,6 +13,7 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsErrorContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsIOMessagesEventContainer;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,16 +54,31 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
     public Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException {
         String query = String.format(FIND_RECEIPT_QUERY, thirdPartyId);
 
-        //Query the container
-        CosmosPagedIterable<Receipt> queryResponse = this.containerReceipts
-                .queryItems(query, new CosmosQueryRequestOptions(), Receipt.class);
+        CosmosPagedIterable<Receipt> queryResponse;
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.queryItems")
+                .tag("container", containerReceipts.getId())) {
+            queryResponse = this.containerReceipts
+                    .queryItems(query, new CosmosQueryRequestOptions(), Receipt.class);
+        }
 
-        if (!queryResponse.iterator().hasNext()) {
+        boolean hasNext;
+        Receipt receipt = null;
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.iterateFirst")
+                .tag("container", containerReceipts.getId())) {
+            var iterator = queryResponse.iterator();
+            hasNext = iterator.hasNext();
+            t.tag("found", hasNext);
+            if (hasNext) {
+                receipt = iterator.next();
+            }
+        }
+
+        if (!hasNext) {
             String errMsg = String.format("Receipt with id %s not found in the defined container: %s", sanitize(thirdPartyId), containerReceipts.getId());
             logger.error(errMsg);
             throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
         }
-        return queryResponse.iterator().next();
+        return receipt;
     }
 
     /**

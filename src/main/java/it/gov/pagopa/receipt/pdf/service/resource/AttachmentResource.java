@@ -6,6 +6,7 @@ import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 import it.gov.pagopa.receipt.pdf.service.model.AttachmentsDetailsResponse;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
 import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -22,6 +23,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,10 +87,14 @@ public class AttachmentResource {
         // replace new line and tab from user input to avoid log injection
         requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
 
-        AttachmentsDetailsResponse attachmentDetails =
-                attachmentsService.getAttachmentsDetails(thirdPartyId, requestFiscalCode);
-
-        return RestResponse.status(Status.OK, attachmentDetails);
+        MDC.put(MDC_THIRD_PARTY_ID, thirdPartyId);
+        try (PerfTracer tracer = PerfTracer.start(logger, "getAttachmentDetails.endpoint")) {
+            AttachmentsDetailsResponse attachmentDetails =
+                    attachmentsService.getAttachmentsDetails(thirdPartyId, requestFiscalCode);
+            return RestResponse.status(Status.OK, attachmentDetails);
+        } finally {
+            MDC.remove(MDC_THIRD_PARTY_ID);
+        }
     }
 
     @Operation(
