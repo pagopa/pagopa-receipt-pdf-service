@@ -61,16 +61,16 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         //Query the container
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.queryItems")
                 .tag("container", containerReceipts.getId())) {
-        return this.containerReceipts
-                .queryItems(querySpec, new CosmosQueryRequestOptions(), Receipt.class)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> {
-                    String errMsg = String.format("Receipt with id %s not found in the defined container: %s",
-                            sanitize(thirdPartyId), containerReceipts.getId());
-                    logger.error(errMsg);
-                    return new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
-                });
+            return this.containerReceipts
+                    .queryItems(querySpec, new CosmosQueryRequestOptions(), Receipt.class)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> {
+                        String errMsg = String.format("Receipt with id %s not found in the defined container: %s",
+                                sanitize(thirdPartyId), containerReceipts.getId());
+                        logger.error(errMsg);
+                        return new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
+                    });
         }
     }
 
