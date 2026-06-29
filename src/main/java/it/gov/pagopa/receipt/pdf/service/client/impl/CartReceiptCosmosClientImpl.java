@@ -1,7 +1,9 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
 import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
@@ -45,26 +47,20 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
     }
 
     public CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException {
-        // Build query
-        SqlQuerySpec querySpec = new SqlQuerySpec(
-                "SELECT * FROM c WHERE c.cartId = @cartId",
-                List.of(new SqlParameter("@cartId", cartId))
-        );
-
         // Query the container
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.queryItems")
                 .tag("container", containerCartReceipts.getId())) {
-            return this.containerCartReceipts.queryItems(
-                            querySpec, new CosmosQueryRequestOptions(), CartForReceipt.class)
-                    .stream()
-                    .findFirst()
-                    .orElseThrow(() -> {
-                        String errMsg = String.format(
-                                "Cart with id %s not found in the defined container: %s",
-                                sanitize(cartId), containerCartReceipts.getId());
-                        logger.error(errMsg);
-                        return new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
-                    });
+            try {
+                return this.containerCartReceipts.readItem(
+                                cartId, new PartitionKey(cartId), CartForReceipt.class)
+                        .getItem();
+            } catch (NotFoundException e) {
+                String errMsg = String.format(
+                        "Cart with id %s not found in the defined container: %s",
+                        sanitize(cartId), containerCartReceipts.getId());
+                logger.error(errMsg);
+                throw  new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
+            }
         }
     }
 
@@ -86,17 +82,13 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
 
     @Override
     public CartReceiptError getCartReceiptError(String cartId) throws CartNotFoundException {
-        //Build query
-        SqlQuerySpec querySpec = new SqlQuerySpec(
-                "SELECT * FROM c WHERE c.id = @cartId",
-                List.of(new SqlParameter("@id", cartId))
-        );
-
         //Query the container
-        return this.containerCartReceiptsError
-                .queryItems(querySpec, new CosmosQueryRequestOptions(), CartReceiptError.class)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG));
+        try {
+            return this.containerCartReceiptsError
+                    .readItem(cartId, new PartitionKey(cartId), CartReceiptError.class)
+                    .getItem();
+        } catch (NotFoundException e) {
+            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG);
+        }
     }
 }
