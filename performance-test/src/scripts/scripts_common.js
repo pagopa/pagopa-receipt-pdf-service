@@ -1,8 +1,15 @@
 import {BlobServiceClient} from "@azure/storage-blob";
 import {CosmosClient} from "@azure/cosmos";
 import {createRequire} from 'node:module';
-import http from 'k6/http';
+const axios = require("axios");
 
+// Configuring a dedicated instance
+const pdfServiceClient = axios.create({
+    baseURL: process.env.TOKENIZER_API_KEY,
+    headers: {
+        "x-api-key": process.env.TOKENIZER_API_KEY || ""
+    }
+});
 const require = createRequire(import.meta.url);
 
 //ENVIRONMENTAL VARIABLES
@@ -15,7 +22,6 @@ let environmentVars = require(`../${environmentString}.environment.json`)?.envir
 const blobStorageContainerID = environmentVars.blobStorageContainerID;
 const receiptCosmosDBDatabaseId = environmentVars.receiptDatabaseID;
 export const receiptCosmosDBContainerId = environmentVars.receiptContainerID;
-const tokenizer_url = environmentVars.tokenizerUrl;
 
 //CONSTANTS
 export const PARTITION_ID = environmentVars.receiptTestId;
@@ -34,14 +40,8 @@ export const receiptContainer = client.database(receiptCosmosDBDatabaseId).conta
 //METHODS
 
 export function createToken(fiscalCode) {
-    let token_api_key = process.env.TOKENIZER_API_KEY;
-  	let headers = {
-  	  "x-api-key": token_api_key
-  	};
-
-  	return http.put(tokenizer_url+'/search',
-  	 { "pii": fiscalCode }, { headers });
-
+  	return pdfServiceClient.put('/search',
+  	 { "pii": fiscalCode });
 }
 
 export function createReceipt(id) {
