@@ -14,6 +14,7 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsErrorContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsIOMessagesEventContainer;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,8 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         );
 
         //Query the container
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.queryItems")
+                .tag("container", containerReceipts.getId())) {
         return this.containerReceipts
                 .queryItems(querySpec, new CosmosQueryRequestOptions(), Receipt.class)
                 .stream()
@@ -68,6 +71,7 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
                     logger.error(errMsg);
                     return new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
                 });
+        }
     }
 
     /**

@@ -14,6 +14,7 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsErrorContainer;
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.CartReceiptsIOMessagesContainer;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,8 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
         );
 
         // Query the container
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.queryItems")
+                .tag("container", containerCartReceipts.getId())) {
         return this.containerCartReceipts.queryItems(
                         querySpec, new CosmosQueryRequestOptions(), CartForReceipt.class)
                 .stream()
@@ -62,6 +65,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
                     logger.error(errMsg);
                     return new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
                 });
+        }
     }
 
     @Override
