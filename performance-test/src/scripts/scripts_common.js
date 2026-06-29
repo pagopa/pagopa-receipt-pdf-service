@@ -1,6 +1,6 @@
-import { BlobServiceClient } from "@azure/storage-blob";
-import { CosmosClient } from "@azure/cosmos";
-import { createRequire } from 'node:module';
+import {BlobServiceClient} from "@azure/storage-blob";
+import {CosmosClient} from "@azure/cosmos";
+import {createRequire} from 'node:module';
 import http from 'k6/http';
 
 const require = createRequire(import.meta.url);
@@ -15,10 +15,11 @@ let environmentVars = require(`../${environmentString}.environment.json`)?.envir
 const blobStorageContainerID = environmentVars.blobStorageContainerID;
 const receiptCosmosDBDatabaseId = environmentVars.receiptDatabaseID;
 export const receiptCosmosDBContainerId = environmentVars.receiptContainerID;
-export tokenizer_url = environmentVars.tokenizerUrl;
+const tokenizer_url = environmentVars.tokenizerUrl;
 
 //CONSTANTS
 export const PARTITION_ID = environmentVars.receiptTestId;
+export const PDF_NAME = "pagopa-ricevuta-260512-doc-test-ricevute-21d15117-l5ef-435c-80ez-fb6ffadba7rh-p";
 
 //CLIENTS
 const blobServiceClient = BlobServiceClient.fromConnectionString(
@@ -43,26 +44,24 @@ export function createToken(fiscalCode) {
 
 }
 
-export function createReceipt(id, pdfName, pdfUrl) {
+export function createReceipt(id) {
   let tokenResponse = createToken("JHNDOE00A01F205N");
-  let responseBody = JSON.parse(response.body);
+  let responseBody = JSON.parse(tokenResponse.body);
 
-	let receipt =
-	{
-    "id" : id,
-		"eventId": id,
-		"eventData": {
-			"payerFiscalCode": responseBody.token,
-			"debtorFiscalCode": responseBody.token
-		},
-        "mdAttach":{
-            name: pdfName,
-            url: pdfUrl
+    return {
+        "id": id,
+        "eventId": id,
+        "eventData": {
+            "payerFiscalCode": responseBody.token,
+            "debtorFiscalCode": responseBody.token
         },
-		"status": "IO_NOTIFIED",
-		"numRetry": 0
-	}
-	return receipt
+        "mdAttach": {
+            name: PDF_NAME,
+            url: PDF_NAME
+        },
+        "status": "IO_NOTIFIED",
+        "numRetry": 0
+    }
 }
 
 export const fileToBase64 = (filename, filepath) => {

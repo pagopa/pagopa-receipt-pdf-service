@@ -1,8 +1,15 @@
-import { blobContainerClient, receiptContainer, PARTITION_ID } from "./scripts_common.js";
+import {blobContainerClient, receiptContainer, PARTITION_ID, PDF_NAME} from "./scripts_common.js";
 
 //DELETE PDF FROM BLOB STORAGE
 const deleteDocumentFromAzure = async () => {
-    const response = await blobContainerClient.deleteBlob(PARTITION_ID);
+    const blockBlobClient = blobContainerClient.getBlockBlobClient(PDF_NAME);
+    // include: Delete the base blob and all of its snapshots.
+    // only: Delete only the blob's snapshots and not the blob itself.
+    const options = {
+        deleteSnapshots: 'include' // or 'only'
+    }
+
+    const response = await blockBlobClient.deleteIfExists(options);
     if (response._response.status !== 202) {
         throw new Error(`Error deleting PDF ${PARTITION_ID}`);
     }
