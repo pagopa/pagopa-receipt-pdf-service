@@ -51,15 +51,15 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.queryItems")
                 .tag("container", containerCartReceipts.getId())) {
             try {
-                return this.containerCartReceipts.readItem(
-                                cartId, new PartitionKey(cartId), CartForReceipt.class)
+                return this.containerCartReceipts
+                        .readItem(cartId, new PartitionKey(cartId), CartForReceipt.class)
                         .getItem();
             } catch (NotFoundException e) {
                 String errMsg = String.format(
                         "Cart with id %s not found in the defined container: %s",
                         sanitize(cartId), containerCartReceipts.getId());
                 logger.error(errMsg);
-                throw  new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
+                throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
             }
         }
     }
