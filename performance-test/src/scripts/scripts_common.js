@@ -1,16 +1,10 @@
 import {BlobServiceClient} from "@azure/storage-blob";
 import {CosmosClient} from "@azure/cosmos";
 import {createRequire} from 'node:module';
-const axios = require("axios");
 
-// Configuring a dedicated instance
-const pdfServiceClient = axios.create({
-    baseURL: process.env.TOKENIZER_API_KEY,
-    headers: {
-        "x-api-key": process.env.TOKENIZER_API_KEY || ""
-    }
-});
 const require = createRequire(import.meta.url);
+
+const axios = require("axios");
 
 //ENVIRONMENTAL VARIABLES
 const blobStorageConnString = process.env.BLOB_STORAGE_CONN_STRING;
@@ -29,13 +23,21 @@ export const PDF_NAME = "pagopa-ricevuta-260512-doc-test-ricevute-21d15117-l5ef-
 
 //CLIENTS
 const blobServiceClient = BlobServiceClient.fromConnectionString(
-    blobStorageConnString || ""
+blobStorageConnString || ""
 );
 export const blobContainerClient = blobServiceClient.getContainerClient(
-    blobStorageContainerID || ""
+blobStorageContainerID || ""
 );
 const client = new CosmosClient(receiptCosmosDBConnString);
 export const receiptContainer = client.database(receiptCosmosDBDatabaseId).container(receiptCosmosDBContainerId);
+
+// Configuring a dedicated instance (declared AFTER environmentVars to avoid TDZ)
+const pdfServiceClient = axios.create({
+    baseURL: environmentVars.tokenizerUrl,
+    headers: {
+        "x-api-key": process.env.TOKENIZER_API_KEY || ""
+    }
+});
 
 //METHODS
 
@@ -44,9 +46,9 @@ export function createToken(fiscalCode) {
   	 { "pii": fiscalCode });
 }
 
-export function createReceipt(id) {
-  let tokenResponse = createToken("JHNDOE00A01F205N");
-  let responseBody = JSON.parse(tokenResponse.body);
+export async function createReceipt(id) {
+  const tokenResponse = await createToken("JHNDOE00A01F205N");
+  const responseBody = tokenResponse.data;
 
     return {
         "id": id,
@@ -63,26 +65,3 @@ export function createReceipt(id) {
         "numRetry": 0
     }
 }
-
-export const fileToBase64 = (filename, filepath) => {
-    return new Promise(resolve => {
-      let file = new File([filename], filepath);
-      let reader = new FileReader();
-      // Read file content on file loaded event
-      reader.onload = function(event) {
-        resolve(event.target.result);
-      };
-      
-      // Convert data to base64 
-      reader.readAsDataURL(file);
-    });
-};
-
-export const converPdfToBase64 = (filename, filepath) => {
-    let finalResult;
-    fileToBase64(filename, filepath).then(result => {
-        finalResult = result;
-    })
-
-    return finalResult;
-};
