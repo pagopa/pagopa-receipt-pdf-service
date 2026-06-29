@@ -9,42 +9,44 @@ export const ENV_VARS = varsArray[0];
 export let options = JSON.parse(open(__ENV.TEST_TYPE));
 
 const fiscalCode = "JHNDOE00A01F205N";
-let receiptId = ENV_VARS.receiptTestId;
-let attachmentUrl = "";
-
+const receiptId = ENV_VARS.receiptTestId;
 const receiptServiceURIBasePath = `${ENV_VARS.receiptServiceURIBasePath}`;
 
 export default function () {
-    //getAttachmentDetails
-    let response = getToService(`${receiptServiceURIBasePath}/${receiptId}`, fiscalCode);
-    console.info("Receipt Service getAttachmentDetails call, Status " + response.status);
+    // getAttachmentDetails
+    let response = getToService(
+        `${receiptServiceURIBasePath}/${receiptId}`,
+        fiscalCode,
+        'getAttachmentDetails'
+    );
 
-    let responseBody = JSON.parse(response.body);
-
-    attachmentUrl = responseBody &&
+    const responseBody = response.body ? JSON.parse(response.body) : null;
+    const attachmentUrl =
+        responseBody &&
+        responseBody.attachments &&
         responseBody.attachments.length > 0 &&
         responseBody.attachments[0] &&
-        responseBody.attachments[0].url
+        responseBody.attachments[0].url;
 
     check(response, {
-        'Receipt Service getAttachmentDetails status is 200': () => response.status === 200,
-        'Receipt Service getAttachmentDetails body has attachment url': () =>
-            attachmentUrl
+        'getAttachmentDetails status is 200': (r) => r.status === 200,
+        'getAttachmentDetails body has attachment url': () => !!attachmentUrl,
     });
 
-    if (
-        attachmentUrl
-    ) {
-        //getAttachment
-        response = getToService(`${receiptServiceURIBasePath}/${receiptId}/${attachmentUrl}`, fiscalCode);
-
-        console.log("Receipt Service getAttachment call, Status " + response.status);
+    if (attachmentUrl) {
+        // getAttachment
+        response = getToService(
+            `${receiptServiceURIBasePath}/${receiptId}/${attachmentUrl}`,
+            fiscalCode,
+            'getAttachment'
+        );
 
         check(response, {
-            'Receipt Service getAttachment status is 200': (response) => response.status === 200,
-            'Receipt Service getAttachment content_type is the expected application/pdf': (response) => response.headers["Content-Type"] === "application/pdf",
-            'Receipt Service getAttachment body not null': (response) => response.body !== null
+            'getAttachment status is 200': (r) => r.status === 200,
+            'getAttachment content_type is application/pdf':
+                (r) => r.headers["Content-Type"] === "application/pdf",
+            'getAttachment body not null': (r) => r.body !== null,
         });
     }
-
 }
+
