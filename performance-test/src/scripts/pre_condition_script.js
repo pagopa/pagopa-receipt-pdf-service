@@ -26,7 +26,7 @@ uploadDocumentToAzure().then(resp => {
 
 //SAVE RECEIPT WITH BLOB INFO ON COSMOSDB
 async function createDocumentInReceiptsDatastore() {
-  let event = await createReceipt(PARTITION_ID);
+  let event = createReceipt(PARTITION_ID);
   try {
       return await receiptContainer.items.create(event);
   } catch (err) {
