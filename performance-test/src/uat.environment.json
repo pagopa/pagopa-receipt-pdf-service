@@ -4,7 +4,7 @@
       "env": "uat",
       "receiptCosmosDBURI": "https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/",
       "receiptDatabaseID":"db",
-      "receiptContainerID":"receipts",
+      "receiptContainerID":"receipts-index",
       "blobStorageContainerID": "pagopa-u-weu-receipts-azure-blob-receipt-st-attach",
       "blobStorageAccountName":"pagopauweureceiptsfnsa",
       "receiptTestId": "receipt-service-perf-test-id-1",
