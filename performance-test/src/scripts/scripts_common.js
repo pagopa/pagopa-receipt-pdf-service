@@ -19,7 +19,7 @@ export const receiptCosmosDBContainerId = environmentVars.receiptContainerID;
 
 //CONSTANTS
 export const PARTITION_ID = environmentVars.receiptTestId;
-export const PDF_NAME = "pagopa-ricevuta-260512-doc-test-ricevute-21d15117-l5ef-435c-80ez-fb6ffadba7rh-p";
+export const PDF_NAME = "pagopa-ricevuta-260512-doc-test-ricevute-21d15117-l5ef-435c-80ez-fb6ffadba7rh-p.pdf";
 
 //CLIENTS
 const blobServiceClient = BlobServiceClient.fromConnectionString(
