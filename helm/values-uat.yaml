@@ -20,9 +20,9 @@ microservice-chart: &microservice-chart
     initialDelaySeconds: 30
     failureThreshold: 6
     periodSeconds: 10
-  deployment:
+  deployment: &deployment
     create: true
-    replicas: 1
+    replicas: 3 # equals to HPA min
     strategy:
       type: RollingUpdate
       rollingUpdate:
@@ -66,14 +66,14 @@ microservice-chart: &microservice-chart
       memory: '512Mi'
       cpu: '300m'
     limits:
-      memory: '512Mi'
-      cpu: '500m'
-  autoscaling:
+      memory: '1512Mi'
+      cpu: '900m'
+  autoscaling: &autoscaling
     enable: true
-    minReplica: 1
-    maxReplica: 1
+    minReplica: 3
+    maxReplica: 10
     pollingInterval: 10 # seconds
-    cooldownPeriod: 120 # seconds
+    cooldownPeriod: 50 # seconds
     triggers:
       - type: cpu
         metadata:
@@ -167,11 +167,18 @@ microservice-chart: &microservice-chart
 pagopa-receipt-pdf-service-helpdesk:
   !!merge <<: *microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service-helpdesk'
+  deployment:
+    !!merge <<: *deployment
+    replicas: 1 # equals to HPA min
   ingress:
     !!merge <<: *ingress
     path: /pagopa-receipt-pdf-service-helpdesk/(.*)
   resources:
     !!merge <<: *resources
+  autoscaling:
+    !!merge <<: *autoscaling
+    minReplica: 1
+    maxReplica: 1
   envConfig:
     !!merge <<: *envConfig
     APP_NAME: 'pdf-receipt-service-helpdesk'
