@@ -6,7 +6,20 @@ const varsArray = new SharedArray('vars', function () {
     return JSON.parse(open(`./${__ENV.VARS}`)).environment;
 });
 export const ENV_VARS = varsArray[0];
-export let options = JSON.parse(open(__ENV.TEST_TYPE));
+
+// Carica la config del test (stages/vus/ecc.) e aggiunge le threshold per endpoint.
+// Le sub-metriche taggate compaiono nel summary finale di k6 SOLO se hanno una threshold.
+const testTypeOptions = JSON.parse(open(__ENV.TEST_TYPE));
+export let options = {
+    ...testTypeOptions,
+    thresholds: {
+        ...(testTypeOptions.thresholds || {}),
+        'http_req_duration{endpoint:getAttachmentDetails}': ['p(95)<2000', 'p(99)<5000'],
+        'http_req_duration{endpoint:getAttachment}':        ['p(95)<3000', 'p(99)<8000'],
+        'http_req_failed{endpoint:getAttachmentDetails}':   ['rate<0.01'],
+        'http_req_failed{endpoint:getAttachment}':          ['rate<0.01'],
+    },
+};
 
 const fiscalCode = "JHNDOE00A01F205N";
 const receiptId = ENV_VARS.receiptTestId;
@@ -49,4 +62,3 @@ export default function () {
         });
     }
 }
-
