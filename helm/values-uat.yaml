@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service'
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: '0.15.4'
+    tag: '0.15.4-1-receipts-index-performance-test'
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -20,9 +20,9 @@ microservice-chart: &microservice-chart
     initialDelaySeconds: 30
     failureThreshold: 6
     periodSeconds: 10
-  deployment:
+  deployment: &deployment
     create: true
-    replicas: 1
+    replicas: 3 # equals to HPA min
     strategy:
       type: RollingUpdate
       rollingUpdate:
@@ -66,14 +66,14 @@ microservice-chart: &microservice-chart
       memory: '512Mi'
       cpu: '300m'
     limits:
-      memory: '512Mi'
-      cpu: '500m'
-  autoscaling:
+      memory: '1512Mi'
+      cpu: '900m'
+  autoscaling: &autoscaling
     enable: true
-    minReplica: 1
-    maxReplica: 1
+    minReplica: 3
+    maxReplica: 10
     pollingInterval: 10 # seconds
-    cooldownPeriod: 120 # seconds
+    cooldownPeriod: 50 # seconds
     triggers:
       - type: cpu
         metadata:
@@ -94,7 +94,7 @@ microservice-chart: &microservice-chart
     DEFAULT_LOGGING_LEVEL: 'INFO'
     COSMOS_RECEIPT_ENDPOINT: 'https://pagopa-u-weu-receipts-ds-cosmos-account.documents.azure.com:443/'
     COSMOS_RECEIPT_DB_NAME: 'db'
-    COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: 'receipts'
+    COSMOS_RECEIPT_CONTAINER_RECEIPTS_NAME: 'receipts-index'
     COSMOS_RECEIPT_CONTAINER_RECEIPTS_ERROR_NAME: 'receipts-message-errors'
     COSMOS_RECEIPT_CONTAINER_RECEIPTS_IO_MESSAGES_EVENT_NAME: 'receipts-io-messages-evt'
     COSMOS_RECEIPT_CONTAINER_CART_NAME: 'cart-for-receipts'
@@ -167,11 +167,18 @@ microservice-chart: &microservice-chart
 pagopa-receipt-pdf-service-helpdesk:
   !!merge <<: *microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service-helpdesk'
+  deployment:
+    !!merge <<: *deployment
+    replicas: 1 # equals to HPA min
   ingress:
     !!merge <<: *ingress
     path: /pagopa-receipt-pdf-service-helpdesk/(.*)
   resources:
     !!merge <<: *resources
+  autoscaling:
+    !!merge <<: *autoscaling
+    minReplica: 1
+    maxReplica: 1
   envConfig:
     !!merge <<: *envConfig
     APP_NAME: 'pdf-receipt-service-helpdesk'

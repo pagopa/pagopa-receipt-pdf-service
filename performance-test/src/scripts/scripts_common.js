@@ -1,7 +1,6 @@
-import { BlobServiceClient } from "@azure/storage-blob";
-import { CosmosClient } from "@azure/cosmos";
-import { createRequire } from 'node:module';
-import http from 'k6/http';
+import {BlobServiceClient} from "@azure/storage-blob";
+import {CosmosClient} from "@azure/cosmos";
+import {createRequire} from 'node:module';
 
 const require = createRequire(import.meta.url);
 
@@ -15,75 +14,37 @@ let environmentVars = require(`../${environmentString}.environment.json`)?.envir
 const blobStorageContainerID = environmentVars.blobStorageContainerID;
 const receiptCosmosDBDatabaseId = environmentVars.receiptDatabaseID;
 export const receiptCosmosDBContainerId = environmentVars.receiptContainerID;
-export tokenizer_url = environmentVars.tokenizerUrl;
 
 //CONSTANTS
 export const PARTITION_ID = environmentVars.receiptTestId;
+export const PDF_NAME = "pagopa-ricevuta-260512-doc-test-ricevute-21d15117-l5ef-435c-80ez-fb6ffadba7rh-p.pdf";
+export const TOKENIZED_FISCAL_CODE = "311ba4fb-36e7-4861-8bf3-47bc004d6738";
 
 //CLIENTS
 const blobServiceClient = BlobServiceClient.fromConnectionString(
-    blobStorageConnString || ""
+blobStorageConnString || ""
 );
 export const blobContainerClient = blobServiceClient.getContainerClient(
-    blobStorageContainerID || ""
+blobStorageContainerID || ""
 );
 const client = new CosmosClient(receiptCosmosDBConnString);
 export const receiptContainer = client.database(receiptCosmosDBDatabaseId).container(receiptCosmosDBContainerId);
 
 //METHODS
 
-export function createToken(fiscalCode) {
-    let token_api_key = process.env.TOKENIZER_API_KEY;
-  	let headers = {
-  	  "x-api-key": token_api_key
-  	};
-
-  	return http.put(tokenizer_url+'/search',
-  	 { "pii": fiscalCode }, { headers });
-
-}
-
-export function createReceipt(id, pdfName, pdfUrl) {
-  let tokenResponse = createToken("JHNDOE00A01F205N");
-  let responseBody = JSON.parse(response.body);
-
-	let receipt =
-	{
-    "id" : id,
-		"eventId": id,
-		"eventData": {
-			"payerFiscalCode": responseBody.token,
-			"debtorFiscalCode": responseBody.token
-		},
-        "mdAttach":{
-            name: pdfName,
-            url: pdfUrl
+export function createReceipt(id) {
+    return {
+        "id": id,
+        "eventId": id,
+        "eventData": {
+            "payerFiscalCode": TOKENIZED_FISCAL_CODE,
+            "debtorFiscalCode": TOKENIZED_FISCAL_CODE
         },
-		"status": "IO_NOTIFIED",
-		"numRetry": 0
-	}
-	return receipt
+        "mdAttach": {
+            name: PDF_NAME,
+            url: PDF_NAME
+        },
+        "status": "IO_NOTIFIED",
+        "numRetry": 0
+    }
 }
-
-export const fileToBase64 = (filename, filepath) => {
-    return new Promise(resolve => {
-      let file = new File([filename], filepath);
-      let reader = new FileReader();
-      // Read file content on file loaded event
-      reader.onload = function(event) {
-        resolve(event.target.result);
-      };
-      
-      // Convert data to base64 
-      reader.readAsDataURL(file);
-    });
-};
-
-export const converPdfToBase64 = (filename, filepath) => {
-    let finalResult;
-    fileToBase64(filename, filepath).then(result => {
-        finalResult = result;
-    })
-
-    return finalResult;
-};
