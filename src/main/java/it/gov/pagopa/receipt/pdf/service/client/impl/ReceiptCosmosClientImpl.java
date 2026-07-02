@@ -1,7 +1,10 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
@@ -15,6 +18,7 @@ import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsErr
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsIOMessagesEventContainer;
 import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +56,13 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      * @throws ReceiptNotFoundException in case no receipt has been found with the given idEvent
      */
     public Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException {
+        // First attempt a point read by id (fast path). If not found, fall back to query by eventId.
+        Receipt receipt = pointRead(thirdPartyId);
+        if (receipt != null) {
+            return receipt;
+        }
+
+        // Fallback: query by eventId
         String query = String.format(FIND_RECEIPT_QUERY, thirdPartyId);
 
         CosmosPagedIterable<Receipt> queryResponse;
@@ -62,7 +73,6 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         }
 
         boolean hasNext;
-        Receipt receipt = null;
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.iterateFirst")
                 .tag("container", containerReceipts.getId())) {
             var iterator = queryResponse.iterator();
@@ -79,6 +89,32 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
             throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
         }
         return receipt;
+    }
+
+    private @Nullable Receipt pointRead(String thirdPartyId) {
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.pointRead")
+                .tag("container", containerReceipts.getId())) {
+            try {
+                // Use the id as partition key as a best-effort. If your container uses a different partition key,
+                // adjust accordingly.
+                CosmosItemResponse<Receipt> itemResponse = this.containerReceipts
+                        .readItem(thirdPartyId, new PartitionKey(thirdPartyId), Receipt.class);
+                if (itemResponse != null) {
+                    Receipt receipt = itemResponse.getItem();
+                    t.tag("found", receipt != null);
+                    return receipt;
+                } else {
+                    t.tag("found", false);
+                    logger.debug("Point read returned null for id {} in container {}", sanitize(thirdPartyId), containerReceipts.getId());
+                }
+            } catch (CosmosException ce) {
+                t.tag("statusCode", ce.getStatusCode());
+                if (ce.getStatusCode() != 404) {
+                    throw ce;
+                }
+            }
+        }
+        return null;
     }
 
     /**

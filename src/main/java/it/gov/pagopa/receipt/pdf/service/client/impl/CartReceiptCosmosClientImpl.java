@@ -1,7 +1,11 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.implementation.NotFoundException;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.PartitionKey;
+import com.azure.cosmos.models.SqlParameter;
+import com.azure.cosmos.models.SqlQuerySpec;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
@@ -17,6 +21,8 @@ import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 
@@ -42,37 +48,21 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
     }
 
     public CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException {
-        // Build query
-        String query = String.format("SELECT * FROM c WHERE c.cartId = '%s'", cartId);
-
-        CosmosPagedIterable<CartForReceipt> queryResponse;
+        // Query the container
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.queryItems")
                 .tag("container", containerCartReceipts.getId())) {
-            queryResponse = this.containerCartReceipts.queryItems(
-                    query, new CosmosQueryRequestOptions(), CartForReceipt.class);
-        }
-
-        boolean hasNext;
-        CartForReceipt cart = null;
-        try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.iterateFirst")
-                .tag("container", containerCartReceipts.getId())) {
-            var iterator = queryResponse.iterator();
-            hasNext = iterator.hasNext();
-            t.tag("found", hasNext);
-            if (hasNext) {
-                cart = iterator.next();
+            try {
+                return this.containerCartReceipts
+                        .readItem(cartId, new PartitionKey(cartId), CartForReceipt.class)
+                        .getItem();
+            } catch (NotFoundException e) {
+                String errMsg = String.format(
+                        "Cart with id %s not found in the defined container: %s",
+                        sanitize(cartId), containerCartReceipts.getId());
+                logger.error(errMsg);
+                throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
             }
         }
-
-        if (!hasNext) {
-            String errMsg =
-                    String.format(
-                            "Cart with id %s not found in the defined container: %s",
-                            sanitize(cartId), containerCartReceipts.getId());
-            logger.error(errMsg);
-            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
-        }
-        return cart;
     }
 
     @Override
@@ -92,16 +82,13 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
 
     @Override
     public CartReceiptError getCartReceiptError(String cartId) throws CartNotFoundException {
-        //Build query
-        String query = String.format("SELECT * FROM c WHERE c.id = '%s'", cartId);
-
         //Query the container
-        CosmosPagedIterable<CartReceiptError> queryResponse = this.containerCartReceiptsError
-                .queryItems(query, new CosmosQueryRequestOptions(), CartReceiptError.class);
-
-        if (queryResponse.iterator().hasNext()) {
-            return queryResponse.iterator().next();
+        try {
+            return this.containerCartReceiptsError
+                    .readItem(cartId, new PartitionKey(cartId), CartReceiptError.class)
+                    .getItem();
+        } catch (NotFoundException e) {
+            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG, cartId);
         }
-        throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG);
     }
 }
