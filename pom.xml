@@ -133,11 +133,6 @@
       <groupId>org.jboss.slf4j</groupId>
       <artifactId>slf4j-jboss-logmanager</artifactId>
     </dependency>
-    <dependency>
-      <groupId>it.gov.pagopa</groupId>
-      <artifactId>pdf-receipt-service</artifactId>
-      <version>0.15.4</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
