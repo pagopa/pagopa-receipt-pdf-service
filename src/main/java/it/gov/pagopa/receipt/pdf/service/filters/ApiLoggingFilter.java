@@ -3,6 +3,7 @@ package it.gov.pagopa.receipt.pdf.service.filters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 import it.gov.pagopa.receipt.pdf.service.model.ErrorResponse;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -50,6 +51,7 @@ public class ApiLoggingFilter {
 
     public ApiLoggingFilter(ObjectMapper objectMapper) {
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new BlackbirdModule());
         this.objectMapper = objectMapper;
     }
 
