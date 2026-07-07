@@ -1,7 +1,9 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
@@ -53,19 +55,36 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      * @throws ReceiptNotFoundException in case no receipt has been found with the given idEvent
      */
     public Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException {
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.pointRead")
+                .tag("container", containerReceipts.getId())) {
+            try {
+                t.tag("found", true);
+                return this.containerReceipts
+                        .readItem(thirdPartyId, new PartitionKey(thirdPartyId), Receipt.class)
+                        .getItem();
+            } catch (CosmosException ce) {
+                t.tag("found", false);
+                t.tag("statusCode", ce.getStatusCode());
+                if (ce.getStatusCode() != 404) {
+                    throw ce;
+                }
+            }
+        }
+
         SqlQuerySpec querySpec = new SqlQuerySpec(
                 "SELECT * FROM c WHERE c.eventId = @eventId",
                 List.of(new SqlParameter("@eventId", thirdPartyId))
         );
-
         //Query the container
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.queryItems")
                 .tag("container", containerReceipts.getId())) {
+            t.tag("found", true);
             return this.containerReceipts
                     .queryItems(querySpec, new CosmosQueryRequestOptions(), Receipt.class)
                     .stream()
                     .findFirst()
                     .orElseThrow(() -> {
+                        t.tag("found", false);
                         String errMsg = String.format("Receipt with id %s not found in the defined container: %s",
                                 sanitize(thirdPartyId), containerReceipts.getId());
                         logger.error(errMsg);
@@ -119,5 +138,4 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
                 .findFirst()
                 .orElseThrow(() -> new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, DOCUMENT_NOT_FOUND_ERR_MSG));
     }
-
 }

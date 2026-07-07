@@ -88,7 +88,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
                     .readItem(cartId, new PartitionKey(cartId), CartReceiptError.class)
                     .getItem();
         } catch (NotFoundException e) {
-            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG);
+            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG, cartId);
         }
     }
 }
