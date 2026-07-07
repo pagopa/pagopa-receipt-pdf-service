@@ -1,7 +1,7 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.implementation.NotFoundException;
+import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.SqlParameter;
@@ -54,12 +54,15 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
                 return this.containerCartReceipts
                         .readItem(cartId, new PartitionKey(cartId), CartForReceipt.class)
                         .getItem();
-            } catch (NotFoundException e) {
+            } catch (CosmosException e) {
+                if (e.getStatusCode() != 404) {
+                    throw e;
+                }
                 String errMsg = String.format(
                         "Cart with id %s not found in the defined container: %s",
                         sanitize(cartId), containerCartReceipts.getId());
                 logger.error(errMsg);
-                throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId);
+                throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, errMsg, cartId, e);
             }
         }
     }
@@ -87,8 +90,11 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
             return this.containerCartReceiptsError
                     .readItem(cartId, new PartitionKey(cartId), CartReceiptError.class)
                     .getItem();
-        } catch (NotFoundException e) {
-            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG, cartId);
+        } catch (CosmosException e) {
+            if (e.getStatusCode() != 404) {
+                throw e;
+            }
+            throw new CartNotFoundException(AppErrorCodeEnum.PDFS_801, DOCUMENT_NOT_FOUND_ERR_MSG, cartId, e);
         }
     }
 }
