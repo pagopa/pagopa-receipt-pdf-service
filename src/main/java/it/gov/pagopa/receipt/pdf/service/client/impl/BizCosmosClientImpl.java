@@ -44,5 +44,4 @@ public class BizCosmosClientImpl implements BizCosmosClient {
                 .findFirst()
                 .orElseThrow(() -> new BizEventNotFoundException(AppErrorCodeEnum.PDFS_100, AppErrorCodeEnum.PDFS_100.getErrorMessage()));
     }
-
 }

@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.CONTAINER_TAG;
 
 /**
  * Client for the CosmosDB database
@@ -49,7 +50,7 @@ public class CartReceiptCosmosClientImpl implements CartReceiptCosmosClient {
     public CartForReceipt getCartForReceiptDocument(String cartId) throws CartNotFoundException {
         // Query the container
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.cartReceipts.queryItems")
-                .tag("container", containerCartReceipts.getId())) {
+                .tag(CONTAINER_TAG, containerCartReceipts.getId())) {
             try {
                 return this.containerCartReceipts
                         .readItem(cartId, new PartitionKey(cartId), CartForReceipt.class)

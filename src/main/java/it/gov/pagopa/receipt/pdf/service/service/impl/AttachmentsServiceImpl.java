@@ -34,6 +34,7 @@ import java.util.Objects;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_706;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 import static it.gov.pagopa.receipt.pdf.service.utils.Constants.MDC_THIRD_PARTY_ID;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.FOUND_TAG;
 
 @ApplicationScoped
 public class AttachmentsServiceImpl implements AttachmentsService {
@@ -102,7 +103,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         Receipt receiptDocument;
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.getReceiptDocument")) {
             receiptDocument = this.cosmosClient.getReceiptDocument(thirdPartyId);
-            t.tag("found", receiptDocument != null);
+            t.tag(FOUND_TAG, receiptDocument != null);
         }
 
         try (PerfTracer t = PerfTracer.start(logger, "receipt.validate")) {

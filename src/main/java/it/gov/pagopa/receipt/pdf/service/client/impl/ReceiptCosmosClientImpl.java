@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.CONTAINER_TAG;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.FOUND_TAG;
 
 /**
  * Client for the CosmosDB database
@@ -56,14 +58,13 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      */
     public Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException {
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.pointRead")
-                .tag("container", containerReceipts.getId())) {
+                .tag(CONTAINER_TAG, containerReceipts.getId())) {
             try {
-                t.tag("found", true);
                 return this.containerReceipts
                         .readItem(thirdPartyId, new PartitionKey(thirdPartyId), Receipt.class)
                         .getItem();
             } catch (CosmosException ce) {
-                t.tag("found", false);
+                t.tag(FOUND_TAG, false);
                 t.tag("statusCode", ce.getStatusCode());
                 if (ce.getStatusCode() != 404) {
                     throw ce;
@@ -77,14 +78,13 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
         );
         //Query the container
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.queryItems")
-                .tag("container", containerReceipts.getId())) {
-            t.tag("found", true);
+                .tag(CONTAINER_TAG, containerReceipts.getId())) {
             return this.containerReceipts
                     .queryItems(querySpec, new CosmosQueryRequestOptions(), Receipt.class)
                     .stream()
                     .findFirst()
                     .orElseThrow(() -> {
-                        t.tag("found", false);
+                        t.tag(FOUND_TAG, false);
                         String errMsg = String.format("Receipt with id %s not found in the defined container: %s",
                                 sanitize(thirdPartyId), containerReceipts.getId());
                         logger.error(errMsg);
