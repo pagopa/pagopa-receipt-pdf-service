@@ -8,11 +8,14 @@ import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_800;
 
+@Slf4j
 @ApplicationScoped
 public class ReceiptCosmosService {
 
@@ -27,19 +30,21 @@ public class ReceiptCosmosService {
 
     public Receipt getReceipt(String eventId) throws ReceiptNotFoundException {
         Receipt receipt;
-        try {
-            receipt = this.receiptCosmosClient.getReceiptDocument(eventId);
-        } catch (ReceiptNotFoundException e) {
-            String errorMsg = String.format("Receipt not found with the biz-event id %s", eventId);
-            throw new ReceiptNotFoundException(PDFS_800, errorMsg, e);
+        try (PerfTracer t = PerfTracer.start(log, "cosmos.getReceiptDocument")) {
+            try {
+                receipt = this.receiptCosmosClient.getReceiptDocument(eventId);
+            } catch (ReceiptNotFoundException e) {
+                String errorMsg = String.format("Receipt not found with the biz-event id %s", eventId);
+                throw new ReceiptNotFoundException(PDFS_800, errorMsg, e);
 
-        }
+            }
 
-        if (receipt == null) {
-            String errorMsg = String.format("Receipt retrieved with the biz-event id %s is null", eventId);
-            throw new ReceiptNotFoundException(PDFS_800, errorMsg);
+            if (receipt == null) {
+                String errorMsg = String.format("Receipt retrieved with the biz-event id %s is null", eventId);
+                throw new ReceiptNotFoundException(PDFS_800, errorMsg);
+            }
+            return receipt;
         }
-        return receipt;
     }
 
     public IOMessage getReceiptMessage(String messageId) throws IoMessageNotFoundException {

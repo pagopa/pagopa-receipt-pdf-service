@@ -8,12 +8,14 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_801;
 
-
+@Slf4j
 @ApplicationScoped
 public class CartReceiptCosmosService {
 
@@ -28,19 +30,21 @@ public class CartReceiptCosmosService {
 
     public CartForReceipt getCartReceipt(String cartId) throws CartNotFoundException {
         CartForReceipt receipt;
-        try {
-            receipt = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
-        } catch (CartNotFoundException e) {
-            String errorMsg = String.format("Receipt not found with the cart id %s", cartId);
-            throw new CartNotFoundException(PDFS_801, errorMsg, e);
+        try (PerfTracer t = PerfTracer.start(log, "cosmos.getCartForReceiptDocument").tag("cartId", cartId)) {
+            try {
+                receipt = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
+            } catch (CartNotFoundException e) {
+                String errorMsg = String.format("Receipt not found with the cart id %s", cartId);
+                throw new CartNotFoundException(PDFS_801, errorMsg, e);
 
-        }
+            }
 
-        if (receipt == null) {
-            String errorMsg = String.format("Receipt retrieved with the cart id %s is null", cartId);
-            throw new CartNotFoundException(PDFS_801, errorMsg);
+            if (receipt == null) {
+                String errorMsg = String.format("Receipt retrieved with the cart id %s is null", cartId);
+                throw new CartNotFoundException(PDFS_801, errorMsg);
+            }
+            return receipt;
         }
-        return receipt;
     }
 
     public CartIOMessage getCartReceiptMessage(String messageId) throws IoMessageNotFoundException {
