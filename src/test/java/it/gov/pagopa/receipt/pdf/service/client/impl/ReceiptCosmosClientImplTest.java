@@ -22,7 +22,6 @@ import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,7 +49,7 @@ class ReceiptCosmosClientImplTest {
 
     @BeforeAll
     static void setUp() {
-        containerReceiptsMock = Mockito.mock(CosmosContainer.class);
+        containerReceiptsMock = mock(CosmosContainer.class);
         QuarkusMock.installMockForType(
                 containerReceiptsMock,
                 CosmosContainer.class,
@@ -58,7 +57,7 @@ class ReceiptCosmosClientImplTest {
                 }
         );
 
-        CosmosContainer containerReceiptsIOMessagesMock = Mockito.mock(CosmosContainer.class);
+        CosmosContainer containerReceiptsIOMessagesMock = mock(CosmosContainer.class);
         QuarkusMock.installMockForType(
                 containerReceiptsIOMessagesMock,
                 CosmosContainer.class,
@@ -66,7 +65,7 @@ class ReceiptCosmosClientImplTest {
                 }
         );
 
-        CosmosContainer containerReceiptsErrorMock = Mockito.mock(CosmosContainer.class);
+        CosmosContainer containerReceiptsErrorMock = mock(CosmosContainer.class);
         QuarkusMock.installMockForType(
                 containerReceiptsErrorMock,
                 CosmosContainer.class,
@@ -74,12 +73,12 @@ class ReceiptCosmosClientImplTest {
                 }
         );
 
-        CosmosPagedIterable<Receipt> mockReceiptIterable = Mockito.mock(CosmosPagedIterable.class);
-        mockReceiptStream = Mockito.mock(Stream.class);
-        CosmosPagedIterable<IOMessage> mockIOMessageIterable = Mockito.mock(CosmosPagedIterable.class);
-        mockIOMessageStream = Mockito.mock(Stream.class);
-        CosmosPagedIterable<ReceiptError> mockReceiptErrorIterable = Mockito.mock(CosmosPagedIterable.class);
-        mockReceiptErrorStream = Mockito.mock(Stream.class);
+        CosmosPagedIterable<Receipt> mockReceiptIterable = mock(CosmosPagedIterable.class);
+        mockReceiptStream = mock(Stream.class);
+        CosmosPagedIterable<IOMessage> mockIOMessageIterable = mock(CosmosPagedIterable.class);
+        mockIOMessageStream = mock(Stream.class);
+        CosmosPagedIterable<ReceiptError> mockReceiptErrorIterable = mock(CosmosPagedIterable.class);
+        mockReceiptErrorStream = mock(Stream.class);
 
         doReturn(mockReceiptIterable).when(containerReceiptsMock)
                 .queryItems(any(SqlQuerySpec.class), any(), eq(Receipt.class));

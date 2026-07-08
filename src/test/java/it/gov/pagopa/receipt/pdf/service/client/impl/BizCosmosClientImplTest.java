@@ -15,7 +15,6 @@ import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -27,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @QuarkusTest
 class BizCosmosClientImplTest {
@@ -38,7 +38,7 @@ class BizCosmosClientImplTest {
 
     @BeforeAll
     static void setUp() {
-        CosmosContainer containerBizEventMock = Mockito.mock(CosmosContainer.class);
+        CosmosContainer containerBizEventMock = mock(CosmosContainer.class);
         QuarkusMock.installMockForType(
                 containerBizEventMock,
                 CosmosContainer.class,
@@ -46,8 +46,8 @@ class BizCosmosClientImplTest {
                 }
         );
 
-        CosmosPagedIterable<Receipt> mockReceiptIterable = Mockito.mock(CosmosPagedIterable.class);
-        mockBizEventStream = Mockito.mock(Stream.class);
+        CosmosPagedIterable<Receipt> mockReceiptIterable = mock(CosmosPagedIterable.class);
+        mockBizEventStream = mock(Stream.class);
 
         doReturn(mockReceiptIterable).when(containerBizEventMock)
                 .queryItems(any(SqlQuerySpec.class), any(), eq(BizEvent.class));
