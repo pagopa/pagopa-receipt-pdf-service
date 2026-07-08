@@ -101,7 +101,7 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
-        String fiscalCode = this.tokenizerService.getSearchTokenResponse(requestFiscalCode).getToken();
+        String fiscalCode = this.tokenizerService.getFiscalCodeToken(requestFiscalCode);
         if (Objects.equals(receipt.getEventData().getDebtorFiscalCode(), fiscalCode)) {
             if (receipt.getMdAttach() == null) {
                 throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
@@ -138,7 +138,7 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
-        String fiscalCode = this.tokenizerService.getSearchTokenResponse(requestFiscalCode).getToken();
+        String fiscalCode = this.tokenizerService.getFiscalCodeToken(requestFiscalCode);
         Payload cartPayload = cart.getPayload();
         if (Objects.equals(cartPayload.getPayerFiscalCode(), fiscalCode)) {
             if (cartPayload.getMdAttachPayer() == null) {
