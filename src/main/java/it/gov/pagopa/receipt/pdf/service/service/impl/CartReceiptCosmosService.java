@@ -7,6 +7,7 @@ import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
+import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,21 +30,26 @@ public class CartReceiptCosmosService {
     }
 
     public CartForReceipt getCartReceipt(String cartId) throws CartNotFoundException {
-        CartForReceipt receipt;
+        CartForReceipt cart;
         try (PerfTracer t = PerfTracer.start(log, "cosmos.getCartForReceiptDocument").tag("cartId", cartId)) {
             try {
-                receipt = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
+                cart = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
             } catch (CartNotFoundException e) {
                 String errorMsg = String.format("Receipt not found with the cart id %s", cartId);
                 throw new CartNotFoundException(PDFS_801, errorMsg, e);
 
             }
 
-            if (receipt == null) {
+            if (cart == null) {
                 String errorMsg = String.format("Receipt retrieved with the cart id %s is null", cartId);
                 throw new CartNotFoundException(PDFS_801, errorMsg);
             }
-            return receipt;
+
+            Payload payload = cart.getPayload();
+            int cartSize = payload != null && payload.getCart() != null ? payload.getCart().size() : 0;
+            t.tag("cartSize", cartSize);
+
+            return cart;
         }
     }
 

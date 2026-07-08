@@ -20,6 +20,7 @@ import java.util.Objects;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.*;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.IS_CART_TAG;
 
 @Slf4j
 @ApplicationScoped
@@ -64,7 +65,7 @@ public class PdfService {
         String attachmentName;
 
         boolean isCart = CommonUtils.isCart(thirdPartyId);
-        try (PerfTracer t = PerfTracer.start(log, "getReceiptPdf").tag("isCart", isCart)) {
+        try (PerfTracer t = PerfTracer.start(log, "getReceiptPdf").tag(IS_CART_TAG, isCart)) {
             if (isCart) {
                 attachmentName = getCartAttachmentName(thirdPartyId, requestFiscalCode);
             } else {
