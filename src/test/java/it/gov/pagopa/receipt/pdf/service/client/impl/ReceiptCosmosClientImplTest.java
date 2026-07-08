@@ -1,6 +1,8 @@
 package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.SqlQuerySpec;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import io.quarkus.test.junit.QuarkusMock;
@@ -32,10 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class ReceiptCosmosClientImplTest {
 
+    private static CosmosContainer containerReceiptsMock;
     private static Stream<Receipt> mockReceiptStream;
     private static Stream<IOMessage> mockIOMessageStream;
     private static Stream<ReceiptError> mockReceiptErrorStream;
@@ -45,7 +50,7 @@ class ReceiptCosmosClientImplTest {
 
     @BeforeAll
     static void setUp() {
-        CosmosContainer containerReceiptsMock = Mockito.mock(CosmosContainer.class);
+        containerReceiptsMock = Mockito.mock(CosmosContainer.class);
         QuarkusMock.installMockForType(
                 containerReceiptsMock,
                 CosmosContainer.class,
@@ -89,10 +94,30 @@ class ReceiptCosmosClientImplTest {
 
     @SneakyThrows
     @Test
-    void getReceiptDocumentSuccess() {
+    void getReceiptDocumentSuccess_foundWithpointRead() {
+        CosmosItemResponse<Receipt> cosmosItemResponseMock = mock(CosmosItemResponse.class);
         Receipt receipt = new Receipt();
 
-        doReturn(Optional.of(receipt)).when(mockReceiptStream).findFirst();
+        when(containerReceiptsMock.readItem(any(), any(), eq(Receipt.class)))
+                .thenReturn(cosmosItemResponseMock);
+        when(cosmosItemResponseMock.getItem()).thenReturn(receipt);
+
+        Receipt result = assertDoesNotThrow(() -> sut.getReceiptDocument("id"));
+
+        assertEquals(receipt, result);
+    }
+
+    @SneakyThrows
+    @Test
+    void getReceiptDocumentSuccess_foundWithIterate() {
+        Receipt receipt = new Receipt();
+
+        CosmosException cosmosExceptionMock = mock(CosmosException.class);
+
+        when(cosmosExceptionMock.getStatusCode()).thenReturn(404);
+        when(containerReceiptsMock.readItem(any(), any(), eq(Receipt.class)))
+                .thenThrow(cosmosExceptionMock);
+        when(mockReceiptStream.findFirst()).thenReturn(Optional.of(receipt));
 
         Receipt result = assertDoesNotThrow(() -> sut.getReceiptDocument("id"));
 
@@ -102,12 +127,31 @@ class ReceiptCosmosClientImplTest {
     @SneakyThrows
     @Test
     void getReceiptDocumentFailureReceiptNotFound() {
-        doReturn(Optional.empty()).when(mockReceiptStream).findFirst();
+        CosmosException cosmosExceptionMock = mock(CosmosException.class);
+
+        when(cosmosExceptionMock.getStatusCode()).thenReturn(404);
+        when(containerReceiptsMock.readItem(any(), any(), eq(Receipt.class)))
+                .thenThrow(cosmosExceptionMock);
+        when(mockReceiptStream.findFirst()).thenReturn(Optional.empty());
 
         ReceiptNotFoundException e = assertThrows(ReceiptNotFoundException.class, () -> sut.getReceiptDocument("id"));
 
         assertNotNull(e);
         assertEquals(AppErrorCodeEnum.PDFS_800, e.getErrorCode());
+    }
+
+    @SneakyThrows
+    @Test
+    void getReceiptDocumentFailure_genericError() {
+        CosmosException cosmosExceptionMock = mock(CosmosException.class);
+
+        when(cosmosExceptionMock.getStatusCode()).thenReturn(500);
+        when(containerReceiptsMock.readItem(any(), any(), eq(Receipt.class)))
+                .thenThrow(cosmosExceptionMock);
+
+        CosmosException e = assertThrows(CosmosException.class, () -> sut.getReceiptDocument("id"));
+
+        assertNotNull(e);
     }
 
     @SneakyThrows
