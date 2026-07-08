@@ -127,20 +127,6 @@ class AttachmentsServiceImplTest {
 
     @Test
     @SneakyThrows
-    void getAttachmentDetailsFailReceiptNull() {
-        doReturn(null).when(receiptCosmosServiceMock).getReceipt(anyString());
-
-        InvalidReceiptException e = assertThrows(
-                InvalidReceiptException.class,
-                () -> sut.getAttachmentsDetails("tp-id", FISCAL_CODE_A)
-        );
-
-        assertNotNull(e);
-        assertEquals(AppErrorCodeEnum.PDFS_701, e.getErrorCode());
-    }
-
-    @Test
-    @SneakyThrows
     void getAttachmentDetailsFailEventDataNull() {
         doReturn(Receipt.builder().numRetry(0).build()).when(receiptCosmosServiceMock).getReceipt(anyString());
 
@@ -823,17 +809,6 @@ class AttachmentsServiceImplTest {
         FiscalCodeNotAuthorizedException ex = assertThrows(FiscalCodeNotAuthorizedException.class,
                 () -> sut.getAttachmentsDetails("id3", "OTHER"));
         assertEquals(AppErrorCodeEnum.PDFS_700, ex.getErrorCode());
-    }
-
-    @Test
-    @SneakyThrows
-    void getAttachmentsDetails_receipt_null() {
-        when(receiptCosmosServiceMock.getReceipt(anyString())).thenReturn(null);
-        when(restClientMock.searchToken(any())).thenReturn(new SearchTokenResponse("FCODE"));
-
-        InvalidReceiptException ex = assertThrows(InvalidReceiptException.class,
-                () -> sut.getAttachmentsDetails("id4", "FCODE"));
-        assertEquals(AppErrorCodeEnum.PDFS_701, ex.getErrorCode());
     }
 
     @Test
