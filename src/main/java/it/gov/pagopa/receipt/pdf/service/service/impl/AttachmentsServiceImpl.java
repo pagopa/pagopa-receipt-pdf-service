@@ -70,8 +70,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException, CartNotFoundException {
 
         boolean isCart = CommonUtils.isCart(thirdPartyId);
-        try (PerfTracer tracer = PerfTracer.start(logger, "getAttachmentsDetails")
-                .tag("isCart", isCart)) {
+        try (PerfTracer t = PerfTracer.start(logger, "getAttachmentsDetails").tag("isCart", isCart)) {
             if (isCart) {
                 return handleCartAttachmentDetails(thirdPartyId, requestFiscalCode);
             }
@@ -86,8 +85,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             BlobStorageClientException, AttachmentNotFoundException, InvalidCartException, CartNotFoundException {
 
         boolean isCart = CommonUtils.isCart(thirdPartyId);
-        try (PerfTracer tracer = PerfTracer.start(logger, "getAttachment")
-                .tag("isCart", isCart)) {
+        try (PerfTracer t = PerfTracer.start(logger, "getAttachment").tag("isCart", isCart)) {
             if (isCart) {
                 checkIfUserIsAuthorizedToAccessCartAttachment(thirdPartyId, requestFiscalCode, attachmentUrl);
             } else {
@@ -95,7 +93,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             }
         }
 
-        try (PerfTracer tracer = PerfTracer.start(logger, "getAttachmentFromBlobStorage")) {
+        try (PerfTracer t = PerfTracer.start(logger, "getAttachmentFromBlobStorage")) {
             return this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentUrl);
         }
     }

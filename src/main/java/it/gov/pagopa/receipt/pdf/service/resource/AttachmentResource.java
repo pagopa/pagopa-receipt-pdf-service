@@ -151,16 +151,16 @@ public class AttachmentResource {
         requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
 
         MDC.put(MDC_THIRD_PARTY_ID, thirdPartyId);
-        try (PerfTracer tracer = PerfTracer.start(logger, "getAttachment.endpoint");
-             InputStream inputStream = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl)
-        ) {
-            return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
-                    .header("content-type", "application/pdf")
-                    .header("content-disposition", "attachment;")
-                    .build();
-        } catch (IOException e) {
-            logger.error("Error handling the stream generated from pdf attachment");
-            throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
+        try (PerfTracer tracer = PerfTracer.start(logger, "getAttachment.endpoint")) {
+            try (InputStream inputStream = attachmentsService.getAttachment(thirdPartyId, requestFiscalCode, attachmentUrl)) {
+                return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
+                        .header("content-type", "application/pdf")
+                        .header("content-disposition", "attachment;")
+                        .build();
+            } catch (IOException e) {
+                logger.error("Error handling the stream generated from pdf attachment");
+                throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
+            }
         } finally {
             MDC.remove(MDC_THIRD_PARTY_ID);
         }
