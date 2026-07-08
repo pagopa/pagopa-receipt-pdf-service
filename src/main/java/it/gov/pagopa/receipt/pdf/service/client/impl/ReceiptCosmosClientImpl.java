@@ -2,10 +2,10 @@ package it.gov.pagopa.receipt.pdf.service.client.impl;
 
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosException;
-import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
-import com.azure.cosmos.util.CosmosPagedIterable;
+import com.azure.cosmos.models.SqlParameter;
+import com.azure.cosmos.models.SqlQuerySpec;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.exception.IoMessageNotFoundException;
@@ -18,11 +18,14 @@ import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsErr
 import it.gov.pagopa.receipt.pdf.service.producer.receipt.containers.ReceiptsIOMessagesEventContainer;
 import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.CONTAINER_TAG;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.FOUND_TAG;
 
 /**
  * Client for the CosmosDB database
@@ -31,8 +34,6 @@ import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
 
     private static final String DOCUMENT_NOT_FOUND_ERR_MSG = "Document not found in the defined container";
-
-    private static final String FIND_RECEIPT_QUERY = "SELECT * FROM c WHERE c.eventId = '%s'";
 
     private final Logger logger = LoggerFactory.getLogger(ReceiptCosmosClientImpl.class);
 
@@ -56,65 +57,40 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      * @throws ReceiptNotFoundException in case no receipt has been found with the given idEvent
      */
     public Receipt getReceiptDocument(String thirdPartyId) throws ReceiptNotFoundException {
-        // First attempt a point read by id (fast path). If not found, fall back to query by eventId.
-        Receipt receipt = pointRead(thirdPartyId);
-        if (receipt != null) {
-            return receipt;
-        }
-
-        // Fallback: query by eventId
-        String query = String.format(FIND_RECEIPT_QUERY, thirdPartyId);
-
-        CosmosPagedIterable<Receipt> queryResponse;
-        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.queryItems")
-                .tag("container", containerReceipts.getId())) {
-            queryResponse = this.containerReceipts
-                    .queryItems(query, new CosmosQueryRequestOptions(), Receipt.class);
-        }
-
-        boolean hasNext;
-        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.iterateFirst")
-                .tag("container", containerReceipts.getId())) {
-            var iterator = queryResponse.iterator();
-            hasNext = iterator.hasNext();
-            t.tag("found", hasNext);
-            if (hasNext) {
-                receipt = iterator.next();
-            }
-        }
-
-        if (!hasNext) {
-            String errMsg = String.format("Receipt with id %s not found in the defined container: %s", sanitize(thirdPartyId), containerReceipts.getId());
-            logger.error(errMsg);
-            throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
-        }
-        return receipt;
-    }
-
-    private @Nullable Receipt pointRead(String thirdPartyId) {
         try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.pointRead")
-                .tag("container", containerReceipts.getId())) {
+                .tag(CONTAINER_TAG, containerReceipts.getId())) {
             try {
-                // Use the id as partition key as a best-effort. If your container uses a different partition key,
-                // adjust accordingly.
-                CosmosItemResponse<Receipt> itemResponse = this.containerReceipts
-                        .readItem(thirdPartyId, new PartitionKey(thirdPartyId), Receipt.class);
-                if (itemResponse != null) {
-                    Receipt receipt = itemResponse.getItem();
-                    t.tag("found", receipt != null);
-                    return receipt;
-                } else {
-                    t.tag("found", false);
-                    logger.debug("Point read returned null for id {} in container {}", sanitize(thirdPartyId), containerReceipts.getId());
-                }
+                return this.containerReceipts
+                        .readItem(thirdPartyId, new PartitionKey(thirdPartyId), Receipt.class)
+                        .getItem();
             } catch (CosmosException ce) {
+                t.tag(FOUND_TAG, false);
                 t.tag("statusCode", ce.getStatusCode());
                 if (ce.getStatusCode() != 404) {
                     throw ce;
                 }
             }
         }
-        return null;
+
+        SqlQuerySpec querySpec = new SqlQuerySpec(
+                "SELECT * FROM c WHERE c.eventId = @eventId",
+                List.of(new SqlParameter("@eventId", thirdPartyId))
+        );
+        //Query the container
+        try (PerfTracer t = PerfTracer.start(logger, "cosmos.receipts.queryItems")
+                .tag(CONTAINER_TAG, containerReceipts.getId())) {
+            return this.containerReceipts
+                    .queryItems(querySpec, new CosmosQueryRequestOptions(), Receipt.class)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> {
+                        t.tag(FOUND_TAG, false);
+                        String errMsg = String.format("Receipt with id %s not found in the defined container: %s",
+                                sanitize(thirdPartyId), containerReceipts.getId());
+                        logger.error(errMsg);
+                        return new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, errMsg, thirdPartyId);
+                    });
+        }
     }
 
     /**
@@ -126,18 +102,18 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
      */
     @Override
     public IOMessage getIoMessage(String messageId) throws IoMessageNotFoundException {
-
         //Build query
-        String query = String.format("SELECT * FROM c WHERE c.messageId = '%s'", messageId);
+        SqlQuerySpec querySpec = new SqlQuerySpec(
+                "SELECT * FROM c WHERE c.messageId = @messageId",
+                List.of(new SqlParameter("@messageId", messageId))
+        );
 
         //Query the container
-        CosmosPagedIterable<IOMessage> queryResponse = this.containerReceiptsIOMessagesEvent
-                .queryItems(query, new CosmosQueryRequestOptions(), IOMessage.class);
-
-        if (queryResponse.iterator().hasNext()) {
-            return queryResponse.iterator().next();
-        }
-        throw new IoMessageNotFoundException(DOCUMENT_NOT_FOUND_ERR_MSG);
+        return this.containerReceiptsIOMessagesEvent
+                .queryItems(querySpec, new CosmosQueryRequestOptions(), IOMessage.class)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IoMessageNotFoundException(DOCUMENT_NOT_FOUND_ERR_MSG));
     }
 
     /**
@@ -150,16 +126,16 @@ public class ReceiptCosmosClientImpl implements ReceiptCosmosClient {
     @Override
     public ReceiptError getReceiptError(String bizEventId) throws ReceiptNotFoundException {
         //Build query
-        String query = "SELECT * FROM c WHERE c.bizEventId = " + "'" + bizEventId + "'";
+        SqlQuerySpec querySpec = new SqlQuerySpec(
+                "SELECT * FROM c WHERE c.bizEventId = @bizEventId",
+                List.of(new SqlParameter("@bizEventId", bizEventId))
+        );
 
         //Query the container
-        CosmosPagedIterable<ReceiptError> queryResponse = containerReceiptsError
-                .queryItems(query, new CosmosQueryRequestOptions(), ReceiptError.class);
-
-        if (queryResponse.iterator().hasNext()) {
-            return queryResponse.iterator().next();
-        }
-        throw new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, DOCUMENT_NOT_FOUND_ERR_MSG);
+        return containerReceiptsError
+                .queryItems(querySpec, new CosmosQueryRequestOptions(), ReceiptError.class)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ReceiptNotFoundException(AppErrorCodeEnum.PDFS_800, DOCUMENT_NOT_FOUND_ERR_MSG));
     }
-
 }
