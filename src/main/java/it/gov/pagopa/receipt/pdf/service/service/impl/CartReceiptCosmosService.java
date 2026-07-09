@@ -8,7 +8,6 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartIOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartReceiptError;
 import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
-import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,12 +20,15 @@ import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDF
 public class CartReceiptCosmosService {
 
     private final CartReceiptCosmosClient cartReceiptCosmosClient;
+    private final Aes256Service aes256Service;
 
     @Inject
     public CartReceiptCosmosService(
-            CartReceiptCosmosClient cartReceiptCosmosClient
+            CartReceiptCosmosClient cartReceiptCosmosClient,
+            Aes256Service aes256Service
     ) {
         this.cartReceiptCosmosClient = cartReceiptCosmosClient;
+        this.aes256Service = aes256Service;
     }
 
     public CartForReceipt getCartReceipt(String cartId) throws CartNotFoundException {
@@ -84,7 +86,7 @@ public class CartReceiptCosmosService {
         String payload = receiptError.getMessagePayload();
         if (payload != null && !payload.isBlank()) {
             try {
-                receiptError.setMessagePayload(Aes256Utils.decrypt(payload));
+                receiptError.setMessagePayload(aes256Service.decrypt(payload));
             } catch (IllegalArgumentException | Aes256Exception ignored) {
                 // Return encrypted payload
             }

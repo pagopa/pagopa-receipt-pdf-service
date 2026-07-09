@@ -7,7 +7,6 @@ import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
-import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,12 +19,15 @@ import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDF
 public class ReceiptCosmosService {
 
     private final ReceiptCosmosClient receiptCosmosClient;
+    private final Aes256Service aes256Service;
 
     @Inject
     public ReceiptCosmosService(
-            ReceiptCosmosClient receiptCosmosClient
+            ReceiptCosmosClient receiptCosmosClient,
+            Aes256Service aes256Service
     ) {
         this.receiptCosmosClient = receiptCosmosClient;
+        this.aes256Service = aes256Service;
     }
 
     public Receipt getReceipt(String eventId) throws ReceiptNotFoundException {
@@ -79,7 +81,7 @@ public class ReceiptCosmosService {
         String payload = receiptError.getMessagePayload();
         if (payload != null && !payload.isBlank()) {
             try {
-                receiptError.setMessagePayload(Aes256Utils.decrypt(payload));
+                receiptError.setMessagePayload(aes256Service.decrypt(payload));
             } catch (IllegalArgumentException | Aes256Exception ignored) {
                 // Return encrypted payload
             }
