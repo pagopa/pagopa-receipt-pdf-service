@@ -16,6 +16,7 @@ import it.gov.pagopa.receipt.pdf.service.model.Detail;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartPayment;
 import it.gov.pagopa.receipt.pdf.service.model.cart.MessageData;
+import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.service.AttachmentsService;
@@ -184,8 +185,8 @@ public class AttachmentsServiceImpl implements AttachmentsService {
         }
         //Payer case -> no need for bizEventId
         if (bizEventId == null) {
-
-            if (cart.getPayload().getMdAttachPayer() == null) {
+            Payload payload = cart.getPayload();
+            if (payload.getMdAttachPayer() == null) {
                 String errMsg =
                         String.format("The retrieved receipt metadata for cart %s has null payer attachment info",
                                 sanitize(cartId));
@@ -193,7 +194,7 @@ public class AttachmentsServiceImpl implements AttachmentsService {
                 throw new InvalidReceiptException(AppErrorCodeEnum.PDFS_712, errMsg);
             }
 
-            if (cart.getPayload().getMessagePayer() == null) {
+            if (payload.getMessagePayer() == null) {
                 String errMsg =
                         String.format("The retrieved receipt metadata for cart %s has null payer message data",
                                 sanitize(cartId));
@@ -202,11 +203,11 @@ public class AttachmentsServiceImpl implements AttachmentsService {
             }
 
             return buildCartAttachmentDetails(cart,
-                    cart.getPayload().getMdAttachPayer(), cart.getPayload().getMessagePayer(), "cart-payer");
+                    payload.getMdAttachPayer(), payload.getMessagePayer(), "cart-payer");
         }
 
         //Debtor case -> obtained receiptmetadata in cart filtered by bizEventId
-        CartPayment cartItem = findDebtorCartPaymentByBizEventId(cart, bizEventId);
+        CartPayment cartItem = findDebtorCartPaymentByBizEventId(bizEventId, cart.getPayload());
 
         if (cartItem == null || cartItem.getMdAttach() == null) {
             String errMsg =
@@ -223,24 +224,23 @@ public class AttachmentsServiceImpl implements AttachmentsService {
     /**
      * Finds the debtor cart payment item in the given cart that matches the specified business event ID.
      *
-     * @param cartForReceipt the cart containing the list of payments
-     * @param eventId        the business event ID to match
+     * @param eventId the business event ID to match
+     * @param payload the payload containing the cart payments
      * @return the first matching {@link CartPayment} with non-null attachment and message for the debtor, or null if not found
      */
-    private CartPayment findDebtorCartPaymentByBizEventId(CartForReceipt cartForReceipt, String eventId) {
-        return cartForReceipt.getPayload().getCart() != null
-                ?
-                cartForReceipt.getPayload().getCart().stream()
+    private CartPayment findDebtorCartPaymentByBizEventId(String eventId, Payload payload) {
+        if (payload.getCart() == null) {
+            return null;
+        }
+        return payload.getCart().stream()
                 .filter(elem ->
                         elem != null
-                        && elem.getMdAttach() != null
-                        && elem.getMessageDebtor() != null
-                        && eventId.equals(elem.getBizEventId())
+                                && elem.getMdAttach() != null
+                                && elem.getMessageDebtor() != null
+                                && eventId.equals(elem.getBizEventId())
                 )
                 .findFirst()
-                .orElse(null)
-                :
-                null;
+                .orElse(null);
     }
 
     private void checkIfUserIsAuthorizedToAccessReceiptAttachment(
