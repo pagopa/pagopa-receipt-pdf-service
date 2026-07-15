@@ -20,6 +20,9 @@ overrides:
       response_time_evaluation_frequency: 10 # Default: 10
       response_time_evaluation_time_window: 30 # Default: 20
       response_time_event_occurrences: 30 # Default: 1
+      availability_evaluation_frequency: 5
+      availability_evaluation_time_window: 10
+      availability_event_occurrences: 2
     GET /messages/{tp_id}:
       response_time_threshold: 2 # Default: 1
       response_time_evaluation_frequency: 10 # Default: 10
