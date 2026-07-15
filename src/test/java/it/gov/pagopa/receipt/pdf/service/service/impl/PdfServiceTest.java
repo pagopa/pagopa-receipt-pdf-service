@@ -1,13 +1,16 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
 import io.quarkus.test.junit.QuarkusTest;
-import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
-import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum;
 import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
-import it.gov.pagopa.receipt.pdf.service.exception.*;
-import it.gov.pagopa.receipt.pdf.service.model.SearchTokenResponse;
+import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.BlobStorageClientException;
+import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
+import it.gov.pagopa.receipt.pdf.service.exception.InvalidCartException;
+import it.gov.pagopa.receipt.pdf.service.exception.InvalidReceiptException;
+import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartForReceipt;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartPayment;
 import it.gov.pagopa.receipt.pdf.service.model.cart.CartStatusType;
@@ -31,9 +34,20 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_700;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_706;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_714;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_715;
+import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_716;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class PdfServiceTest {
@@ -61,9 +75,9 @@ class PdfServiceTest {
     public static final String INVALID_FISCAL_CODE_TOKENIZED = "invalidFiscalCodeTokenized";
 
     @Mock
-    private ReceiptCosmosClient receiptCosmosClient;
+    private ReceiptCosmosService receiptCosmosService;
     @Mock
-    private CartReceiptCosmosClient cartReceiptCosmosClient;
+    private CartReceiptCosmosService cartReceiptCosmosService;
     @Mock
     private TokenizerService tokenizerService;
     @Mock
@@ -73,12 +87,12 @@ class PdfServiceTest {
 
     @BeforeEach
     void setUp() {
-        receiptCosmosClient = mock(ReceiptCosmosClient.class);
-        cartReceiptCosmosClient = mock(CartReceiptCosmosClient.class);
+        receiptCosmosService = mock(ReceiptCosmosService.class);
+        cartReceiptCosmosService = mock(CartReceiptCosmosService.class);
         tokenizerService = mock(TokenizerService.class);
         receiptBlobClient = mock(ReceiptBlobClient.class);
 
-        sut = new PdfService(receiptCosmosClient, cartReceiptCosmosClient, tokenizerService, receiptBlobClient);
+        sut = new PdfService(receiptCosmosService, cartReceiptCosmosService, tokenizerService, receiptBlobClient);
     }
 
     @Nested
@@ -96,16 +110,14 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_Payer_OK(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, null, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
-
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(tokenizerService.getFiscalCodeToken(PAYER_FISCAL_CODE)).thenReturn(PAYER_FISCAL_CODE_TOKENIZED);
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER))
+                    .thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE));
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
         }
 
         @ParameterizedTest
@@ -120,16 +132,14 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_Debtor_OK(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, null, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
-
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(tokenizerService.getFiscalCodeToken(DEBTOR_FISCAL_CODE_1)).thenReturn(DEBTOR_FISCAL_CODE_1_TOKENIZED);
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1))
+                    .thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, DEBTOR_FISCAL_CODE_1));
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
         }
 
         @ParameterizedTest
@@ -140,7 +150,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_KO_Still_Generating(ReceiptStatusType status) {
             Receipt receipt = getReceipt(status, null, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -148,8 +158,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_714, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -162,7 +172,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_KO_RetryableFailure(ReceiptStatusType status) {
             Receipt receipt = getReceipt(status, ERROR_CODE_RETRYABLE, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -170,8 +180,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -183,7 +193,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_KO_CriticalFailure_Payer(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, ERROR_CODE_CRITICAL, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
 
             InvalidReceiptException exception = assertThrows(
                     InvalidReceiptException.class,
@@ -191,8 +201,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -204,7 +214,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_KO_CriticalFailure_Debtor(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, null, ERROR_CODE_CRITICAL);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
 
             InvalidReceiptException exception = assertThrows(
                     InvalidReceiptException.class,
@@ -212,8 +222,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -225,7 +235,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_KO_OneCriticalFailure_OneRetryableFailure(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, ERROR_CODE_RETRYABLE, ERROR_CODE_CRITICAL);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
 
             InvalidReceiptException exception = assertThrows(
                     InvalidReceiptException.class,
@@ -233,8 +243,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -247,7 +257,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Receipt_KO_CriticalFailure_EmptyReasonErr(ReceiptStatusType status) {
             Receipt receipt = getReceipt(status, null, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -255,17 +265,17 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
         @Test
         void getReceiptPdf_Receipt_KO_TokenizedFiscalCodeNotFound() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
+            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getFiscalCodeToken(PAYER_FISCAL_CODE);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -273,18 +283,16 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_700, exception.getErrorCode());
 
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
         @Test
         void getReceiptPdf_Receipt_KO_FiscalCodeNotFoundInReceipt() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(INVALID_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(INVALID_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(tokenizerService.getFiscalCodeToken(INVALID_FISCAL_CODE)).thenReturn(INVALID_FISCAL_CODE_TOKENIZED);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -292,7 +300,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_706, exception.getErrorCode());
 
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -300,11 +308,9 @@ class PdfServiceTest {
         void getReceiptPdf_Receipt_Payer_KO_MdAttachPayerNull() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
             receipt.setMdAttachPayer(null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(tokenizerService.getFiscalCodeToken(PAYER_FISCAL_CODE)).thenReturn(PAYER_FISCAL_CODE_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -312,7 +318,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -320,11 +326,9 @@ class PdfServiceTest {
         void getReceiptPdf_Receipt_Debtor_KO_MdAttachNull() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
             receipt.setMdAttach(null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(tokenizerService.getFiscalCodeToken(DEBTOR_FISCAL_CODE_1)).thenReturn(DEBTOR_FISCAL_CODE_1_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -332,7 +336,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -342,11 +346,9 @@ class PdfServiceTest {
         void getReceiptPdf_Receipt_KO_AttachmentNameInvalid(String attachmentName) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
             receipt.setMdAttachPayer(ReceiptMetadata.builder().name(attachmentName).build());
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(receiptCosmosService.getReceipt(GENERIC_EVENT_ID)).thenReturn(receipt);
+            when(tokenizerService.getFiscalCodeToken(PAYER_FISCAL_CODE)).thenReturn(PAYER_FISCAL_CODE_TOKENIZED);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -354,11 +356,15 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
+            verify(cartReceiptCosmosService, never()).getCartReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
-        private Receipt getReceipt(ReceiptStatusType receiptStatusType, Integer errorCodePayer, Integer errorCodeDebtor) {
+        private Receipt getReceipt(
+                ReceiptStatusType receiptStatusType,
+                Integer errorCodePayer,
+                Integer errorCodeDebtor
+        ) {
             return Receipt.builder()
                     .eventId(GENERIC_EVENT_ID)
                     .eventData(EventData.builder().payerFiscalCode(PAYER_FISCAL_CODE_TOKENIZED).debtorFiscalCode(DEBTOR_FISCAL_CODE_1_TOKENIZED).build())
@@ -386,16 +392,14 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_Payer_OK(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
-
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(PAYER_FISCAL_CODE)).thenReturn(PAYER_FISCAL_CODE_TOKENIZED);
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER))
+                    .thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE));
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
         }
 
         @ParameterizedTest
@@ -410,16 +414,14 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_Debtor1_OK(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
-
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(DEBTOR_FISCAL_CODE_1)).thenReturn(DEBTOR_FISCAL_CODE_1_TOKENIZED);
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_1))
+                    .thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, DEBTOR_FISCAL_CODE_1));
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
         }
 
         @ParameterizedTest
@@ -434,16 +436,14 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_Debtor2_OK(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_2_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_2)).thenReturn(searchTokenResponse);
-
-            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_2)).thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(DEBTOR_FISCAL_CODE_2)).thenReturn(DEBTOR_FISCAL_CODE_2_TOKENIZED);
+            when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_DEBTOR_2))
+                    .thenReturn(new ByteArrayInputStream("temp".getBytes(StandardCharsets.UTF_8)));
 
             assertDoesNotThrow(() -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_2, DEBTOR_FISCAL_CODE_2));
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
         }
 
         @ParameterizedTest
@@ -455,7 +455,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_KO_Still_Generating(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -463,8 +463,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_714, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -477,7 +477,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_KO_RetryableFailure(CartStatusType status) {
             CartForReceipt cart = getCart(status, ERROR_CODE_RETRYABLE, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -485,8 +485,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -498,7 +498,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_Payer_KO_CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, ERROR_CODE_CRITICAL, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -506,8 +506,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -519,7 +519,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_Debtor1_KO_CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, ERROR_CODE_CRITICAL, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -527,8 +527,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -540,7 +540,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_Debtor2_KO_CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, null, ERROR_CODE_CRITICAL);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -548,8 +548,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -562,7 +562,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_KO_EmptyReasonErr(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -570,8 +570,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -585,7 +585,7 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_KO_EmptyPayload(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
             cart.setPayload(null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -593,8 +593,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -608,7 +608,7 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_KO_EmptyCart(CartStatusType status) {
             CartForReceipt cart = getCart(status, null, null, null);
             cart.getPayload().setCart(null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -616,8 +616,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_715, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -629,7 +629,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_KO_PayerRetryableFailure_Debtor1CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, ERROR_CODE_RETRYABLE, ERROR_CODE_CRITICAL, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -637,8 +637,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -650,7 +650,7 @@ class PdfServiceTest {
         })
         void getReceiptPdf_Cart_KO_Debtor1RetryableFailure_Debtor2CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, ERROR_CODE_RETRYABLE, ERROR_CODE_CRITICAL);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -658,17 +658,17 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(tokenizerService, never()).getFiscalCodeToken(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
         @Test
         void getReceiptPdf_Cart_KO_TokenizedFiscalCodeNotFound() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
 
-            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
+            doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getFiscalCodeToken(PAYER_FISCAL_CODE);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -676,18 +676,16 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_700, exception.getErrorCode());
 
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
         @Test
         void getReceiptPdf_Cart_KO_FiscalCodeNotFoundInReceipt() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(INVALID_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(INVALID_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(INVALID_FISCAL_CODE)).thenReturn(INVALID_FISCAL_CODE_TOKENIZED);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -695,18 +693,16 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_706, exception.getErrorCode());
 
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
         @Test
         void getReceiptPdf_Cart_KO_DebtorBizEventNotFoundInReceipt() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(DEBTOR_FISCAL_CODE_1)).thenReturn(DEBTOR_FISCAL_CODE_1_TOKENIZED);
 
             FiscalCodeNotAuthorizedException exception = assertThrows(
                     FiscalCodeNotAuthorizedException.class,
@@ -714,7 +710,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_706, exception.getErrorCode());
 
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -722,11 +718,9 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_Payer_KO_MdAttachPayerNull() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
             cart.getPayload().setMdAttachPayer(null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(PAYER_FISCAL_CODE)).thenReturn(PAYER_FISCAL_CODE_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -734,7 +728,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -742,11 +736,9 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_Debtor1_KO_MdAttachNull() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
             cart.getPayload().getCart().get(0).setMdAttach(null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_1_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_1)).thenReturn(searchTokenResponse);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(DEBTOR_FISCAL_CODE_1)).thenReturn(DEBTOR_FISCAL_CODE_1_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -754,7 +746,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -762,11 +754,9 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_Debtor2_KO_MdAttachNull() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
             cart.getPayload().getCart().get(1).setMdAttach(null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(DEBTOR_FISCAL_CODE_2_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(DEBTOR_FISCAL_CODE_2)).thenReturn(searchTokenResponse);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(DEBTOR_FISCAL_CODE_2)).thenReturn(DEBTOR_FISCAL_CODE_2_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -774,7 +764,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
@@ -784,11 +774,9 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_KO_AttachmentNameInvalid(String attachmentName) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
             cart.getPayload().setMdAttachPayer(ReceiptMetadata.builder().name(attachmentName).build());
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-            SearchTokenResponse searchTokenResponse = new SearchTokenResponse();
-            searchTokenResponse.setToken(PAYER_FISCAL_CODE_TOKENIZED);
-            when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(searchTokenResponse);
+            when(cartReceiptCosmosService.getCartReceipt(CART_ID)).thenReturn(cart);
+            when(tokenizerService.getFiscalCodeToken(PAYER_FISCAL_CODE)).thenReturn(PAYER_FISCAL_CODE_TOKENIZED);
 
             AttachmentNotFoundException exception = assertThrows(
                     AttachmentNotFoundException.class,
@@ -796,11 +784,16 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
+            verify(receiptCosmosService, never()).getReceipt(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
-        private CartForReceipt getCart(CartStatusType cartStatusType, Integer errorCodePayer, Integer errorCodeDebtor1, Integer errorCodeDebtor2) {
+        private CartForReceipt getCart(
+                CartStatusType cartStatusType,
+                Integer errorCodePayer,
+                Integer errorCodeDebtor1,
+                Integer errorCodeDebtor2
+        ) {
             return CartForReceipt.builder()
                     .cartId(CART_ID)
                     .status(cartStatusType)
