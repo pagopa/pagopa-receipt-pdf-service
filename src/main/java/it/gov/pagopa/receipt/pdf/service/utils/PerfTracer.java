@@ -36,6 +36,8 @@ public final class PerfTracer implements AutoCloseable {
     public static final String MDC_ELAPSED_MS = MDC_PREFIX + "elapsedMs";
     public static final String FOUND_TAG = "found";
     public static final String CONTAINER_TAG = "container";
+    public static final String VALID_TAG = "valid";
+    public static final String IS_CART_TAG = "isCart";
 
     private final Logger logger;
     private final String step;
