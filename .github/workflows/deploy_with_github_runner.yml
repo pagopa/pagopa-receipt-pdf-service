@@ -25,7 +25,7 @@ jobs:
       contents: read
     steps:
       - name: Deploy
-        uses: pagopa/github-actions-template/aks-deploy@main
+        uses: pagopa/github-actions-template/aks-deploy@705d571bb13b279776fd20e9eb20232dc25679e4 # main
         with:
           branch: ${{ inputs.branch }}
           client_id: ${{ secrets.CLIENT_ID }}
