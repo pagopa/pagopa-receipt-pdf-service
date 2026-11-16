@@ -3,6 +3,7 @@ package it.gov.pagopa.receipt.pdf.service.service.impl;
 import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
+import it.gov.pagopa.receipt.pdf.service.client.ReceiptPdfGeneratorClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
 import it.gov.pagopa.receipt.pdf.service.exception.*;
 import it.gov.pagopa.receipt.pdf.service.model.ReceiptPdfResponse;
@@ -14,33 +15,41 @@ import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.Objects;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
-import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.*;
+import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.sanitize;
 import static it.gov.pagopa.receipt.pdf.service.utils.Constants.MDC_THIRD_PARTY_ID;
 
 @ApplicationScoped
 public class PdfService {
     public static final int PDF_TEMPLATE_ERROR_CODE = 903;
+    private static final Logger logger = LoggerFactory.getLogger(PdfService.class);
 
     private final ReceiptCosmosClient cosmosClient;
     private final CartReceiptCosmosClient cartReceiptCosmosClient;
     private final TokenizerService tokenizerService;
     private final ReceiptBlobClient receiptBlobClient;
+    private final ReceiptPdfGeneratorClient generatorClient;
 
     @Inject
     public PdfService(
             ReceiptCosmosClient cosmosClient, CartReceiptCosmosClient cartReceiptCosmosClient,
             TokenizerService tokenizerService,
-            ReceiptBlobClient receiptBlobClient
+            ReceiptBlobClient receiptBlobClient,
+            @RestClient ReceiptPdfGeneratorClient generatorClient
     ) {
         this.cosmosClient = cosmosClient;
         this.cartReceiptCosmosClient = cartReceiptCosmosClient;
         this.tokenizerService = tokenizerService;
         this.receiptBlobClient = receiptBlobClient;
+        this.generatorClient = generatorClient;
     }
 
     /**
@@ -60,27 +69,54 @@ public class PdfService {
     public ReceiptPdfResponse getReceiptPdf(String thirdPartyId, String requestFiscalCode) throws
             FiscalCodeNotAuthorizedException, BlobStorageClientException, AttachmentNotFoundException,
             ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
-        String attachmentName;
-
         try {
             MDC.put(MDC_THIRD_PARTY_ID, thirdPartyId);
-
-            if (CommonUtils.isCart(thirdPartyId)) {
-                attachmentName = getCartAttachmentName(thirdPartyId, requestFiscalCode);
-            } else {
-                attachmentName = getReceiptAttachmentName(thirdPartyId, requestFiscalCode);
+            try {
+                return retrieveReceiptPdf(thirdPartyId, requestFiscalCode);
+            } catch (PdfServiceException e) {
+                // If the PDF is not found, we try to regenerate it and retrieve it again
+                boolean regenerated = regenerate(thirdPartyId, e);
+                if (!regenerated) {
+                    // If the regeneration fails, we throw the original exception to be handled by the controller
+                    throw e;
+                }
+                return retrieveReceiptPdf(thirdPartyId, requestFiscalCode);
             }
-
-            if (attachmentName == null || attachmentName.isEmpty() || attachmentName.isBlank()) {
-                throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
-            }
-
-            return ReceiptPdfResponse.builder()
-                    .attachmentName(attachmentName)
-                    .pdfFile(this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
-                    .build();
         } finally {
             MDC.remove(MDC_THIRD_PARTY_ID);
+        }
+    }
+
+    private ReceiptPdfResponse retrieveReceiptPdf(String thirdPartyId, String requestFiscalCode) throws
+            FiscalCodeNotAuthorizedException, BlobStorageClientException, AttachmentNotFoundException,
+            ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
+        String attachmentName = CommonUtils.isCart(thirdPartyId)
+                ? getCartAttachmentName(thirdPartyId, requestFiscalCode)
+                : getReceiptAttachmentName(thirdPartyId, requestFiscalCode);
+
+        if (attachmentName == null || attachmentName.isBlank()) {
+            throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
+        }
+
+        return ReceiptPdfResponse.builder()
+                .attachmentName(attachmentName)
+                .pdfFile(this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
+                .build();
+    }
+
+    private boolean regenerate(String thirdPartyId, Exception originalException) {
+        try (Response response = CommonUtils.isCart(thirdPartyId)
+                ? generatorClient.regenerateCart(CommonUtils.getPaymentId(thirdPartyId))
+                : generatorClient.regenerateReceipt(thirdPartyId)) {
+            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                logger.error("PDF regeneration failed with HTTP status {}", response.getStatus());
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            originalException.addSuppressed(e);
+            logger.error("PDF regeneration failed", e);
+            return false;
         }
     }
 
