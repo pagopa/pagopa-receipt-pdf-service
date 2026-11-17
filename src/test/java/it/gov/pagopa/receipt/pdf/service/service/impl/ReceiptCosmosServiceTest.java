@@ -9,7 +9,6 @@ import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.model.IOMessage;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptError;
-import it.gov.pagopa.receipt.pdf.service.utils.Aes256Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,16 +31,17 @@ class ReceiptCosmosServiceTest {
     private static final String TEST_KEY = "test-secret-key-32-chars-long-!!";
     private static final String TEST_SALT = "test-salt";
 
+    private static Aes256Service aes256Service;
+
     @BeforeAll
     static void globalSetup() {
-        // Initialize Aes256Utils with test keys so internal decryption calls don't fail
-        Aes256Utils.setKeys(TEST_KEY, TEST_SALT);
+        aes256Service = new Aes256Service(TEST_KEY, TEST_SALT);
     }
 
     @BeforeEach
     void setUp() {
         receiptCosmosClientMock = mock(ReceiptCosmosClient.class);
-        sut = new ReceiptCosmosService(receiptCosmosClientMock);
+        sut = new ReceiptCosmosService(receiptCosmosClientMock, aes256Service);
     }
 
     // --- getReceipt Tests ---
@@ -106,7 +106,7 @@ class ReceiptCosmosServiceTest {
     @DisplayName("getReceiptError: Success with Payload Decryption")
     void getReceiptErrorSuccessWithDecryption() throws ReceiptNotFoundException, Aes256Exception {
         String originalPayload = "SecretData";
-        String encryptedPayload = Aes256Utils.encrypt(originalPayload);
+        String encryptedPayload = aes256Service.encrypt(originalPayload);
 
         ReceiptError receiptError = new ReceiptError();
         receiptError.setMessagePayload(encryptedPayload);

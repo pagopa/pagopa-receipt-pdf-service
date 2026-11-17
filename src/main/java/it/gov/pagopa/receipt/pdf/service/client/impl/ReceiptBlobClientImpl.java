@@ -7,6 +7,7 @@ import com.azure.storage.blob.models.BlobStorageException;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.exception.BlobStorageClientException;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -59,7 +60,7 @@ public class ReceiptBlobClientImpl implements ReceiptBlobClient {
             BlobClient blobClient
     ) throws BlobStorageClientException, AttachmentNotFoundException {
 
-        try {
+        try(PerfTracer tracer = PerfTracer.start(logger, "downloadAttachment")) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
             blobClient.downloadStreamWithResponse(

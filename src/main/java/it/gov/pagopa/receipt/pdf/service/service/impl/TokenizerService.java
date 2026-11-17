@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class TokenizerService {
     private final Logger logger = LoggerFactory.getLogger(TokenizerService.class);
+
     private final PDVTokenizerClient pdvTokenizerClient;
 
     @Inject
@@ -22,7 +23,7 @@ public class TokenizerService {
         this.pdvTokenizerClient = pdvTokenizerClient;
     }
 
-    public SearchTokenResponse getSearchTokenResponse(String requestFiscalCode)
+    public String getFiscalCodeToken(String requestFiscalCode)
             throws FiscalCodeNotAuthorizedException {
         try (PerfTracer tracer = PerfTracer.start(logger, "tokenizer.searchToken.http")) {
             SearchTokenResponse searchTokenResponse =
@@ -32,7 +33,7 @@ public class TokenizerService {
             if (!hasToken) {
                 throw new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "Missing token");
             }
-            return searchTokenResponse;
+            return searchTokenResponse.getToken();
         } catch (FiscalCodeNotAuthorizedException e) {
             throw e;
         } catch (Exception e) {

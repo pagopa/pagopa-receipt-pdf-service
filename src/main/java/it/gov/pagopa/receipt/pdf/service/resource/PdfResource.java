@@ -1,11 +1,20 @@
 package it.gov.pagopa.receipt.pdf.service.resource;
 
 import io.quarkus.arc.profile.IfBuildProfile;
-import it.gov.pagopa.receipt.pdf.service.exception.*;
+import it.gov.pagopa.receipt.pdf.service.exception.AttachmentNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.BlobStorageClientException;
+import it.gov.pagopa.receipt.pdf.service.exception.CartNotFoundException;
+import it.gov.pagopa.receipt.pdf.service.exception.ErrorHandlingPdfAttachmentFileException;
+import it.gov.pagopa.receipt.pdf.service.exception.FiscalCodeNotAuthorizedException;
+import it.gov.pagopa.receipt.pdf.service.exception.InvalidCartException;
+import it.gov.pagopa.receipt.pdf.service.exception.InvalidFiscalCodeHeaderException;
+import it.gov.pagopa.receipt.pdf.service.exception.InvalidReceiptException;
+import it.gov.pagopa.receipt.pdf.service.exception.ReceiptNotFoundException;
 import it.gov.pagopa.receipt.pdf.service.filters.LoggedAPI;
 import it.gov.pagopa.receipt.pdf.service.model.ReceiptPdfResponse;
 import it.gov.pagopa.receipt.pdf.service.service.impl.PdfService;
 import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -19,13 +28,18 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_500;
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.PDFS_901;
-import static it.gov.pagopa.receipt.pdf.service.utils.Constants.*;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.FILENAME_RESPONSE_HEADER;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.FISCAL_CODE_HEADER;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.FISCAL_CODE_LENGTH;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.MDC_THIRD_PARTY_ID;
+import static it.gov.pagopa.receipt.pdf.service.utils.Constants.THIRD_PARTY_ID_PARAM;
 
 @Tag(name = "PDF", description = "PDF operations")
 @Path("/pdf")
@@ -61,10 +75,15 @@ public class PdfResource {
     public RestResponse<byte[]> getReceiptPdf(
             @PathParam(THIRD_PARTY_ID_PARAM) String thirdPartyId,
             @QueryParam(FISCAL_CODE_HEADER) String requestFiscalCode
-    )
-            throws InvalidFiscalCodeHeaderException, FiscalCodeNotAuthorizedException, ErrorHandlingPdfAttachmentFileException,
-            AttachmentNotFoundException, BlobStorageClientException, ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
-
+    ) throws InvalidFiscalCodeHeaderException,
+            FiscalCodeNotAuthorizedException,
+            ErrorHandlingPdfAttachmentFileException,
+            AttachmentNotFoundException,
+            BlobStorageClientException,
+            ReceiptNotFoundException,
+            CartNotFoundException,
+            InvalidReceiptException,
+            InvalidCartException {
         // replace new line and tab from user input to avoid log injection
         thirdPartyId = CommonUtils.sanitize(thirdPartyId);
 
@@ -75,16 +94,22 @@ public class PdfResource {
         // replace new line and tab from user input to avoid log injection
         requestFiscalCode = CommonUtils.sanitize(requestFiscalCode);
 
-        ReceiptPdfResponse receiptPdfResponse = this.pdfService.getReceiptPdf(thirdPartyId, requestFiscalCode);
-        try (InputStream inputStream = receiptPdfResponse.getPdfFile()) {
-            return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
-                    .header("content-type", "application/pdf")
-                    .header("content-disposition", "attachment;")
-                    .header(FILENAME_RESPONSE_HEADER, receiptPdfResponse.getAttachmentName())
-                    .build();
-        } catch (IOException e) {
-            logger.error("Error handling the stream generated from pdf attachment");
-            throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
+        MDC.put(MDC_THIRD_PARTY_ID, thirdPartyId);
+        try (PerfTracer tracer = PerfTracer.start(logger, "getReceiptPdf.endpoint")) {
+            ReceiptPdfResponse receiptPdfResponse = this.pdfService.getReceiptPdf(thirdPartyId, requestFiscalCode);
+
+            try (InputStream inputStream = receiptPdfResponse.getPdfFile()) {
+                return RestResponse.ResponseBuilder.ok(inputStream.readAllBytes())
+                        .header("content-type", "application/pdf")
+                        .header("content-disposition", "attachment;")
+                        .header(FILENAME_RESPONSE_HEADER, receiptPdfResponse.getAttachmentName())
+                        .build();
+            } catch (IOException e) {
+                logger.error("Error handling the stream generated from pdf attachment");
+                throw new ErrorHandlingPdfAttachmentFileException(PDFS_500, PDFS_500.getErrorMessage(), e);
+            }
+        } finally {
+            MDC.remove(MDC_THIRD_PARTY_ID);
         }
     }
 }

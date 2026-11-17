@@ -1,6 +1,5 @@
 package it.gov.pagopa.receipt.pdf.service.service.impl;
 
-import it.gov.pagopa.receipt.pdf.service.client.CartReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptBlobClient;
 import it.gov.pagopa.receipt.pdf.service.client.ReceiptCosmosClient;
 import it.gov.pagopa.receipt.pdf.service.enumeration.ReceiptStatusType;
@@ -12,33 +11,36 @@ import it.gov.pagopa.receipt.pdf.service.model.cart.Payload;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.Receipt;
 import it.gov.pagopa.receipt.pdf.service.model.receipt.ReceiptMetadata;
 import it.gov.pagopa.receipt.pdf.service.utils.CommonUtils;
+import it.gov.pagopa.receipt.pdf.service.utils.PerfTracer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.MDC;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
 
 import static it.gov.pagopa.receipt.pdf.service.enumeration.AppErrorCodeEnum.*;
 import static it.gov.pagopa.receipt.pdf.service.utils.CommonUtils.*;
-import static it.gov.pagopa.receipt.pdf.service.utils.Constants.MDC_THIRD_PARTY_ID;
+import static it.gov.pagopa.receipt.pdf.service.utils.PerfTracer.IS_CART_TAG;
 
+@Slf4j
 @ApplicationScoped
 public class PdfService {
     public static final int PDF_TEMPLATE_ERROR_CODE = 903;
 
-    private final ReceiptCosmosClient cosmosClient;
-    private final CartReceiptCosmosClient cartReceiptCosmosClient;
+    private final ReceiptCosmosService receiptCosmosService;
+    private final CartReceiptCosmosService cartReceiptCosmosService;
     private final TokenizerService tokenizerService;
     private final ReceiptBlobClient receiptBlobClient;
 
     @Inject
     public PdfService(
-            ReceiptCosmosClient cosmosClient, CartReceiptCosmosClient cartReceiptCosmosClient,
+            ReceiptCosmosService receiptCosmosService,
+            CartReceiptCosmosService cartReceiptCosmosService,
             TokenizerService tokenizerService,
             ReceiptBlobClient receiptBlobClient
     ) {
-        this.cosmosClient = cosmosClient;
-        this.cartReceiptCosmosClient = cartReceiptCosmosClient;
+        this.receiptCosmosService = receiptCosmosService;
+        this.cartReceiptCosmosService = cartReceiptCosmosService;
         this.tokenizerService = tokenizerService;
         this.receiptBlobClient = receiptBlobClient;
     }
@@ -62,16 +64,15 @@ public class PdfService {
             ReceiptNotFoundException, CartNotFoundException, InvalidReceiptException, InvalidCartException {
         String attachmentName;
 
-        try {
-            MDC.put(MDC_THIRD_PARTY_ID, thirdPartyId);
-
-            if (CommonUtils.isCart(thirdPartyId)) {
+        boolean isCart = CommonUtils.isCart(thirdPartyId);
+        try (PerfTracer t = PerfTracer.start(log, "getReceiptPdf").tag(IS_CART_TAG, isCart)) {
+            if (isCart) {
                 attachmentName = getCartAttachmentName(thirdPartyId, requestFiscalCode);
             } else {
                 attachmentName = getReceiptAttachmentName(thirdPartyId, requestFiscalCode);
             }
 
-            if (attachmentName == null || attachmentName.isEmpty() || attachmentName.isBlank()) {
+            if (attachmentName == null || attachmentName.isBlank()) {
                 throw new AttachmentNotFoundException(PDFS_716, PDFS_716.getErrorMessage());
             }
 
@@ -79,8 +80,6 @@ public class PdfService {
                     .attachmentName(attachmentName)
                     .pdfFile(this.receiptBlobClient.getAttachmentFromBlobStorage(attachmentName))
                     .build();
-        } finally {
-            MDC.remove(MDC_THIRD_PARTY_ID);
         }
     }
 
@@ -89,7 +88,7 @@ public class PdfService {
             String requestFiscalCode
     ) throws ReceiptNotFoundException, InvalidReceiptException, FiscalCodeNotAuthorizedException, InvalidCartException, AttachmentNotFoundException {
         String attachmentName;
-        Receipt receipt = this.cosmosClient.getReceiptDocument(thirdPartyId);
+        Receipt receipt = this.receiptCosmosService.getReceipt(thirdPartyId);
 
         if (ReceiptStatusType.PDF_WAITING_TO_BE_GENERATED.contains(receipt.getStatus())) {
             throw new AttachmentNotFoundException(PDFS_714, PDFS_714.getErrorMessage());
@@ -101,13 +100,13 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
-        String fiscalCode = this.tokenizerService.getSearchTokenResponse(requestFiscalCode).getToken();
-        if (Objects.equals(receipt.getEventData().getDebtorFiscalCode(), fiscalCode)) {
+        String token = getFiscalCodeToken(requestFiscalCode);
+        if (Objects.equals(receipt.getEventData().getDebtorFiscalCode(), token)) {
             if (receipt.getMdAttach() == null) {
                 throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
             }
             attachmentName = receipt.getMdAttach().getName();
-        } else if (Objects.equals(receipt.getEventData().getPayerFiscalCode(), fiscalCode)) {
+        } else if (Objects.equals(receipt.getEventData().getPayerFiscalCode(), token)) {
             if (receipt.getMdAttachPayer() == null) {
                 throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
             }
@@ -126,7 +125,7 @@ public class PdfService {
         String attachmentName;
         String cartId = CommonUtils.getPaymentId(thirdPartyId);
 
-        CartForReceipt cart = this.cartReceiptCosmosClient.getCartForReceiptDocument(cartId);
+        CartForReceipt cart = this.cartReceiptCosmosService.getCartReceipt(cartId);
 
         if (CartStatusType.PDF_WAITING_TO_BE_GENERATED.contains(cart.getStatus())) {
             throw new AttachmentNotFoundException(PDFS_714, PDFS_714.getErrorMessage());
@@ -138,9 +137,9 @@ public class PdfService {
             throw new AttachmentNotFoundException(PDFS_715, PDFS_715.getErrorMessage());
         }
 
-        String fiscalCode = this.tokenizerService.getSearchTokenResponse(requestFiscalCode).getToken();
+        String token = getFiscalCodeToken(requestFiscalCode);
         Payload cartPayload = cart.getPayload();
-        if (Objects.equals(cartPayload.getPayerFiscalCode(), fiscalCode)) {
+        if (Objects.equals(cartPayload.getPayerFiscalCode(), token)) {
             if (cartPayload.getMdAttachPayer() == null) {
                 throw new InvalidCartException(PDFS_716, PDFS_716.getErrorMessage());
             }
@@ -149,7 +148,7 @@ public class PdfService {
             String bizEventId = CommonUtils.getBizEventId(thirdPartyId);
             ReceiptMetadata mdAttach = cartPayload.getCart().stream()
                     .filter(md ->
-                            Objects.equals(md.getDebtorFiscalCode(), fiscalCode) &&
+                            Objects.equals(md.getDebtorFiscalCode(), token) &&
                                     Objects.equals(md.getBizEventId(), bizEventId)
                     )
                     .findFirst().orElseThrow(() -> new FiscalCodeNotAuthorizedException(
@@ -177,5 +176,11 @@ public class PdfService {
     private boolean isSingleReceiptInCriticalFailure(Receipt receipt) {
         return (receipt.getReasonErr() != null && receipt.getReasonErr().getCode() == PDF_TEMPLATE_ERROR_CODE) ||
                 (receipt.getReasonErrPayer() != null && receipt.getReasonErrPayer().getCode() == PDF_TEMPLATE_ERROR_CODE);
+    }
+
+    private String getFiscalCodeToken(String requestFiscalCode) throws FiscalCodeNotAuthorizedException {
+        try (PerfTracer t = PerfTracer.start(log, "tokenizer.searchToken")) {
+            return this.tokenizerService.getFiscalCodeToken(requestFiscalCode);
+        }
     }
 }
