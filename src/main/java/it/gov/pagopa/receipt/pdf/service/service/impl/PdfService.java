@@ -73,6 +73,8 @@ public class PdfService {
             MDC.put(MDC_THIRD_PARTY_ID, thirdPartyId);
             try {
                 return retrieveReceiptPdf(thirdPartyId, requestFiscalCode);
+            } catch (FiscalCodeNotAuthorizedException e) {
+                throw e;
             } catch (PdfServiceException e) {
                 // If the PDF is not found, we try to regenerate it and retrieve it again
                 boolean regenerated = regenerate(thirdPartyId, e);

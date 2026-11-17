@@ -176,8 +176,7 @@ class PdfServiceTest {
 
     @Test
     @SneakyThrows
-    void regeneratesForAuthorizationFailure() {
-        when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenAnswer(invocation -> Response.ok().build());
+    void doesNotRegenerateReceiptForAuthorizationFailure() {
         when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID))
                 .thenReturn(getReceipt(ReceiptStatusType.GENERATED, null, null));
         SearchTokenResponse token = new SearchTokenResponse();
@@ -186,8 +185,29 @@ class PdfServiceTest {
 
         assertThrows(FiscalCodeNotAuthorizedException.class,
                 () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, INVALID_FISCAL_CODE));
-        verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
-        verify(tokenizerService, times(2)).getSearchTokenResponse(INVALID_FISCAL_CODE);
+        verify(generatorClient, never()).regenerateReceipt(anyString());
+        verify(generatorClient, never()).regenerateCart(anyString());
+        verify(tokenizerService).getSearchTokenResponse(INVALID_FISCAL_CODE);
+    }
+
+    @Test
+    @SneakyThrows
+    void doesNotRegenerateCartForAuthorizationFailure() {
+        CartForReceipt cart = CartForReceipt.builder()
+                .status(CartStatusType.GENERATED)
+                .payload(Payload.builder().payerFiscalCode(PAYER_FISCAL_CODE_TOKENIZED)
+                        .cart(List.of()).build())
+                .build();
+        when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+        SearchTokenResponse token = new SearchTokenResponse();
+        token.setToken(INVALID_FISCAL_CODE_TOKENIZED);
+        when(tokenizerService.getSearchTokenResponse(INVALID_FISCAL_CODE)).thenReturn(token);
+
+        assertThrows(FiscalCodeNotAuthorizedException.class,
+                () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, INVALID_FISCAL_CODE));
+        verify(generatorClient, never()).regenerateReceipt(anyString());
+        verify(generatorClient, never()).regenerateCart(anyString());
+        verify(tokenizerService).getSearchTokenResponse(INVALID_FISCAL_CODE);
     }
 
     @Nested
