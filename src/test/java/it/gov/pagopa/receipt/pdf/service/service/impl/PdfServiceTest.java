@@ -92,7 +92,7 @@ class PdfServiceTest {
     void regeneratesSingleReceiptAndRetrievesFreshAttachment() {
         when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenAnswer(invocation -> Response.ok().build());
         when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID))
-                .thenThrow(new ReceiptNotFoundException(PDFS_716, "not found"))
+                .thenReturn(getReceipt(ReceiptStatusType.FAILED, ERROR_CODE_CRITICAL, null))
                 .thenReturn(getReceipt(ReceiptStatusType.GENERATED, null, null));
         SearchTokenResponse token = new SearchTokenResponse();
         token.setToken(PAYER_FISCAL_CODE_TOKENIZED);
@@ -110,11 +110,16 @@ class PdfServiceTest {
     @SneakyThrows
     void regeneratesCartUsingCartIdAndRetriesOnlyOnce() {
         when(generatorClient.regenerateCart(CART_ID)).thenAnswer(invocation -> Response.ok().build());
-        CartNotFoundException failure = new CartNotFoundException(PDFS_716, "not found");
-        when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenThrow(failure);
+        CartForReceipt cart = CartForReceipt.builder()
+                .status(CartStatusType.FAILED)
+                .payload(Payload.builder()
+                        .reasonErrPayer(ReasonError.builder().code(ERROR_CODE_CRITICAL).build()).build())
+                .build();
+        when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
-        assertSame(failure, assertThrows(CartNotFoundException.class,
-                () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, PAYER_FISCAL_CODE)));
+        InvalidCartException failure = assertThrows(InvalidCartException.class,
+                () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, PAYER_FISCAL_CODE));
+        assertEquals(PDFS_716, failure.getErrorCode());
         verify(generatorClient).regenerateCart(CART_ID);
         verify(generatorClient, never()).regenerateReceipt(anyString());
         verify(cartReceiptCosmosClient, times(2)).getCartForReceiptDocument(CART_ID);
@@ -130,7 +135,12 @@ class PdfServiceTest {
                         .mdAttachPayer(ReceiptMetadata.builder().name(ATTACHMENT_NAME_PAYER).build()).build())
                 .build();
         when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID))
-                .thenThrow(new CartNotFoundException(PDFS_716, "not found")).thenReturn(cart);
+                .thenReturn(CartForReceipt.builder()
+                        .status(CartStatusType.FAILED)
+                        .payload(Payload.builder()
+                                .reasonErrPayer(ReasonError.builder().code(ERROR_CODE_CRITICAL).build()).build())
+                        .build())
+                .thenReturn(cart);
         SearchTokenResponse token = new SearchTokenResponse();
         token.setToken(PAYER_FISCAL_CODE_TOKENIZED);
         when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(token);
@@ -144,33 +154,61 @@ class PdfServiceTest {
 
     @Test
     @SneakyThrows
-    void regeneratesAndRereadsAfterBlobFailure() {
-        when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenAnswer(invocation -> Response.ok().build());
+    void doesNotRegenerateAfterBlobFailure() {
         when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID))
                 .thenReturn(getReceipt(ReceiptStatusType.GENERATED, null, null));
         SearchTokenResponse token = new SearchTokenResponse();
         token.setToken(PAYER_FISCAL_CODE_TOKENIZED);
         when(tokenizerService.getSearchTokenResponse(PAYER_FISCAL_CODE)).thenReturn(token);
-        when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER))
-                .thenThrow(new BlobStorageClientException(PDFS_716, "blob unavailable"))
-                .thenReturn(new ByteArrayInputStream("pdf".getBytes(StandardCharsets.UTF_8)));
+        BlobStorageClientException failure = new BlobStorageClientException(PDFS_716, "blob unavailable");
+        when(receiptBlobClient.getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER)).thenThrow(failure);
 
-        assertEquals(ATTACHMENT_NAME_PAYER, sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE).getAttachmentName());
-        verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
-        verify(receiptBlobClient, times(2)).getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER);
+        assertSame(failure, assertThrows(BlobStorageClientException.class,
+                () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)));
+        verifyNoInteractions(generatorClient);
+        verify(receiptCosmosClient).getReceiptDocument(GENERIC_EVENT_ID);
+        verify(receiptBlobClient).getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = AppErrorCodeEnum.class, names = {"PDFS_716", "PDFS_800"})
+    @SneakyThrows
+    void doesNotRegenerateWhenReceiptIsNotFound(AppErrorCodeEnum errorCode) {
+        ReceiptNotFoundException failure = new ReceiptNotFoundException(errorCode, "not found");
+        when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenThrow(failure);
+
+        assertSame(failure, assertThrows(ReceiptNotFoundException.class,
+                () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)));
+        verifyNoInteractions(generatorClient, tokenizerService, receiptBlobClient, cartReceiptCosmosClient);
+        verify(receiptCosmosClient).getReceiptDocument(GENERIC_EVENT_ID);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = AppErrorCodeEnum.class, names = {"PDFS_716", "PDFS_801"})
+    @SneakyThrows
+    void doesNotRegenerateWhenCartIsNotFound(AppErrorCodeEnum errorCode) {
+        CartNotFoundException failure = new CartNotFoundException(errorCode, "not found");
+        when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenThrow(failure);
+
+        assertSame(failure, assertThrows(CartNotFoundException.class,
+                () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE)));
+        verifyNoInteractions(generatorClient, tokenizerService, receiptBlobClient, receiptCosmosClient);
+        verify(cartReceiptCosmosClient).getCartForReceiptDocument(CART_ID);
     }
 
     @Test
     @SneakyThrows
     void preservesOriginalErrorWhenGeneratorFails() {
-        ReceiptNotFoundException failure = new ReceiptNotFoundException(PDFS_716, "not found");
         RuntimeException generatorFailure = new RuntimeException("generator unavailable");
-        when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenThrow(failure);
+        when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID))
+                .thenReturn(getReceipt(ReceiptStatusType.FAILED, ERROR_CODE_CRITICAL, null));
         when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenThrow(generatorFailure);
 
-        assertSame(failure, assertThrows(ReceiptNotFoundException.class,
-                () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE)));
+        InvalidReceiptException failure = assertThrows(InvalidReceiptException.class,
+                () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE));
+        assertEquals(PDFS_716, failure.getErrorCode());
         assertArrayEquals(new Throwable[]{generatorFailure}, failure.getSuppressed());
+        verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
         verify(receiptCosmosClient).getReceiptDocument(GENERIC_EVENT_ID);
     }
 
@@ -446,13 +484,11 @@ class PdfServiceTest {
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
-        @ParameterizedTest
-        @NullAndEmptySource
-        @ValueSource(strings = {" "})
+        @Test
         @SneakyThrows
-        void regeneratesReceiptWhenAttachmentNameIsMissing(String attachmentName) {
+        void regeneratesReceiptWhenAttachmentMetadataIsMissing() {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
-            receipt.setMdAttachPayer(ReceiptMetadata.builder().name(attachmentName).build());
+            receipt.setMdAttachPayer(null);
             Receipt regenerated = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt, regenerated);
             when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenAnswer(invocation -> Response.ok().build());
@@ -506,7 +542,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
+            verifyNoInteractions(generatorClient);
+            verify(receiptCosmosClient).getReceiptDocument(GENERIC_EVENT_ID);
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -893,13 +930,11 @@ class PdfServiceTest {
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
-        @ParameterizedTest
-        @NullAndEmptySource
-        @ValueSource(strings = {" "})
+        @Test
         @SneakyThrows
-        void regeneratesCartWhenAttachmentNameIsMissing(String attachmentName) {
+        void regeneratesCartWhenAttachmentMetadataIsMissing() {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
-            cart.getPayload().setMdAttachPayer(ReceiptMetadata.builder().name(attachmentName).build());
+            cart.getPayload().setMdAttachPayer(null);
             CartForReceipt regenerated = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart, regenerated);
             when(generatorClient.regenerateCart(CART_ID)).thenAnswer(invocation -> Response.ok().build());
@@ -973,7 +1008,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(generatorClient).regenerateCart(CART_ID);
+            verifyNoInteractions(generatorClient);
+            verify(cartReceiptCosmosClient).getCartForReceiptDocument(CART_ID);
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
