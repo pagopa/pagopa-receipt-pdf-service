@@ -160,7 +160,7 @@ microservice-chart: &microservice-chart
         repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
         tag: '0.7.0'
         pullPolicy: Always
-      envConfig: {JAVA_TOOL_OPTIONS: "-XX:-UseBASE64Intrinsics"}
+      envConfig: {}
       envSecret: {}
 pagopa-receipt-pdf-service-helpdesk:
   !!merge <<: *microservice-chart
