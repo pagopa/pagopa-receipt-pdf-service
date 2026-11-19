@@ -30,7 +30,7 @@ import static it.gov.pagopa.receipt.pdf.service.utils.Constants.*;
 @Tag(name = "PDF", description = "PDF operations")
 @Path("/pdf")
 @LoggedAPI
-@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "pdf"})
+@IfBuildProfile(anyOf = {"build", "dev", "local", "uat", "prod", "test", "pdf"})
 public class PdfResource {
     private final Logger logger = LoggerFactory.getLogger(PdfResource.class);
     private final PdfService pdfService;
