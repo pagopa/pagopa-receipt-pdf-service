@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service'
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: '0.15.6-3-PAGOPA-3850-receipts-pdf-fix-errori-get-receipts'
+    tag: '0.15.7'
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -22,7 +22,7 @@ microservice-chart: &microservice-chart
     periodSeconds: 10
   deployment: &deployment
     create: true
-    replicas: 3 # equals to HPA min
+    replicas: 10 # equals to HPA min
     strategy:
       type: RollingUpdate
       rollingUpdate:
@@ -70,8 +70,8 @@ microservice-chart: &microservice-chart
       cpu: '900m'
   autoscaling: &autoscaling
     enable: true
-    minReplica: 3
-    maxReplica: 10
+    minReplica: 10
+    maxReplica: 20
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
     triggers:
@@ -110,7 +110,7 @@ microservice-chart: &microservice-chart
     QUARKUS_OTEL_RESOURCE_ATTRIBUTES: 'deployment.environment=prod'
     TOKENIZER_URL: 'https://api.tokenizer.pdv.pagopa.it'
     RECEIPT_PDF_GENERATOR_URL: 'https://api.platform.pagopa.it/receipts/helpdesk/generator/v1'
-    JAVA_TOOL_OPTIONS: '-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m'
+    JAVA_TOOL_OPTIONS: '-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m -XX:-UseBASE64Intrinsics'
     TOKENIZER_MAX_RETRY: '3'
     TOKENIZER_DELAY: '200'
     TOKENIZER_EXPB_MAX_DELAY: '6000'
