@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>it.gov.pagopa</groupId>
   <artifactId>pdf-receipt-service</artifactId>
-  <version>0.15.7</version>
+  <version>0.15.7-1-PAGOPA-3850-receipts-pdf-fix-errori-get-receipts</version>
   <name>pagopa-pdf-receipt-service</name>
   <properties>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
