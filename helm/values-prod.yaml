@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: 'pagopa-receipt-pdf-service'
   image:
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
-    tag: '0.15.7'
+    tag: '0.15.7-1-PAGOPA-3850-receipts-pdf-fix-errori-get-receipts'
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -109,6 +109,7 @@ microservice-chart: &microservice-chart
     QUARKUS_OTEL_TRACES_SAMPLER_ARG: '1.0'
     QUARKUS_OTEL_RESOURCE_ATTRIBUTES: 'deployment.environment=prod'
     TOKENIZER_URL: 'https://api.tokenizer.pdv.pagopa.it'
+    RECEIPT_PDF_GENERATOR_URL: 'https://api.platform.pagopa.it/receipts/helpdesk/generator/v1'
     JAVA_TOOL_OPTIONS: '-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m -XX:-UseBASE64Intrinsics'
     TOKENIZER_MAX_RETRY: '3'
     TOKENIZER_DELAY: '200'
@@ -124,6 +125,7 @@ microservice-chart: &microservice-chart
     COSMOS_RECEIPT_KEY: 'cosmos-receipt-pkey'
     COSMOS_BIZEVENT_KEY: 'cosmos-bizevent-pkey'
     TOKENIZER_API_KEY: 'tokenizer-api-key'
+    RECEIPT_PDF_GENERATOR_API_KEY: 'receipt-pdf-generator-api-key'
     BLOB_STORAGE_CONN_STRING: 'receipts-storage-account-connection-string'
     COSMOS_RECEIPTS_CONN_STRING: 'cosmos-receipt-connection-string'
     QUARKUS_OTEL_EXPORTER_OTLP_HEADERS: 'elastic-otl-secret-token'

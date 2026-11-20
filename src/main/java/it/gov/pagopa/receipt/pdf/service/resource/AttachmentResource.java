@@ -38,7 +38,7 @@ import static it.gov.pagopa.receipt.pdf.service.utils.Constants.*;
 @Tag(name = "Attachments", description = "Attachments operations")
 @Path("/messages")
 @LoggedAPI
-@IfBuildProfile(anyOf = {"build", "dev", "uat", "prod", "test", "attachments"})
+@IfBuildProfile(anyOf = {"build", "dev", "local", "uat", "prod", "test", "attachments"})
 public class AttachmentResource {
     private final Logger logger = LoggerFactory.getLogger(AttachmentResource.class);
     private final AttachmentsService attachmentsService;
