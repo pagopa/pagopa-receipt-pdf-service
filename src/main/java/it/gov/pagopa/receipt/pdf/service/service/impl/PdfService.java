@@ -53,7 +53,8 @@ public class PdfService {
     }
 
     /**
-     * Retrieve the PDF of a receipt using the given third party id and fiscalCode, only if the fiscal code is authorized to access it
+     * Retrieve the PDF of a receipt using the given third party id and fiscalCode, only if the fiscal code is authorized to access it.
+     * Ownership is checked before regenerating a failed PDF, including the biz event match for cart debtors.
      *
      * @param thirdPartyId      the id of the biz event for single receipt, the id of the transaction concatenated with the biz event for cart receipts
      * @param requestFiscalCode the fiscal code of the user that request the receipt
@@ -77,6 +78,7 @@ public class PdfService {
                 if (e.getErrorCode() != PDFS_716) {
                     throw e;
                 }
+                validateOwnership(thirdPartyId, requestFiscalCode);
                 // If the PDF is not found, we try to regenerate it and retrieve it again
                 boolean regenerated = regenerate(thirdPartyId, e);
                 if (!regenerated) {
@@ -107,6 +109,45 @@ public class PdfService {
                 .build();
     }
 
+    /**
+     * @param thirdPartyId      the ID of the third party
+     * @param requestFiscalCode the fiscal code of the requester
+     * @throws FiscalCodeNotAuthorizedException if the fiscal code is not authorized to access the receipt
+     * @throws ReceiptNotFoundException         if the receipt is not found
+     * @throws CartNotFoundException            if the cart is not found
+     *                                          <p>
+     *                                          This method validates the ownership of the receipt or cart by checking if the fiscal code matches either the payer or debtor fiscal code in the receipt or cart payload. If the fiscal code is not authorized, it throws a FiscalCodeNotAuthorizedException. If the receipt or cart is not found, it throws a ReceiptNotFoundException or CartNotFoundException respectively.
+     */
+    private void validateOwnership(String thirdPartyId, String requestFiscalCode) throws
+            FiscalCodeNotAuthorizedException, ReceiptNotFoundException, CartNotFoundException {
+        String fiscalCode = this.tokenizerService.getSearchTokenResponse(requestFiscalCode).getToken();
+        boolean authorized;
+        if (CommonUtils.isCart(thirdPartyId)) {
+            Payload payload = this.cartReceiptCosmosClient
+                    .getCartForReceiptDocument(CommonUtils.getPaymentId(thirdPartyId)).getPayload();
+            String bizEventId = CommonUtils.getBizEventId(thirdPartyId);
+            authorized = payload != null &&
+                    (Objects.equals(payload.getPayerFiscalCode(), fiscalCode) ||
+                            (payload.getCart() != null && payload.getCart().stream().anyMatch(payment ->
+                                    Objects.equals(payment.getDebtorFiscalCode(), fiscalCode) &&
+                                            Objects.equals(payment.getBizEventId(), bizEventId))));
+        } else {
+            Receipt receipt = this.cosmosClient.getReceiptDocument(thirdPartyId);
+            authorized = receipt.getEventData() != null &&
+                    (Objects.equals(receipt.getEventData().getDebtorFiscalCode(), fiscalCode) ||
+                            Objects.equals(receipt.getEventData().getPayerFiscalCode(), fiscalCode));
+        }
+        if (fiscalCode == null || !authorized) {
+            throw new FiscalCodeNotAuthorizedException(PDFS_706, String.format(
+                    "Fiscal code is not authorized to access the receipt with id %s", sanitize(thirdPartyId)));
+        }
+    }
+
+    /**
+     * @param thirdPartyId      the ID of the third party
+     * @param originalException the original exception that triggered the regeneration
+     * @return true if the regeneration was successful, false otherwise
+     */
     private boolean regenerate(String thirdPartyId, Exception originalException) {
         try (Response response = CommonUtils.isCart(thirdPartyId)
                 ? generatorClient.regenerateCart(CommonUtils.getPaymentId(thirdPartyId))

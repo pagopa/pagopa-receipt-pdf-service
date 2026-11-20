@@ -93,6 +93,7 @@ class PdfServiceTest {
         when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenAnswer(invocation -> Response.ok().build());
         when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID))
                 .thenReturn(getReceipt(ReceiptStatusType.FAILED, ERROR_CODE_CRITICAL, null))
+                .thenReturn(getReceipt(ReceiptStatusType.FAILED, ERROR_CODE_CRITICAL, null))
                 .thenReturn(getReceipt(ReceiptStatusType.GENERATED, null, null));
         SearchTokenResponse token = new SearchTokenResponse();
         token.setToken(PAYER_FISCAL_CODE_TOKENIZED);
@@ -103,7 +104,7 @@ class PdfServiceTest {
         assertEquals(ATTACHMENT_NAME_PAYER, sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE).getAttachmentName());
         verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
         verify(generatorClient, never()).regenerateCart(anyString());
-        verify(receiptCosmosClient, times(2)).getReceiptDocument(GENERIC_EVENT_ID);
+        verify(receiptCosmosClient, times(3)).getReceiptDocument(GENERIC_EVENT_ID);
     }
 
     @Test
@@ -113,16 +114,18 @@ class PdfServiceTest {
         CartForReceipt cart = CartForReceipt.builder()
                 .status(CartStatusType.FAILED)
                 .payload(Payload.builder()
+                        .payerFiscalCode(PAYER_FISCAL_CODE_TOKENIZED)
                         .reasonErrPayer(ReasonError.builder().code(ERROR_CODE_CRITICAL).build()).build())
                 .build();
         when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+        mockFiscalCode(PAYER_FISCAL_CODE, PAYER_FISCAL_CODE_TOKENIZED);
 
         InvalidCartException failure = assertThrows(InvalidCartException.class,
                 () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, PAYER_FISCAL_CODE));
         assertEquals(PDFS_716, failure.getErrorCode());
         verify(generatorClient).regenerateCart(CART_ID);
         verify(generatorClient, never()).regenerateReceipt(anyString());
-        verify(cartReceiptCosmosClient, times(2)).getCartForReceiptDocument(CART_ID);
+        verify(cartReceiptCosmosClient, times(3)).getCartForReceiptDocument(CART_ID);
     }
 
     @Test
@@ -138,6 +141,7 @@ class PdfServiceTest {
                 .thenReturn(CartForReceipt.builder()
                         .status(CartStatusType.FAILED)
                         .payload(Payload.builder()
+                                .payerFiscalCode(PAYER_FISCAL_CODE_TOKENIZED)
                                 .reasonErrPayer(ReasonError.builder().code(ERROR_CODE_CRITICAL).build()).build())
                         .build())
                 .thenReturn(cart);
@@ -149,7 +153,7 @@ class PdfServiceTest {
 
         assertEquals(ATTACHMENT_NAME_PAYER, sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE).getAttachmentName());
         verify(generatorClient).regenerateCart(CART_ID);
-        verify(cartReceiptCosmosClient, times(2)).getCartForReceiptDocument(CART_ID);
+        verify(cartReceiptCosmosClient, times(3)).getCartForReceiptDocument(CART_ID);
     }
 
     @Test
@@ -202,6 +206,7 @@ class PdfServiceTest {
         RuntimeException generatorFailure = new RuntimeException("generator unavailable");
         when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID))
                 .thenReturn(getReceipt(ReceiptStatusType.FAILED, ERROR_CODE_CRITICAL, null));
+        mockFiscalCode(PAYER_FISCAL_CODE, PAYER_FISCAL_CODE_TOKENIZED);
         when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenThrow(generatorFailure);
 
         InvalidReceiptException failure = assertThrows(InvalidReceiptException.class,
@@ -209,43 +214,81 @@ class PdfServiceTest {
         assertEquals(PDFS_716, failure.getErrorCode());
         assertArrayEquals(new Throwable[]{generatorFailure}, failure.getSuppressed());
         verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
-        verify(receiptCosmosClient).getReceiptDocument(GENERIC_EVENT_ID);
+        verify(receiptCosmosClient, times(2)).getReceiptDocument(GENERIC_EVENT_ID);
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(value = ReceiptStatusType.class, names = {"GENERATED", "NOT_QUEUE_SENT", "FAILED", "TO_REVIEW"})
     @SneakyThrows
-    void doesNotRegenerateReceiptForAuthorizationFailure() {
+    void doesNotRegenerateReceiptForAuthorizationFailure(ReceiptStatusType status) {
         when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID))
-                .thenReturn(getReceipt(ReceiptStatusType.GENERATED, null, null));
+                .thenReturn(getReceipt(status, ERROR_CODE_CRITICAL, ERROR_CODE_CRITICAL));
         SearchTokenResponse token = new SearchTokenResponse();
         token.setToken(INVALID_FISCAL_CODE_TOKENIZED);
         when(tokenizerService.getSearchTokenResponse(INVALID_FISCAL_CODE)).thenReturn(token);
 
-        assertThrows(FiscalCodeNotAuthorizedException.class,
+        FiscalCodeNotAuthorizedException failure = assertThrows(FiscalCodeNotAuthorizedException.class,
                 () -> sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, INVALID_FISCAL_CODE));
-        verify(generatorClient, never()).regenerateReceipt(anyString());
-        verify(generatorClient, never()).regenerateCart(anyString());
+        assertEquals(PDFS_706, failure.getErrorCode());
+        verifyNoInteractions(generatorClient, receiptBlobClient);
+        verify(receiptCosmosClient, times(status == ReceiptStatusType.GENERATED ? 1 : 2))
+                .getReceiptDocument(GENERIC_EVENT_ID);
         verify(tokenizerService).getSearchTokenResponse(INVALID_FISCAL_CODE);
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(value = CartStatusType.class, names = {"GENERATED", "NOT_QUEUE_SENT", "FAILED", "TO_REVIEW"})
     @SneakyThrows
-    void doesNotRegenerateCartForAuthorizationFailure() {
+    void doesNotRegenerateCartForAuthorizationFailure(CartStatusType status) {
         CartForReceipt cart = CartForReceipt.builder()
-                .status(CartStatusType.GENERATED)
+                .status(status)
                 .payload(Payload.builder().payerFiscalCode(PAYER_FISCAL_CODE_TOKENIZED)
-                        .cart(List.of()).build())
+                        .reasonErrPayer(ReasonError.builder().code(ERROR_CODE_CRITICAL).build())
+                        .cart(List.of(CartPayment.builder()
+                                .debtorFiscalCode(DEBTOR_FISCAL_CODE_1_TOKENIZED)
+                                .bizEventId(DEBTOR_1_EVENT_ID)
+                                .reasonErrDebtor(ReasonError.builder().code(ERROR_CODE_CRITICAL).build())
+                                .build())).build())
                 .build();
         when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
         SearchTokenResponse token = new SearchTokenResponse();
         token.setToken(INVALID_FISCAL_CODE_TOKENIZED);
         when(tokenizerService.getSearchTokenResponse(INVALID_FISCAL_CODE)).thenReturn(token);
 
-        assertThrows(FiscalCodeNotAuthorizedException.class,
+        FiscalCodeNotAuthorizedException failure = assertThrows(FiscalCodeNotAuthorizedException.class,
                 () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, INVALID_FISCAL_CODE));
-        verify(generatorClient, never()).regenerateReceipt(anyString());
-        verify(generatorClient, never()).regenerateCart(anyString());
+        assertEquals(PDFS_706, failure.getErrorCode());
+        verifyNoInteractions(generatorClient, receiptBlobClient);
+        verify(cartReceiptCosmosClient, times(status == CartStatusType.GENERATED ? 1 : 2))
+                .getCartForReceiptDocument(CART_ID);
         verify(tokenizerService).getSearchTokenResponse(INVALID_FISCAL_CODE);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @SneakyThrows
+    void doesNotRegenerateFailedCartWithoutMatchingDebtor(List<CartPayment> payments) {
+        CartForReceipt cart = CartForReceipt.builder()
+                .status(CartStatusType.FAILED)
+                .payload(Payload.builder().payerFiscalCode(PAYER_FISCAL_CODE_TOKENIZED)
+                        .reasonErrPayer(ReasonError.builder().code(ERROR_CODE_CRITICAL).build())
+                        .cart(payments).build())
+                .build();
+        when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+        mockFiscalCode(DEBTOR_FISCAL_CODE_1, DEBTOR_FISCAL_CODE_1_TOKENIZED);
+
+        FiscalCodeNotAuthorizedException failure = assertThrows(FiscalCodeNotAuthorizedException.class,
+                () -> sut.getReceiptPdf(THIRD_PARTY_ID_CART_DEBTOR_1, DEBTOR_FISCAL_CODE_1));
+
+        assertEquals(PDFS_706, failure.getErrorCode());
+        verifyNoInteractions(generatorClient, receiptBlobClient);
+        verify(cartReceiptCosmosClient, times(2)).getCartForReceiptDocument(CART_ID);
+    }
+
+    private void mockFiscalCode(String fiscalCode, String token) throws FiscalCodeNotAuthorizedException {
+        SearchTokenResponse response = new SearchTokenResponse();
+        response.setToken(token);
+        when(tokenizerService.getSearchTokenResponse(fiscalCode)).thenReturn(response);
     }
 
     @Nested
@@ -351,6 +394,7 @@ class PdfServiceTest {
         void getReceiptPdf_Receipt_KO_CriticalFailure_Payer(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, ERROR_CODE_CRITICAL, null);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            mockFiscalCode(PAYER_FISCAL_CODE, PAYER_FISCAL_CODE_TOKENIZED);
 
             InvalidReceiptException exception = assertThrows(
                     InvalidReceiptException.class,
@@ -358,7 +402,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
+            verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -372,6 +417,7 @@ class PdfServiceTest {
         void getReceiptPdf_Receipt_KO_CriticalFailure_Debtor(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, null, ERROR_CODE_CRITICAL);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            mockFiscalCode(DEBTOR_FISCAL_CODE_1, DEBTOR_FISCAL_CODE_1_TOKENIZED);
 
             InvalidReceiptException exception = assertThrows(
                     InvalidReceiptException.class,
@@ -379,7 +425,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(DEBTOR_FISCAL_CODE_1);
+            verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -393,6 +440,7 @@ class PdfServiceTest {
         void getReceiptPdf_Receipt_KO_OneCriticalFailure_OneRetryableFailure(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             Receipt receipt = getReceipt(status, ERROR_CODE_RETRYABLE, ERROR_CODE_CRITICAL);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
+            mockFiscalCode(DEBTOR_FISCAL_CODE_1, DEBTOR_FISCAL_CODE_1_TOKENIZED);
 
             InvalidReceiptException exception = assertThrows(
                     InvalidReceiptException.class,
@@ -400,7 +448,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(DEBTOR_FISCAL_CODE_1);
+            verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -427,9 +476,10 @@ class PdfServiceTest {
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
-        @Test
-        void getReceiptPdf_Receipt_KO_TokenizedFiscalCodeNotFound() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
-            Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
+        @ParameterizedTest
+        @EnumSource(value = ReceiptStatusType.class, names = {"IO_NOTIFIED", "FAILED"})
+        void getReceiptPdf_Receipt_KO_TokenizedFiscalCodeNotFound(ReceiptStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+            Receipt receipt = getReceipt(status, ERROR_CODE_CRITICAL, null);
             when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt);
 
             doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
@@ -440,6 +490,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_700, exception.getErrorCode());
 
+            verifyNoInteractions(generatorClient);
             verify(cartReceiptCosmosClient, never()).getCartForReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -490,7 +541,7 @@ class PdfServiceTest {
             Receipt receipt = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
             receipt.setMdAttachPayer(null);
             Receipt regenerated = getReceipt(ReceiptStatusType.IO_NOTIFIED, null, null);
-            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt, regenerated);
+            when(receiptCosmosClient.getReceiptDocument(GENERIC_EVENT_ID)).thenReturn(receipt, receipt, regenerated);
             when(generatorClient.regenerateReceipt(GENERIC_EVENT_ID)).thenAnswer(invocation -> Response.ok().build());
             SearchTokenResponse token = new SearchTokenResponse();
             token.setToken(PAYER_FISCAL_CODE_TOKENIZED);
@@ -500,7 +551,7 @@ class PdfServiceTest {
 
             assertEquals(ATTACHMENT_NAME_PAYER, sut.getReceiptPdf(THIRD_PARTY_ID_RECEIPT, PAYER_FISCAL_CODE).getAttachmentName());
             verify(generatorClient).regenerateReceipt(GENERIC_EVENT_ID);
-            verify(receiptCosmosClient, times(2)).getReceiptDocument(GENERIC_EVENT_ID);
+            verify(receiptCosmosClient, times(3)).getReceiptDocument(GENERIC_EVENT_ID);
             verify(receiptBlobClient).getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER);
         }
 
@@ -565,6 +616,26 @@ class PdfServiceTest {
     @Nested
     @DisplayName("Cart")
     class CartTests {
+        @ParameterizedTest
+        @ValueSource(strings = {
+                THIRD_PARTY_ID_CART_PAYER,
+                THIRD_PARTY_ID_CART_DEBTOR_2,
+                THIRD_PARTY_ID_CART_INVALID_BIZ_EVENT
+        })
+        @SneakyThrows
+        void doesNotRegenerateFailedCartForMismatchedDebtorBizEvent(String thirdPartyId) {
+            CartForReceipt cart = getCart(CartStatusType.FAILED, null, ERROR_CODE_CRITICAL, null);
+            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            mockFiscalCode(DEBTOR_FISCAL_CODE_1, DEBTOR_FISCAL_CODE_1_TOKENIZED);
+
+            FiscalCodeNotAuthorizedException failure = assertThrows(FiscalCodeNotAuthorizedException.class,
+                    () -> sut.getReceiptPdf(thirdPartyId, DEBTOR_FISCAL_CODE_1));
+
+            assertEquals(PDFS_706, failure.getErrorCode());
+            verifyNoInteractions(generatorClient, receiptBlobClient);
+            verify(cartReceiptCosmosClient, times(2)).getCartForReceiptDocument(CART_ID);
+        }
+
         @ParameterizedTest
         @EnumSource(value = CartStatusType.class, names = {
                 "GENERATED",
@@ -690,6 +761,7 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_Payer_KO_CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, ERROR_CODE_CRITICAL, null, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            mockFiscalCode(PAYER_FISCAL_CODE, PAYER_FISCAL_CODE_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -697,7 +769,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
+            verify(generatorClient).regenerateCart(CART_ID);
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -711,6 +784,7 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_Debtor1_KO_CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, ERROR_CODE_CRITICAL, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            mockFiscalCode(DEBTOR_FISCAL_CODE_1, DEBTOR_FISCAL_CODE_1_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -718,7 +792,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(DEBTOR_FISCAL_CODE_1);
+            verify(generatorClient).regenerateCart(CART_ID);
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -732,6 +807,7 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_Debtor2_KO_CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, null, ERROR_CODE_CRITICAL);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            mockFiscalCode(DEBTOR_FISCAL_CODE_2, DEBTOR_FISCAL_CODE_2_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -739,7 +815,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(DEBTOR_FISCAL_CODE_2);
+            verify(generatorClient).regenerateCart(CART_ID);
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -821,6 +898,7 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_KO_PayerRetryableFailure_Debtor1CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, ERROR_CODE_RETRYABLE, ERROR_CODE_CRITICAL, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            mockFiscalCode(PAYER_FISCAL_CODE, PAYER_FISCAL_CODE_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -828,7 +906,8 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
+            verify(generatorClient).regenerateCart(CART_ID);
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -842,6 +921,7 @@ class PdfServiceTest {
         void getReceiptPdf_Cart_KO_Debtor1RetryableFailure_Debtor2CriticalFailure(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
             CartForReceipt cart = getCart(status, null, ERROR_CODE_RETRYABLE, ERROR_CODE_CRITICAL);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
+            mockFiscalCode(DEBTOR_FISCAL_CODE_1, DEBTOR_FISCAL_CODE_1_TOKENIZED);
 
             InvalidCartException exception = assertThrows(
                     InvalidCartException.class,
@@ -849,14 +929,16 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_716, exception.getErrorCode());
 
-            verify(tokenizerService, never()).getSearchTokenResponse(anyString());
+            verify(tokenizerService).getSearchTokenResponse(DEBTOR_FISCAL_CODE_1);
+            verify(generatorClient).regenerateCart(CART_ID);
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
 
-        @Test
-        void getReceiptPdf_Cart_KO_TokenizedFiscalCodeNotFound() throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
-            CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
+        @ParameterizedTest
+        @EnumSource(value = CartStatusType.class, names = {"IO_NOTIFIED", "FAILED"})
+        void getReceiptPdf_Cart_KO_TokenizedFiscalCodeNotFound(CartStatusType status) throws ReceiptNotFoundException, FiscalCodeNotAuthorizedException, AttachmentNotFoundException, BlobStorageClientException, CartNotFoundException {
+            CartForReceipt cart = getCart(status, ERROR_CODE_CRITICAL, null, null);
             when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart);
 
             doThrow(new FiscalCodeNotAuthorizedException(AppErrorCodeEnum.PDFS_700, "")).when(tokenizerService).getSearchTokenResponse(PAYER_FISCAL_CODE);
@@ -867,6 +949,7 @@ class PdfServiceTest {
             );
             assertEquals(PDFS_700, exception.getErrorCode());
 
+            verifyNoInteractions(generatorClient);
             verify(receiptCosmosClient, never()).getReceiptDocument(anyString());
             verify(receiptBlobClient, never()).getAttachmentFromBlobStorage(anyString());
         }
@@ -936,7 +1019,7 @@ class PdfServiceTest {
             CartForReceipt cart = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
             cart.getPayload().setMdAttachPayer(null);
             CartForReceipt regenerated = getCart(CartStatusType.IO_NOTIFIED, null, null, null);
-            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart, regenerated);
+            when(cartReceiptCosmosClient.getCartForReceiptDocument(CART_ID)).thenReturn(cart, cart, regenerated);
             when(generatorClient.regenerateCart(CART_ID)).thenAnswer(invocation -> Response.ok().build());
             SearchTokenResponse token = new SearchTokenResponse();
             token.setToken(PAYER_FISCAL_CODE_TOKENIZED);
@@ -946,7 +1029,7 @@ class PdfServiceTest {
 
             assertEquals(ATTACHMENT_NAME_PAYER, sut.getReceiptPdf(THIRD_PARTY_ID_CART_PAYER, PAYER_FISCAL_CODE).getAttachmentName());
             verify(generatorClient).regenerateCart(CART_ID);
-            verify(cartReceiptCosmosClient, times(2)).getCartForReceiptDocument(CART_ID);
+            verify(cartReceiptCosmosClient, times(3)).getCartForReceiptDocument(CART_ID);
             verify(receiptBlobClient).getAttachmentFromBlobStorage(ATTACHMENT_NAME_PAYER);
         }
 
