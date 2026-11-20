@@ -6,20 +6,31 @@ microservice-chart: &microservice-chart
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
     tag: '0.15.8'
     pullPolicy: Always
+  startupProbe:
+    create: true
+    httpGet:
+      path: /q/health/live
+      port: 8080
+    initialDelaySeconds: 0
+    failureThreshold: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
   livenessProbe:
     httpGet:
       path: /q/health/live
       port: 8080
-    initialDelaySeconds: 30
+    initialDelaySeconds: 0
     failureThreshold: 10
     periodSeconds: 20
+    timeoutSeconds: 5
   readinessProbe:
     httpGet:
       path: /q/health/ready
       port: 8080
-    initialDelaySeconds: 30
+    initialDelaySeconds: 0
     failureThreshold: 6
-    periodSeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 5
   deployment: &deployment
     create: true
     replicas: 10 # equals to HPA min
@@ -67,7 +78,7 @@ microservice-chart: &microservice-chart
       cpu: '300m'
     limits:
       memory: '1512Mi'
-      cpu: '900m'
+      cpu: '1000m'
   autoscaling: &autoscaling
     enable: true
     minReplica: 10
