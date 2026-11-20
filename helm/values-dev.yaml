@@ -6,20 +6,31 @@ microservice-chart: &microservice-chart
     repository: ghcr.io/pagopa/pagopa-receipt-pdf-service
     tag: '0.15.8'
     pullPolicy: Always
+  startupProbe:
+    create: true
+    httpGet:
+      path: /q/health/live
+      port: 8080
+    initialDelaySeconds: 0
+    failureThreshold: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
   livenessProbe:
     httpGet:
       path: /q/health/live
       port: 8080
-    initialDelaySeconds: 60
+    initialDelaySeconds: 0
     failureThreshold: 6
     periodSeconds: 30
+    timeoutSeconds: 5
   readinessProbe:
     httpGet:
       path: /q/health/ready
       port: 8080
-    initialDelaySeconds: 60
+    initialDelaySeconds: 0
     failureThreshold: 6
     periodSeconds: 30
+    timeoutSeconds: 5
   deployment:
     create: true
     replicas: 1
@@ -66,8 +77,8 @@ microservice-chart: &microservice-chart
       memory: '512Mi'
       cpu: '300m'
     limits:
-      memory: '512Mi'
-      cpu: '300m'
+      memory: '1024Mi'
+      cpu: '1000m'
   autoscaling:
     enable: true
     minReplica: 1
@@ -110,7 +121,7 @@ microservice-chart: &microservice-chart
     QUARKUS_OTEL_RESOURCE_ATTRIBUTES: 'deployment.environment=dev'
     TOKENIZER_URL: 'https://api.uat.tokenizer.pdv.pagopa.it'
     RECEIPT_PDF_GENERATOR_URL: 'https://api.dev.platform.pagopa.it/receipts/helpdesk/generator/v1'
-    JAVA_TOOL_OPTIONS: '-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx1024m -XX:-UseBASE64Intrinsics'
+    JAVA_TOOL_OPTIONS: '-javaagent:/deployments/jmx_prometheus_javaagent-0.19.0.jar=12345:/deployments/config.yaml -Xmx512m -XX:-UseBASE64Intrinsics'
     TOKENIZER_MAX_RETRY: '3'
     TOKENIZER_DELAY: '200'
     TOKENIZER_EXPB_MAX_DELAY: '6000'
