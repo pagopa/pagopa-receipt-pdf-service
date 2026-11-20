@@ -10,16 +10,16 @@ microservice-chart: &microservice-chart
     httpGet:
       path: /q/health/live
       port: 8080
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     failureThreshold: 6
-    periodSeconds: 10
+    periodSeconds: 30
   readinessProbe:
     httpGet:
       path: /q/health/ready
       port: 8080
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     failureThreshold: 6
-    periodSeconds: 10
+    periodSeconds: 30
   deployment:
     create: true
     replicas: 1
